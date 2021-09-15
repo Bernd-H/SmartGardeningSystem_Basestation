@@ -11,7 +11,7 @@ namespace GardeningSystem
 {
     public class Worker2 : BackgroundService
     {
-        internal IServerOnlineManager ServerOnlineManager { get; set; }
+        internal IWateringManager WateringManager { get; set; }
 
         internal NLog.ILogger Logger { get; set; }
 

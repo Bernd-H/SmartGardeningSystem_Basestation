@@ -4,8 +4,8 @@ using System.Text;
 
 namespace GardeningSystem.Common.Specifications
 {
-    public interface IServerOnlineManager
+    public interface IWateringManager
     {
-        //bool isOnline();
+        bool IsWateringNeccessary();
     }
 }
