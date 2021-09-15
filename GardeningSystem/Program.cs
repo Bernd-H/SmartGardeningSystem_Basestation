@@ -1,4 +1,3 @@
-using GardeningSystem.Common.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -12,6 +11,7 @@ namespace GardeningSystem
     {
         public static void Main(string[] args)
         {
+            IoC.Init();
             CreateHostBuilder(args).Build().Run();
         }
 

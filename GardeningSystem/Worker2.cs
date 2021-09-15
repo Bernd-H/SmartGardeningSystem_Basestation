@@ -11,13 +11,14 @@ namespace GardeningSystem
 {
     public class Worker2 : BackgroundService
     {
-        internal IWateringManager WateringManager { get; set; }
+        private IWateringManager WateringManager;
 
-        internal NLog.ILogger Logger { get; set; }
+        private NLog.ILogger Logger;
 
-        public Worker2()
+        public Worker2(NLog.ILogger logger, IWateringManager wateringManager)
         {
-            Logger = NLog.LogManager.GetLogger(nameof(Worker2));
+            WateringManager = wateringManager;
+            Logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

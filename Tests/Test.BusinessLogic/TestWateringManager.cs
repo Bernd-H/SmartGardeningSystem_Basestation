@@ -1,8 +1,9 @@
+using GardeningSystem;
 using GardeningSystem.BusinessLogic.Managers;
 using GardeningSystem.Common;
-using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NLog;
 using System;
 
 namespace Test.BusinessLogic
@@ -13,16 +14,17 @@ namespace Test.BusinessLogic
         [TestMethod]
         public void IsWateringNeccessary_LowSoilHumidity_IsNeccessary()
         {
-            // Arrange
-            SystemSettings.LastWateringTime = DateTime.Now.AddDays(-1);
-            IWateringManager m = IoC.Get<WateringManager>();
-            
+            using (var mock = AutoMock.GetLoose())
+            {
+                // Arrange
+                var m = mock.Create<WateringManager>();
 
-            // Act
-            bool isNeccessary = m.IsWateringNeccessary();
+                // Act
+                var result = m.IsWateringNeccessary();
 
-            // Assert
-            Assert.AreEqual(true, isNeccessary);
+                // Assert
+                Assert.AreEqual(true, result);
+            }
         }
     }
 }
