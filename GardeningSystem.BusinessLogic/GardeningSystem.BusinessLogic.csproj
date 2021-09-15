@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="4.7.11" />
+    <PackageReference Include="Spring.Core" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GardeningSystem.Common\GardeningSystem.Common.csproj" />
+    <ProjectReference Include="..\GardeningSystem.DataAccess\GardeningSystem.DataAccess.csproj" />
+  </ItemGroup>
+
+</Project>
