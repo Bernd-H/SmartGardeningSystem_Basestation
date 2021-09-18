@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using GardeningSystem.BusinessLogic.Managers;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Jobs;
 using NLog;
 
 namespace GardeningSystem {
@@ -15,6 +16,7 @@ namespace GardeningSystem {
             // Register individual components
             builder.Register(c => LogManager.GetLogger("main")).As<ILogger>();
             builder.RegisterType<WateringManager>().As<IWateringManager>();
+            builder.RegisterType<WateringJob>().AsSelf();
             builder.RegisterType<Worker2>().AsSelf();
 
             applicationContext = builder.Build();

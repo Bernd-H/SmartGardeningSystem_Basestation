@@ -15,7 +15,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GardeningSystem.RestAPI", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D4B9CAAD-E3AF-4361-9686-C2F401D210C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.BusinessLogic", "Tests\Test.BusinessLogic\Test.BusinessLogic.csproj", "{431B405E-4234-40A0-A25F-76715E70C4EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.BusinessLogic", "Tests\Test.BusinessLogic\Test.BusinessLogic.csproj", "{431B405E-4234-40A0-A25F-76715E70C4EE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{192A5240-A011-4A26-B963-56EDD65BAC58}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
