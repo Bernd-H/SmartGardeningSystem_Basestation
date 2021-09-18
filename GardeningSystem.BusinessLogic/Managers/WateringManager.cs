@@ -18,6 +18,7 @@ namespace GardeningSystem.BusinessLogic.Managers
 
         public bool IsWateringNeccessary()
         {
+            _logger.Info("This is a test");
             bool neccessary = false;
 
             return neccessary;
