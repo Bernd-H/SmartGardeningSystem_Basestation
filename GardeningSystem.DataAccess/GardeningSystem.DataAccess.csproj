@@ -9,4 +9,8 @@
     <PackageReference Include="NLog" Version="4.7.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\GardeningSystem.Common\GardeningSystem.Common.csproj" />
+  </ItemGroup>
+
 </Project>

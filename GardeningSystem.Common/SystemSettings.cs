@@ -8,8 +8,6 @@ namespace GardeningSystem.Common
 {
     public static class SystemSettings
     {
-        public static DateTime LastWateringTime;
-
-
+        public static string MODULES_FILEPATH = "modules.csv";
     }
 }

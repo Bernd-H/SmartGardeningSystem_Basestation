@@ -21,7 +21,9 @@ namespace GardeningSystem.BusinessLogic.Managers
             _logger.Info("This is a test");
             bool neccessary = false;
 
-            return neccessary;
+            // loop threw alle sensors
+
+            return neccessary; // return a class object
         }
     }
 }
