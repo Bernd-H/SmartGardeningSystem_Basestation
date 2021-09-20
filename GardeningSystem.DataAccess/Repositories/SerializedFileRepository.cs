@@ -12,7 +12,7 @@ using NLog;
 namespace GardeningSystem.DataAccess.Repositories {
     public class SerializedFileRepository<T> : ISerializedFileRepository<T> where T : IDO {
 
-        private string _fileName;
+        private string _filePath;
 
         private ILogger _logger;
 
@@ -29,20 +29,20 @@ namespace GardeningSystem.DataAccess.Repositories {
             _logger = logger;
         }
 
-        public void Init(string fileName) {
-            _fileName = fileName;
+        public void Init(string filePath) {
+            _filePath = filePath;
         }
 
         public void AppendToFile(T o) {
-            var fileContent = ReadFromFile();
-            fileContent = fileContent.Append(o);
+            var fileContent = ReadFromFile().ToList();
+            fileContent.Add(o);
             WriteToFile(fileContent);
         }
 
         public IEnumerable<T> ReadFromFile() {
             var container = readObjectFromFile<Container<T>>();
 
-            return container.Elements;
+            return container?.Elements ?? new List<T>();
         }
 
         public void WriteToFile(IEnumerable<T> objects) {
@@ -58,18 +58,23 @@ namespace GardeningSystem.DataAccess.Repositories {
         }
 
         private void writeObjectToFile<T2>(T2 o) {
-            using (FileStream fs = new FileStream(_fileName, FileMode.Create)) {
+            using (FileStream fs = new FileStream(_filePath, FileMode.Create)) {
                 BinaryFormatter bf = new BinaryFormatter();
 
                 bf.Serialize(fs, o);
             }
         }
 
-        private T2 readObjectFromFile<T2>() {
-            using (FileStream fs = new FileStream(_fileName, FileMode.Open)) {
-                BinaryFormatter bf = new BinaryFormatter();
+        private T2 readObjectFromFile<T2>() where T2 : class {
+            if (File.Exists(_filePath)) {
+                using (FileStream fs = new FileStream(_filePath, FileMode.Open)) {
+                    BinaryFormatter bf = new BinaryFormatter();
 
-                return (T2)bf.Deserialize(fs);
+                    return (T2) bf.Deserialize(fs);
+                }
+            }
+            else {
+                return null;
             }
         }
     }

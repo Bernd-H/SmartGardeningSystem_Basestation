@@ -5,12 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.Common.Specifications.Repositories;
+using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
     public class ModuleManager : IModuleManager {
 
-        public ModuleManager() {
+        private ILogger _logger;
 
+        private IModulesRepository _modulesRepository;
+
+        public ModuleManager(ILogger logger, IModulesRepository modulesRepository) {
+            _logger = logger;
+            _modulesRepository = modulesRepository;
         }
 
         public void ChangeCorrespondingActorState(Guid sensor, int state) {
@@ -22,7 +29,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         public IEnumerable<ModuleInfoDto> GetAllModules() {
-            throw new NotImplementedException();
+            return _modulesRepository.GetAllRegisteredModules();
         }
     }
 }

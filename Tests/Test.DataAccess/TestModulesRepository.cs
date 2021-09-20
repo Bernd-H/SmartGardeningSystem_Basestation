@@ -1,5 +1,16 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using Autofac;
 using Autofac.Extras.Moq;
+using GardeningSystem;
+using GardeningSystem.Common;
+using GardeningSystem.Common.Models;
+using GardeningSystem.Common.Models.Entities;
+using GardeningSystem.Common.Specifications.Repositories;
 using GardeningSystem.DataAccess.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -13,18 +24,33 @@ namespace Test.DataAccess
         [TestMethod]
         public void AddModule_ExistingFile()
         {
-            using (var mock = AutoMock.GetLoose()) {
+            using (var mock = AutoMock.GetLoose((cb) => {
+                cb.RegisterGeneric(typeof(SerializedFileRepository<>)).As(typeof(ISerializedFileRepository<>)).InstancePerDependency();
+            })) {
                 // Arrange
                 mock.Mock<ILogger>().Setup(x => x.Info(It.IsAny<string>())).Callback<string>((s) => {
                     Debug.WriteLine("Log catched: " + s);
                 });
+                //mock.Mock<ISerializedFileRepository<ModuleInfo>>().As<SerializedFileRepository<ModuleInfo>>();
+                SystemSettings.MODULES_FILEPATH = "tempModules.bin";
+                File.Delete(SystemSettings.MODULES_FILEPATH);
+                var moduleToAdd = new ModuleInfo() {
+                    Id = Guid.NewGuid(),
+                    ModuleTyp = ModuleTypeEnum.ACTOR,
+                    Name = "Ventil 1"
+                };
                 var m = mock.Create<ModulesRepository>();
 
                 // Act
-                var result = m.
+                m.AddModule(moduleToAdd);
+                var readModules = m.GetAllRegisteredModules().ToArray();
 
                 // Assert
-                Assert.AreEqual(true, result);
+                Assert.AreEqual(1, readModules.Length);
+
+                var moduleInfoToAddDto = new List<ModuleInfo>();
+                moduleInfoToAddDto.Add(moduleToAdd);
+                //Assert.AreEqual(moduleInfoToAddDto.ToDtos().ToArray()[0], readModules[0]);
             }
         }
 

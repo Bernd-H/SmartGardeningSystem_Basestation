@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using GardeningSystem.Common.Specifications.DataObjects;
 
 namespace GardeningSystem.Common.Models.Entities {
-    public class ModuleInfo : ICsvData, IDO {
+    [Serializable]
+    public class ModuleInfo : IDO {
 
         public Guid Id { get; set; }
 
@@ -14,6 +15,6 @@ namespace GardeningSystem.Common.Models.Entities {
 
         public IEnumerable<Guid> AssociatedModules { get; set; }
 
-        public ModuleTypeEnum ModuleTyp { get; set; }
+        public string ModuleTyp { get; set; }
     }
 }

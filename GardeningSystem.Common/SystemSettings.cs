@@ -8,6 +8,6 @@ namespace GardeningSystem.Common
 {
     public static class SystemSettings
     {
-        public static string MODULES_FILEPATH = "modules.csv";
+        public static string MODULES_FILEPATH = "modules.bin";
     }
 }

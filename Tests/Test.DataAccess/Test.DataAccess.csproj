@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\GardeningSystem.DataAccess\GardeningSystem.DataAccess.csproj" />
+    <ProjectReference Include="..\..\GardeningSystem\GardeningSystem.csproj" />
   </ItemGroup>
 
 </Project>

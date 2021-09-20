@@ -1,5 +1,6 @@
 ﻿using System;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.Managers;
 using NLog;
 
 namespace GardeningSystem.Jobs {
