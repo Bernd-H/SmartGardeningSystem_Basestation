@@ -4,35 +4,40 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GardeningSystem.Common;
+using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.Repositories;
+using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Repositories {
     public class ModulesRepository : IModulesRepository {
 
-        private ISerializedFileRepository<ModuleInfo> _modulesFileRepo;
+        private ISerializedFileRepository<ModuleInfo> ModulesFileRepo;
 
-        private ILogger _logger;
+        private ILogger Logger;
 
-        public ModulesRepository(ILogger logger, ISerializedFileRepository<ModuleInfo> modulesFileRepo) {
-            _logger = logger;
-            _modulesFileRepo = modulesFileRepo;
-            _modulesFileRepo.Init(SystemSettings.MODULES_FILEPATH);
+        private readonly IConfiguration Configuration;
+
+        public ModulesRepository(ILogger logger, IConfiguration configuration, ISerializedFileRepository<ModuleInfo> modulesFileRepo) {
+            Logger = logger;
+            Configuration = configuration;
+            ModulesFileRepo = modulesFileRepo;
+            ModulesFileRepo.Init(Configuration[ConfigurationVars.MODULES_FILEPATH]);
         }
 
         public void AddModule(ModuleInfo module) {
-            _modulesFileRepo.AppendToFile(module);
+            ModulesFileRepo.AppendToFile(module);
         }
 
         public IEnumerable<ModuleInfoDto> GetAllRegisteredModules() {
-            return _modulesFileRepo.ReadFromFile().ToDtos();
+            return ModulesFileRepo.ReadFromFile().ToDtos();
         }
 
         public void RemoveModule(Guid moduleId) {
-            var removed = _modulesFileRepo.RemoveItemFromFile(moduleId);
+            var removed = ModulesFileRepo.RemoveItemFromFile(moduleId);
             if (!removed) {
                 // Module not found in list
                 throw new ArgumentException();

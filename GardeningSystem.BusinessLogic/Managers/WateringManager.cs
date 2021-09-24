@@ -10,16 +10,16 @@ namespace GardeningSystem.BusinessLogic.Managers
 {
     public class WateringManager : IWateringManager
     {
-        private ILogger _logger;
+        private ILogger Logger;
 
         public WateringManager(ILogger logger)
         {
-            _logger = logger;
+            Logger = logger;
         }
 
         public bool IsWateringNeccessary()
         {
-            _logger.Info("This is a test");
+            Logger.Info("This is a test");
             bool neccessary = false;
 
             // loop threw alle sensors

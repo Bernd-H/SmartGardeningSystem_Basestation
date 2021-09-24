@@ -10,7 +10,7 @@ namespace GardeningSystem.Common.Specifications.Managers {
 
         IEnumerable<ModuleInfoDto> GetAllModules();
 
-        IEnumerable<ModuleDataDto> GetAllMeasurements();
+        Task<IEnumerable<ModuleDataDto>> GetAllMeasurements();
 
         /// <summary>
         /// Closes or opens all actors which correspond to the sensor.
