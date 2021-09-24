@@ -10,6 +10,7 @@ using GardeningSystem.Common.Specifications.Repositories;
 using GardeningSystem.Common.Specifications.RfCommunication;
 using Microsoft.Extensions.Configuration;
 using NLog;
+using System.Threading;
 
 namespace GardeningSystem.BusinessLogic.Managers {
     public class ModuleManager : IModuleManager {
@@ -24,6 +25,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private Guid basestationGuid;
 
+        //private static readonly object LOCK_OBJEJCT = new object();
+        private static SemaphoreSlim LOCKER = new SemaphoreSlim(1);
+
         public ModuleManager(ILogger logger, IConfiguration configuration, IModulesRepository modulesRepository, IRfCommunicator rfCommunicator) {
             Logger = logger;
             Configuration = configuration;
@@ -34,24 +38,38 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         public async Task<bool> ChangeCorrespondingActorState(Guid sensor, int state) {
-            var rfMessageDto = await RfCommunicator.SendMessage_ReceiveAnswer(sensor, DataAccess.RfCommunicator.BuildActorMessage(basestationGuid, sensor, state));
+            await LOCKER.WaitAsync();
 
-            if (rfMessageDto.Id == sensor && (rfMessageDto.Bytes.SequenceEqual(new byte[1] { RfCommunication_Codes.ACK }))) {
-                return true;
-            } else {
-                return false;
-            }
+            int attempts = 10;
+            bool success = false;
+            do {
+                var rfMessageDto = await RfCommunicator.SendMessage_ReceiveAnswer(sensor, DataAccess.RfCommunicator.BuildActorMessage(basestationGuid, sensor, state));
+
+                if (rfMessageDto.Id == sensor && (rfMessageDto.Bytes.SequenceEqual(new byte[1] { RfCommunication_Codes.ACK }))) {
+                    success = true;
+                }
+                else {
+                    success = false;
+                    attempts--;
+                    if (attempts > 0)
+                        Logger.Warn("Valve state did not get verified. Retrying - " + (10 - attempts));
+                }
+            } while (!success && attempts > 0);
+
+            return success;
         }
 
         public async Task<IEnumerable<ModuleDataDto>> GetAllMeasurements() {
+            await LOCKER.WaitAsync();
+
             var measurements = new List<ModuleDataDto>();
 
             // get guids and send out requests to all sensors
-            var modules = GetAllModules();
+            var modules = await GetAllModules();
             foreach (var module in modules) {
                 if (module.ModuleTyp == ModuleTypeEnum.SENSOR) {
                     RfMessageDto answer = null;
-                    int attempts = 5;
+                    int attempts = 10;
                     
                     // communicate with current module, repeat if something went wrong 
                     do {
@@ -81,8 +99,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return measurements;
         }
 
-        public IEnumerable<ModuleInfoDto> GetAllModules() {
+        public async Task<IEnumerable<ModuleInfoDto>> GetAllModules() {
+            await LOCKER.WaitAsync();
+
             return ModulesRepository.GetAllRegisteredModules();
+        }
+
+        public async Task<ModuleInfoDto> GetModuleById(Guid id) {
+            await LOCKER.WaitAsync();
+
+            return (await GetAllModules()).Where(m => m.Id == id).First();
         }
     }
 }

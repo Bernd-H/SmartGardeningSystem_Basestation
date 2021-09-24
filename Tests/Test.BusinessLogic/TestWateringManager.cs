@@ -65,5 +65,47 @@ namespace Test.BusinessLogic {
             }
         }
 
+        [TestMethod]
+        public async Task StartWatering_NotValvesRespond() {
+            using (var mock = AutoMock.GetLoose((cb) => {
+            })) {
+                // Arrange
+                Func<List<ModuleDataDto>> getMockModuleData = () => {
+                    List<ModuleDataDto> data = new List<ModuleDataDto>();
+                    data.Add(new ModuleDataDto() { Id = Guid.NewGuid(), Data = (double)0.5, LastWaterings = null });
+                    return data;
+                };
+                Guid sensorId = Guid.NewGuid();
+                mock.Mock<IModuleManager>().Setup(x => x.GetModuleById(sensorId)).Returns(() => {
+                    return Task<ModuleInfoDto>.Factory.StartNew(() => new ModuleInfoDto() {
+                        Id = sensorId,
+                        AssociatedModules = new Guid[2] { Guid.NewGuid(), Guid.NewGuid() }
+                    });
+                });
+                mock.Mock<IModuleManager>().Setup(x => x.ChangeCorrespondingActorState(It.IsAny<Guid>(), 1)).Returns(() => {
+                    return Task<bool>.Factory.StartNew(() => true);
+                });
+                mock.Mock<IModuleManager>().Setup(x => x.ChangeCorrespondingActorState(It.IsAny<Guid>(), 0)).Returns(() => {
+                    return Task<bool>.Factory.StartNew(() => false);
+                });
+
+                List<string> logs = new List<string>();
+                mock.Mock<ILogger>().Setup(x => x.Info(It.IsAny<string>())).Callback<string>((s) => {
+                    Debug.WriteLine("Log catched: " + s);
+                    logs.Add(s);
+                });
+
+                var m = mock.Create<WateringManager>();
+
+                // Act
+                await m.StartWatering(new WateringNeccessaryDto() {
+                    Id = sensorId,
+                    ValveOpenTime = new TimeSpan(0, 0, seconds: 1)
+                });
+
+                // Assert
+                Debug.WriteLine($"Stop here to view {logs.Count} logs");
+            }
+        }
     }
 }

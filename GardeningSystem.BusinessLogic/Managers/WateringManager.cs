@@ -39,13 +39,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     wateringInfo.Add(new WateringNeccessaryDto() {
                         Id = measurement.Id,
                         IsNeccessary = null,
-                        Time = DateTime.Now
+                        Time = DateTime.Now,
+                        ValveOpenTime = TimeSpan.Zero
                     });
                 } else {
+                    var algoResult = wateringAlgo(measurement.Data, measurement.LastWaterings?.Last() ?? null, weatherData);
                     wateringInfo.Add(new WateringNeccessaryDto() {
                         Id = measurement.Id,
-                        IsNeccessary = wateringAlgo(measurement.Data, measurement.LastWaterings?.Last() ?? null, weatherData),
-                        Time = DateTime.Now
+                        IsNeccessary = (algoResult != TimeSpan.Zero),
+                        Time = DateTime.Now,
+                        ValveOpenTime = algoResult
                     });
                 }
             }
@@ -53,18 +56,54 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return wateringInfo;
         }
 
-        private bool wateringAlgo(double soilHumidity, DateTime? lastWateringTime, WeatherDataDto weatherData) {
+        private TimeSpan wateringAlgo(double soilHumidity, DateTime? lastWateringTime, WeatherDataDto weatherData) {
             if (soilHumidity < 0.5) {
                 if (lastWateringTime == null || (DateTime.Now - lastWateringTime.Value).TotalHours > 11) {
-                    return true;
+                    return TimeSpan.FromHours(4);
                 }
             }
 
-            return false;
+            return TimeSpan.Zero;
         }
 
         public Task StartWatering(WateringNeccessaryDto wateringInfo) {
-            throw new NotImplementedException();
+            Logger.Info($"Starting to water sensor {wateringInfo.Id.ToString()} for {wateringInfo.ValveOpenTime.TotalHours} hours.");
+
+            return Task.Run(async () => {
+                // open associated valves
+                var module = await ModuleManager.GetModuleById(wateringInfo.Id);
+                foreach (var valve in module.AssociatedModules) {
+                    bool changeGotVerified = await ModuleManager.ChangeCorrespondingActorState(valve, 1); // open valve
+
+                    if (!changeGotVerified) {
+                        Logger.Error($"Failed to open valve!");
+
+                        // inform user
+                        //throw new NotImplementedException();
+                    }
+                }
+
+                await Task.Delay(wateringInfo.ValveOpenTime);
+
+                // close valves
+                foreach (var valve in module.AssociatedModules) {
+                    // retry 5 times if change did not get verified
+                    bool changeGotVerified = false;
+                    int attempts = 5;
+                    do {
+                        Logger.Info($"Trying to close valve with id {valve.ToString()}.");
+                        changeGotVerified = await ModuleManager.ChangeCorrespondingActorState(valve, 0);
+                        attempts--;
+                    } while (!changeGotVerified && attempts > 0);
+
+                    if (!changeGotVerified) {
+                        Logger.Fatal($"Failed to close valve!");
+
+                        // inform user
+                        //throw new NotImplementedException();
+                    }
+                }
+            });
         }
     }
 }

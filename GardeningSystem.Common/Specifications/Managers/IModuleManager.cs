@@ -8,7 +8,9 @@ using GardeningSystem.Common.Models.DTOs;
 namespace GardeningSystem.Common.Specifications.Managers {
     public interface IModuleManager { 
 
-        IEnumerable<ModuleInfoDto> GetAllModules();
+        Task<IEnumerable<ModuleInfoDto>> GetAllModules();
+
+        Task<ModuleInfoDto> GetModuleById(Guid id);
 
 
         Task<IEnumerable<ModuleDataDto>> GetAllMeasurements();
@@ -17,7 +19,7 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// Closes or opens all actors which correspond to the sensor.
         /// </summary>
         /// <param name="sensor"></param>
-        /// <param name="state">0 = ventil closed, 1 = ventil open</param>
+        /// <param name="state">0 = valve closed, 1 = valve open</param>
         /// <returns>true, if change got verified</returns>
         Task<bool> ChangeCorrespondingActorState(Guid sensor, int state);
     }

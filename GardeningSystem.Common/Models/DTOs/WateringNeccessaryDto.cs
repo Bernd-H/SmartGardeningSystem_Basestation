@@ -8,5 +8,7 @@ namespace GardeningSystem.Common.Models.DTOs {
         public bool? IsNeccessary { get; set; }
 
         public DateTime Time { get; set; }
+
+        public TimeSpan ValveOpenTime { get; set; }
     }
 }
