@@ -28,11 +28,13 @@ namespace GardeningSystem {
 
             builder.RegisterType<WateringManager>().As<IWateringManager>();
             builder.RegisterType<ModuleManager>().As<IModuleManager>();
+            builder.RegisterType<SettingsManager>().As<ISettingsManager>();
             
             builder.RegisterType<FileRepository>().As<IFileRepository>();
             builder.RegisterGeneric(typeof(SerializedFileRepository<>)).As(typeof(ISerializedFileRepository<>)).InstancePerDependency();
             builder.RegisterType<ModulesRepository>().As<IModulesRepository>();
             builder.RegisterType<RfCommunicator>().As<IRfCommunicator>();
+            builder.RegisterType<WeatherRepository>().As<IWeatherRepository>();
 
             applicationContext = builder.Build();
         }

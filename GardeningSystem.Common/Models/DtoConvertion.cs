@@ -16,7 +16,8 @@ namespace GardeningSystem.Common.Models {
                     Id = module.Id,
                     AssociatedModules = module.AssociatedModules,
                     ModuleTyp = module.ModuleTyp,
-                    Name = module.Name
+                    Name = module.Name,
+                    LastWaterings = module.LastWaterings
                 });
             }
 

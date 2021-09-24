@@ -7,5 +7,7 @@
         public static string RFAPP_FILEPATH = "rfapp_path";
 
         public static string BASESTATION_GUID = "basestation_guid";
+
+        public static string APPLICATIONSETTINGS_FILEPATH = "applicationSettings_path";
     }
 }

@@ -12,5 +12,7 @@ namespace GardeningSystem.Common.Models.DTOs {
         public IEnumerable<Guid> AssociatedModules { get; set; }
 
         public string ModuleTyp { get; set; }
+
+        public IEnumerable<DateTime> LastWaterings { get; set; }
     }
 }

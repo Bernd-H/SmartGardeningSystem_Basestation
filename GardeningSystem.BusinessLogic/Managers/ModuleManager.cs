@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
@@ -32,8 +33,14 @@ namespace GardeningSystem.BusinessLogic.Managers {
             basestationGuid = Guid.Parse(Configuration[ConfigurationVars.BASESTATION_GUID]);
         }
 
-        public void ChangeCorrespondingActorState(Guid sensor, int state) {
-            throw new NotImplementedException();
+        public async Task<bool> ChangeCorrespondingActorState(Guid sensor, int state) {
+            var rfMessageDto = await RfCommunicator.SendMessage_ReceiveAnswer(sensor, DataAccess.RfCommunicator.BuildActorMessage(basestationGuid, sensor, state));
+
+            if (rfMessageDto.Id == sensor && (rfMessageDto.Bytes.SequenceEqual(new byte[1] { RfCommunication_Codes.ACK }))) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
         public async Task<IEnumerable<ModuleDataDto>> GetAllMeasurements() {
@@ -57,10 +64,15 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         // still no answer
 
                         Logger.Error("Could not get measurement of module with id " + module.Id.ToString());
+                        measurements.Add(new ModuleDataDto() {
+                            Id = module.Id,
+                            Data = double.NaN
+                        });
                     } else {
                         measurements.Add(new ModuleDataDto() {
                             Id = answer.Id,
-                            Data = BitConverter.ToDouble(answer.Bytes)
+                            Data = BitConverter.ToDouble(answer.Bytes),
+                            LastWaterings = module.LastWaterings
                         });
                     }
                 }

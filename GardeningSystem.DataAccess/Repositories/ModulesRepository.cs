@@ -29,15 +29,15 @@ namespace GardeningSystem.DataAccess.Repositories {
         }
 
         public void AddModule(ModuleInfo module) {
-            ModulesFileRepo.AppendToFile(module);
+            ModulesFileRepo.AppendToFileList(module);
         }
 
         public IEnumerable<ModuleInfoDto> GetAllRegisteredModules() {
-            return ModulesFileRepo.ReadFromFile().ToDtos();
+            return ModulesFileRepo.ReadListFromFile().ToDtos();
         }
 
         public void RemoveModule(Guid moduleId) {
-            var removed = ModulesFileRepo.RemoveItemFromFile(moduleId);
+            var removed = ModulesFileRepo.RemoveItemFromFileList(moduleId);
             if (!removed) {
                 // Module not found in list
                 throw new ArgumentException();

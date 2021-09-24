@@ -33,31 +33,35 @@ namespace GardeningSystem.DataAccess.Repositories {
             _filePath = filePath;
         }
 
-        public void AppendToFile(T o) {
-            var fileContent = ReadFromFile().ToList();
+        #region Serilize list of objects
+
+        public void AppendToFileList(T o) {
+            var fileContent = ReadListFromFile().ToList();
             fileContent.Add(o);
-            WriteToFile(fileContent);
+            WriteListToFile(fileContent);
         }
 
-        public IEnumerable<T> ReadFromFile() {
-            var container = readObjectFromFile<Container<T>>();
+        public IEnumerable<T> ReadListFromFile() {
+            var container = ReadSingleObjectFromFile<Container<T>>();
 
             return container?.Elements ?? new List<T>();
         }
 
-        public void WriteToFile(IEnumerable<T> objects) {
+        public void WriteListToFile(IEnumerable<T> objects) {
             Container<T> container = new Container<T>();
             container.Elements = objects;
 
-            writeObjectToFile(container);
+            WriteSingleObjectToFile(container);
         }
 
-        public bool RemoveItemFromFile(Guid Id) {
-            var fileContent = ReadFromFile().ToList();
+        public bool RemoveItemFromFileList(Guid Id) {
+            var fileContent = ReadListFromFile().ToList();
             return (fileContent.RemoveAll((o) => o.Id == Id) > 0);
         }
 
-        private void writeObjectToFile<T2>(T2 o) {
+        #endregion
+
+        public void WriteSingleObjectToFile<T2>(T2 o) {
             using (FileStream fs = new FileStream(_filePath, FileMode.Create)) {
                 BinaryFormatter bf = new BinaryFormatter();
 
@@ -65,7 +69,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             }
         }
 
-        private T2 readObjectFromFile<T2>() where T2 : class {
+        public T2 ReadSingleObjectFromFile<T2>() where T2 : class {
             if (File.Exists(_filePath)) {
                 using (FileStream fs = new FileStream(_filePath, FileMode.Open)) {
                     BinaryFormatter bf = new BinaryFormatter();

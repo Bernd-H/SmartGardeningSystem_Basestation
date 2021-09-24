@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 using GardeningSystem.Common.Specifications.DataObjects;
 
 namespace GardeningSystem.Common.Models.DTOs {
-    public class ModuleDataDto : IDO {
+    public class ApplicationSettingsDto : IDO {
 
         public Guid Id { get; set; }
 
-        public double Data { get; set; }
-
-        public IEnumerable<DateTime> LastWaterings { get; set; }
+        public string PostalCode { get; set; }
     }
 }

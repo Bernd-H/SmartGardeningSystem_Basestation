@@ -10,6 +10,7 @@ namespace GardeningSystem.Common.Specifications.Managers {
 
         IEnumerable<ModuleInfoDto> GetAllModules();
 
+
         Task<IEnumerable<ModuleDataDto>> GetAllMeasurements();
 
         /// <summary>
@@ -17,6 +18,7 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// </summary>
         /// <param name="sensor"></param>
         /// <param name="state">0 = ventil closed, 1 = ventil open</param>
-        void ChangeCorrespondingActorState(Guid sensor, int state);
+        /// <returns>true, if change got verified</returns>
+        Task<bool> ChangeCorrespondingActorState(Guid sensor, int state);
     }
 }

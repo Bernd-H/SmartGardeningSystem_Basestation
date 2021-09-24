@@ -10,17 +10,26 @@ namespace GardeningSystem.Common.Specifications.Repositories {
 
         void Init(string fileName);
 
-        void AppendToFile(T o);
+        #region Serialize object lists
 
-        IEnumerable<T> ReadFromFile();
+        void AppendToFileList(T o);
 
-        void WriteToFile(IEnumerable<T> objects);
+        IEnumerable<T> ReadListFromFile();
+
+        void WriteListToFile(IEnumerable<T> objects);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="Id"></param>
         /// <returns>True when one or more items got removed.</returns>
-        bool RemoveItemFromFile(Guid Id);
+        bool RemoveItemFromFileList(Guid Id);
+
+        #endregion
+
+
+        public void WriteSingleObjectToFile<T2>(T2 o);
+
+        public T2 ReadSingleObjectFromFile<T2>() where T2 : class;
     }
 }
