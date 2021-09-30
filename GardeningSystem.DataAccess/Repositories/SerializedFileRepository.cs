@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Specifications.DataObjects;
 using GardeningSystem.Common.Specifications.Repositories;
@@ -29,8 +31,8 @@ namespace GardeningSystem.DataAccess.Repositories {
             _logger = logger;
         }
 
-        public void Init(string filePath) {
-            _filePath = filePath;
+        public void Init(string fileName) {
+            _filePath = Assembly.GetExecutingAssembly().Location + "\\" + fileName;
         }
 
         #region Serilize list of objects
@@ -62,20 +64,22 @@ namespace GardeningSystem.DataAccess.Repositories {
         #endregion
 
         public void WriteSingleObjectToFile<T2>(T2 o) {
-            using (FileStream fs = new FileStream(_filePath, FileMode.Create)) {
-                BinaryFormatter bf = new BinaryFormatter();
+            //using (FileStream fs = new FileStream(_filePath, FileMode.Create)) {
+            //    BinaryFormatter bf = new BinaryFormatter();
 
-                bf.Serialize(fs, o);
-            }
+            //    bf.Serialize(fs, o);
+            //}
+            File.WriteAllText(_filePath, JsonSerializer.Serialize(o));
         }
 
         public T2 ReadSingleObjectFromFile<T2>() where T2 : class {
             if (File.Exists(_filePath)) {
-                using (FileStream fs = new FileStream(_filePath, FileMode.Open)) {
-                    BinaryFormatter bf = new BinaryFormatter();
+                //using (FileStream fs = new FileStream(_filePath, FileMode.Open)) {
+                //    BinaryFormatter bf = new BinaryFormatter();
 
-                    return (T2) bf.Deserialize(fs);
-                }
+                //    return (T2) bf.Deserialize(fs);
+                //}
+                return JsonSerializer.Deserialize<T2>(File.ReadAllText(_filePath));
             }
             else {
                 return null;

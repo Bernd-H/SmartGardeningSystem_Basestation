@@ -9,6 +9,7 @@ using GardeningSystem;
 using GardeningSystem.BusinessLogic.Managers;
 using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.Repositories;
 using GardeningSystem.Common.Specifications.RfCommunication;
 using Microsoft.Extensions.Configuration;
@@ -29,19 +30,19 @@ namespace Test.BusinessLogic {
                 var module3Guid = Guid.NewGuid(); // not connected module
                 var module1Guid = Guid.NewGuid(); // connected module
                 mock.Mock<IModulesRepository>().Setup(x => x.GetAllRegisteredModules()).Returns(() => {
-                    var modules = new List<ModuleInfoDto>();
+                    var modules = new List<ModuleInfo>();
                     // add fake modules
-                    modules.Add(new ModuleInfoDto() {
+                    modules.Add(new ModuleInfo() {
                         Id = module1Guid,
                         Name = "Test",
                         ModuleTyp = ModuleTypeEnum.SENSOR
                     });
-                    modules.Add(new ModuleInfoDto() {
+                    modules.Add(new ModuleInfo() {
                         Id = Guid.NewGuid(),
                         Name = "Test2",
                         ModuleTyp = ModuleTypeEnum.ACTOR
                     });
-                    modules.Add(new ModuleInfoDto() {
+                    modules.Add(new ModuleInfo() {
                         Id = module3Guid,
                         Name = "Test3",
                         ModuleTyp = ModuleTypeEnum.SENSOR

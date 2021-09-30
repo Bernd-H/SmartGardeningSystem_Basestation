@@ -102,7 +102,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         public async Task<IEnumerable<ModuleInfoDto>> GetAllModules() {
             await LOCKER.WaitAsync();
 
-            return ModulesRepository.GetAllRegisteredModules();
+            return ModulesRepository.GetAllRegisteredModules().ToDtos();
         }
 
         public async Task<ModuleInfoDto> GetModuleById(Guid id) {

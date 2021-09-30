@@ -79,7 +79,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         Logger.Error($"Failed to open valve!");
 
                         // inform user
-                        //throw new NotImplementedException();
+                        throw new NotImplementedException();
                     }
                 }
 
@@ -100,7 +100,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         Logger.Fatal($"Failed to close valve!");
 
                         // inform user
-                        //throw new NotImplementedException();
+                        throw new NotImplementedException();
                     }
                 }
             });

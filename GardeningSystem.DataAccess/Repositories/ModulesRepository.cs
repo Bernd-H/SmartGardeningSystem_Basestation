@@ -25,15 +25,15 @@ namespace GardeningSystem.DataAccess.Repositories {
             Logger = logger;
             Configuration = configuration;
             ModulesFileRepo = modulesFileRepo;
-            ModulesFileRepo.Init(Configuration[ConfigurationVars.MODULES_FILEPATH]);
+            ModulesFileRepo.Init(Configuration[ConfigurationVars.MODULES_FILENAME]);
         }
 
         public void AddModule(ModuleInfo module) {
             ModulesFileRepo.AppendToFileList(module);
         }
 
-        public IEnumerable<ModuleInfoDto> GetAllRegisteredModules() {
-            return ModulesFileRepo.ReadListFromFile().ToDtos();
+        public IEnumerable<ModuleInfo> GetAllRegisteredModules() {
+            return ModulesFileRepo.ReadListFromFile();
         }
 
         public void RemoveModule(Guid moduleId) {

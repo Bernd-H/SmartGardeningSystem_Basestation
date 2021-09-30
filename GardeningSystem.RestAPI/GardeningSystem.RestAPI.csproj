@@ -6,8 +6,15 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.2.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="NLog" Version="4.7.11" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GardeningSystem.Common\GardeningSystem.Common.csproj" />
+    <ProjectReference Include="..\GardeningSystem.DataAccess\GardeningSystem.DataAccess.csproj" />
+    <ProjectReference Include="..\GardeningSystem\GardeningSystem.csproj" />
   </ItemGroup>
 
 </Project>

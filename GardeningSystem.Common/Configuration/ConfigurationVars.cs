@@ -2,7 +2,7 @@
 {
     public static class ConfigurationVars
     {
-        public static string MODULES_FILEPATH = "modules_path";
+        public static string MODULES_FILENAME = "modules_fileName";
 
         public static string RFAPP_FILEPATH = "rfapp_path";
 

@@ -33,7 +33,7 @@ namespace Test.DataAccess
                 mock.Mock<ILogger>().Setup(x => x.Info(It.IsAny<string>())).Callback<string>((s) => {
                     Debug.WriteLine("Log catched: " + s);
                 });
-                mock.Mock<IConfiguration>().Setup(x => x[ConfigurationVars.MODULES_FILEPATH]).Returns("tempModules.bin");
+                mock.Mock<IConfiguration>().Setup(x => x[ConfigurationVars.MODULES_FILENAME]).Returns("tempModules.bin");
                 if (File.Exists("tempModules.bin"))
                     File.Delete("tempModules.bin");
                 var moduleToAdd = new ModuleInfo() {

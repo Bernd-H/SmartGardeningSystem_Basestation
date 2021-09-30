@@ -10,7 +10,7 @@ namespace GardeningSystem.Common.Specifications.Repositories {
         /// 
         /// </summary>
         /// <returns></returns>
-        IEnumerable<ModuleInfoDto> GetAllRegisteredModules();
+        IEnumerable<ModuleInfo> GetAllRegisteredModules();
 
         void AddModule(ModuleInfo module);
 
