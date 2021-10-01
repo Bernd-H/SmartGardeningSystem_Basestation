@@ -1,0 +1,54 @@
+﻿[INFO - 2021-10-01 13:00:26.4033] Now listening on: http://localhost:5000
+[INFO - 2021-10-01 13:00:26.4425] Now listening on: https://localhost:5001
+[INFO - 2021-10-01 13:00:26.4425] Application started. Press Ctrl+C to shut down.
+[INFO - 2021-10-01 13:00:26.4425] Hosting environment: Development
+[INFO - 2021-10-01 13:00:26.4425] Content root path: C:\Users\bernd\Documents\Schule\Diplomarbeit\GardeningSystem\GardeningSystem.RestAPI
+[INFO - 2021-10-01 13:00:27.2794] Request starting HTTP/2 GET https://localhost:5001/swagger - -
+[INFO - 2021-10-01 13:00:27.3232] Request finished HTTP/2 GET https://localhost:5001/swagger - - - 404 0 - 44.7108ms
+[INFO - 2021-10-01 13:00:27.3909] Request starting HTTP/2 GET https://localhost:5001/favicon.ico - -
+[INFO - 2021-10-01 13:00:27.3909] Request finished HTTP/2 GET https://localhost:5001/favicon.ico - - - 0 - - 2.1516ms
+[INFO - 2021-10-01 13:00:41.2269] Request starting HTTP/1.1 GET https://localhost:5001/api/registration/account - -
+[INFO - 2021-10-01 13:00:41.2321] Executing endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:41.2512] Route matched with {action = "Get", controller = "Registration_AccountInfo"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.ActionResult`1[System.String] Get() on controller GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController (GardeningSystem.RestAPI).
+[INFO - 2021-10-01 13:00:41.3327] Executing action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) - Validation state: Valid
+[INFO - 2021-10-01 13:00:41.3327] Executed action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 0.539ms.
+[INFO - 2021-10-01 13:00:41.3464] Executing ObjectResult, writing value of type 'System.String'.
+[INFO - 2021-10-01 13:00:41.3640] Executed action GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) in 109.4296ms
+[INFO - 2021-10-01 13:00:41.3640] Executed endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:41.3640] Request finished HTTP/1.1 GET https://localhost:5001/api/registration/account - - - 200 - text/plain;+charset=utf-8 143.6522ms
+[INFO - 2021-10-01 13:00:45.2471] Request starting HTTP/1.1 GET https://localhost:5001/api/registration/account - -
+[INFO - 2021-10-01 13:00:45.2471] Executing endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:45.2471] Route matched with {action = "Get", controller = "Registration_AccountInfo"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.ActionResult`1[System.String] Get() on controller GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController (GardeningSystem.RestAPI).
+[INFO - 2021-10-01 13:00:45.2850] Executing action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) - Validation state: Valid
+[INFO - 2021-10-01 13:00:45.2850] Executed action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 0.3873ms.
+[INFO - 2021-10-01 13:00:45.2850] Executing ObjectResult, writing value of type 'System.String'.
+[INFO - 2021-10-01 13:00:45.2850] Executed action GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) in 40.1138ms
+[INFO - 2021-10-01 13:00:45.2922] Executed endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:45.2922] Request finished HTTP/1.1 GET https://localhost:5001/api/registration/account - - - 200 - text/plain;+charset=utf-8 46.1022ms
+[INFO - 2021-10-01 13:00:52.7526] Request starting HTTP/1.1 GET https://localhost:5001/api/registration/account - -
+[INFO - 2021-10-01 13:00:52.7526] Executing endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:52.7526] Route matched with {action = "Get", controller = "Registration_AccountInfo"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.ActionResult`1[System.String] Get() on controller GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController (GardeningSystem.RestAPI).
+[INFO - 2021-10-01 13:00:52.7808] Executing action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) - Validation state: Valid
+[INFO - 2021-10-01 13:00:52.7808] Executed action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 0.0152ms.
+[INFO - 2021-10-01 13:00:52.7808] Executing ObjectResult, writing value of type 'System.String'.
+[INFO - 2021-10-01 13:00:52.7808] Executed action GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) in 25.5587ms
+[INFO - 2021-10-01 13:00:52.7808] Executed endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:52.7808] Request finished HTTP/1.1 GET https://localhost:5001/api/registration/account - - - 200 - text/plain;+charset=utf-8 33.5420ms
+[INFO - 2021-10-01 13:00:53.7863] Request starting HTTP/1.1 GET https://localhost:5001/api/registration/account - -
+[INFO - 2021-10-01 13:00:53.7863] Executing endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:53.7863] Route matched with {action = "Get", controller = "Registration_AccountInfo"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.ActionResult`1[System.String] Get() on controller GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController (GardeningSystem.RestAPI).
+[INFO - 2021-10-01 13:00:53.8136] Executing action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) - Validation state: Valid
+[INFO - 2021-10-01 13:00:53.8136] Executed action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 0.0112ms.
+[INFO - 2021-10-01 13:00:53.8136] Executing ObjectResult, writing value of type 'System.String'.
+[INFO - 2021-10-01 13:00:53.8136] Executed action GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) in 26.0376ms
+[INFO - 2021-10-01 13:00:53.8136] Executed endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:53.8136] Request finished HTTP/1.1 GET https://localhost:5001/api/registration/account - - - 200 - text/plain;+charset=utf-8 32.5593ms
+[INFO - 2021-10-01 13:00:54.7266] Request starting HTTP/1.1 GET https://localhost:5001/api/registration/account - -
+[INFO - 2021-10-01 13:00:54.7266] Executing endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:54.7266] Route matched with {action = "Get", controller = "Registration_AccountInfo"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.ActionResult`1[System.String] Get() on controller GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController (GardeningSystem.RestAPI).
+[INFO - 2021-10-01 13:00:54.7501] Executing action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) - Validation state: Valid
+[INFO - 2021-10-01 13:00:54.7501] Executed action method GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI), returned result Microsoft.AspNetCore.Mvc.ObjectResult in 0.0128ms.
+[INFO - 2021-10-01 13:00:54.7501] Executing ObjectResult, writing value of type 'System.String'.
+[INFO - 2021-10-01 13:00:54.7501] Executed action GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI) in 23.0793ms
+[INFO - 2021-10-01 13:00:54.7501] Executed endpoint 'GardeningSystem.RestAPI.Controllers.Registration_AccountInfoController.Get (GardeningSystem.RestAPI)'
+[INFO - 2021-10-01 13:00:54.7501] Request finished HTTP/1.1 GET https://localhost:5001/api/registration/account - - - 200 - text/plain;+charset=utf-8 28.8334ms

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using GardeningSystem.Common.Specifications.DataObjects;
 
 namespace GardeningSystem.Common.Models.DTOs {
@@ -11,5 +7,14 @@ namespace GardeningSystem.Common.Models.DTOs {
         public Guid Id { get; set; }
 
         public string PostalCode { get; set; }
+
+
+        #region login/registration
+
+        public string Email { get; set; }
+
+        public byte[] Password { get; set; }
+
+        #endregion
     }
 }

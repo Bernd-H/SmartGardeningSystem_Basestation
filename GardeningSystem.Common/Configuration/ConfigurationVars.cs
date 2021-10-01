@@ -9,5 +9,7 @@
         public static string BASESTATION_GUID = "basestation_guid";
 
         public static string APPLICATIONSETTINGS_FILEPATH = "applicationSettings_path";
+
+        public static string WLANINTERFACE_NAME = "wlanInterface_name";
     }
 }
