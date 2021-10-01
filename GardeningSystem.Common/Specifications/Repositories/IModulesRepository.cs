@@ -12,8 +12,18 @@ namespace GardeningSystem.Common.Specifications.Repositories {
         /// <returns></returns>
         IEnumerable<ModuleInfo> GetAllRegisteredModules();
 
+        /// <returns>Null when not found</returns>
+        ModuleInfo GetModuleById(Guid id);
+
         void AddModule(ModuleInfo module);
 
-        void RemoveModule(Guid moduleId);
+        bool RemoveModule(Guid moduleId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="module"></param>
+        /// <returns>true </returns>
+        bool UpdateModule(ModuleInfo module);
     }
 }

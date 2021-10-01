@@ -36,12 +36,23 @@ namespace GardeningSystem.DataAccess.Repositories {
             return ModulesFileRepo.ReadListFromFile();
         }
 
-        public void RemoveModule(Guid moduleId) {
+        public ModuleInfo GetModuleById(Guid id) {
+            var modules = GetAllRegisteredModules().ToList();
+            return modules.Find(m => m.Id == id);
+        }
+
+        public bool RemoveModule(Guid moduleId) {
             var removed = ModulesFileRepo.RemoveItemFromFileList(moduleId);
             if (!removed) {
                 // Module not found in list
-                throw new ArgumentException();
+                return false;
             }
+
+            return true;
+        }
+
+        public bool UpdateModule(ModuleInfo module) {
+            return ModulesFileRepo.UpdateItemFromList(module);
         }
     }
 }

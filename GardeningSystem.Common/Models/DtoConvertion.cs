@@ -12,16 +12,20 @@ namespace GardeningSystem.Common.Models {
         public static IEnumerable<ModuleInfoDto> ToDtos(this IEnumerable<ModuleInfo> moduleInfos) {
             var objects = new List<ModuleInfoDto>();
             foreach (var module in moduleInfos) {
-                objects.Add(new ModuleInfoDto() {
-                    Id = module.Id,
-                    AssociatedModules = module.AssociatedModules,
-                    ModuleTyp = module.ModuleTyp,
-                    Name = module.Name,
-                    LastWaterings = module.LastWaterings
-                });
+                objects.Add(ToDto(module));
             }
 
             return objects;
+        }
+
+        public static ModuleInfoDto ToDto(this ModuleInfo module) {
+            return new ModuleInfoDto() {
+                Id = module.Id,
+                AssociatedModules = module.AssociatedModules,
+                ModuleTyp = module.ModuleTyp,
+                Name = module.Name,
+                LastWaterings = module.LastWaterings
+            };
         }
     }
 }

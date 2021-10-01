@@ -105,10 +105,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return ModulesRepository.GetAllRegisteredModules().ToDtos();
         }
 
+        //public async Task<ModuleInfoDto> GetModuleById(Guid id) {
+        //    await LOCKER.WaitAsync();
+
+        //    return (await GetAllModules()).Where(m => m.Id == id).First();
+        //}
+
         public async Task<ModuleInfoDto> GetModuleById(Guid id) {
             await LOCKER.WaitAsync();
 
-            return (await GetAllModules()).Where(m => m.Id == id).First();
+            return ModulesRepository.GetModuleById(id).ToDto();
         }
     }
 }

@@ -32,7 +32,7 @@ namespace GardeningSystem.DataAccess.Repositories {
         }
 
         public void Init(string fileName) {
-            _filePath = Assembly.GetExecutingAssembly().Location + "\\" + fileName;
+            _filePath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName + "\\" + fileName;
         }
 
         #region Serilize list of objects
@@ -58,7 +58,34 @@ namespace GardeningSystem.DataAccess.Repositories {
 
         public bool RemoveItemFromFileList(Guid Id) {
             var fileContent = ReadListFromFile().ToList();
-            return (fileContent.RemoveAll((o) => o.Id == Id) > 0);
+            bool removed = (fileContent.RemoveAll((o) => o.Id == Id) > 0);
+            if (removed) {
+                // update file
+                WriteListToFile(fileContent);
+            }
+
+            return removed;
+        }
+
+        public bool UpdateItemFromList(T itemToUpdate) {
+
+            var items = ReadListFromFile().ToList();
+
+            // find current item
+            var oldItem = items.Find(i => i.Id == itemToUpdate.Id);
+            if (oldItem != null) {
+                bool removed = items.Remove(oldItem);
+                if (removed) {
+                    items.Add(itemToUpdate);
+
+                    // update file
+                    WriteListToFile(items);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         #endregion

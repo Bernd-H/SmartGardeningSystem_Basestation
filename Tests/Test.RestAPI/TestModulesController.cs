@@ -8,22 +8,22 @@ namespace Test.RestAPI
         [TestMethod]
         public void TestMethod1()
         {
-            // mock fake data
-            ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
-                Id = Guid.NewGuid(),
-                Name = "Test1",
-                ModuleTyp = ModuleTypeEnum.ACTOR
-            });
-            ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
-                Id = Guid.NewGuid(),
-                Name = "Test2",
-                ModuleTyp = ModuleTypeEnum.SENSOR
-            });
-            ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
-                Id = Guid.NewGuid(),
-                Name = "Test3",
-                ModuleTyp = ModuleTypeEnum.ACTOR
-            });
+            //// mock fake data
+            //ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
+            //    Id = Guid.NewGuid(),
+            //    Name = "Test1",
+            //    ModuleTyp = ModuleTypeEnum.ACTOR
+            //});
+            //ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
+            //    Id = Guid.NewGuid(),
+            //    Name = "Test2",
+            //    ModuleTyp = ModuleTypeEnum.SENSOR
+            //});
+            //ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
+            //    Id = Guid.NewGuid(),
+            //    Name = "Test3",
+            //    ModuleTyp = ModuleTypeEnum.ACTOR
+            //});
         }
     }
 }

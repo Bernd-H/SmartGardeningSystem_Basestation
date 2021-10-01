@@ -18,12 +18,13 @@ namespace GardeningSystem.Common.Specifications.Repositories {
 
         void WriteListToFile(IEnumerable<T> objects);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="Id">Item id</param>
         /// <returns>True when one or more items got removed.</returns>
         bool RemoveItemFromFileList(Guid Id);
+
+        /// <param name="itemToUpdate">Updated item</param>
+        /// <returns>False if not found, otherwise true.</returns>
+        bool UpdateItemFromList(T itemToUpdate);
 
         #endregion
 
