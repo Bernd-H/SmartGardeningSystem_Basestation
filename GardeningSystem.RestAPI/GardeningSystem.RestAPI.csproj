@@ -2,21 +2,38 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <UserSecretsId>33d1df85-94e4-4005-8d82-ba6ee915489f</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="6.2.0" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10" />
-    <PackageReference Include="NLog" Version="4.7.11" />
-    <PackageReference Include="NLog.Extensions.Hosting" Version="1.7.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <Content Remove="appsettings.json" />
+    <Content Remove="NLog.config" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GardeningSystem.Common\GardeningSystem.Common.csproj" />
-    <ProjectReference Include="..\GardeningSystem.DataAccess\GardeningSystem.DataAccess.csproj" />
+    <None Remove="C:\Users\bernd\.nuget\packages\nlog.config\4.7.11\contentFiles\any\any\NLog.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="5.0.10" />
+    <PackageReference Include="NLog.Extensions.Hosting" Version="1.7.4" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.14.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.12.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GardeningSystem\GardeningSystem.csproj" />
   </ItemGroup>
 

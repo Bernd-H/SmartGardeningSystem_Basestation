@@ -11,25 +11,27 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace GardeningSystem.RestAPI {
     public class Startup {
-        public Startup() {
+        public Startup(IConfiguration configuration) {
+            Configuration = configuration;
         }
+
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
             var _configuration = IoC.GetConfigurationObject();
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options => {
-                    options.TokenValidationParameters = new TokenValidationParameters {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = _configuration[ConfigurationVars.ISSUER],
-                        ValidAudience = _configuration[ConfigurationVars.ISSUER],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration[ConfigurationVars.ISSUER_SIGNINGKEY]))
-                    };
-                });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
+                options.TokenValidationParameters = new TokenValidationParameters {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = _configuration[ConfigurationVars.ISSUER],
+                    ValidAudience = _configuration[ConfigurationVars.ISSUER],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration[ConfigurationVars.ISSUER_SIGNINGKEY]))
+                };
+            });
 
             services.AddControllers();
         }
