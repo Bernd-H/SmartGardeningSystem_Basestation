@@ -2,8 +2,10 @@
 using System.IO;
 using System.Reflection;
 using Autofac;
+using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.BusinessLogic.Managers;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Specifications.Repositories;
 using GardeningSystem.Common.Specifications.RfCommunication;
@@ -50,6 +52,8 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<ModuleManager>().As<IModuleManager>();
             containerBuilder.RegisterType<SettingsManager>().As<ISettingsManager>();
 
+            containerBuilder.RegisterType<PasswordHasher>().As<IPasswordHasher>();
+
             containerBuilder.RegisterType<FileRepository>().As<IFileRepository>();
             containerBuilder.RegisterGeneric(typeof(SerializedFileRepository<>)).As(typeof(ISerializedFileRepository<>)).InstancePerDependency();
             containerBuilder.RegisterType<ModulesRepository>().As<IModulesRepository>();
@@ -90,7 +94,7 @@ namespace GardeningSystem {
         public static IConfiguration GetConfigurationObject() {
             if (configuration == null) {
                 var GardeningSystemAssembly = Assembly.GetExecutingAssembly();
-                var appSettingsFileStream = GardeningSystemAssembly.GetManifestResourceStream("GardeningSystem.appsettings.json");
+                var appSettingsFileStream = GardeningSystemAssembly.GetManifestResourceStream("GardeningSystem.settings.json");
 
                 // load configuration
                 var builder = new ConfigurationBuilder()

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.DataObjects;
 
 namespace GardeningSystem.Common.Models.DTOs {
@@ -11,10 +13,17 @@ namespace GardeningSystem.Common.Models.DTOs {
 
         #region login/registration
 
-        public string Email { get; set; }
-
-        public byte[] Password { get; set; }
+        public IEnumerable<User> RegisteredUsers { get; set; }
 
         #endregion
+
+
+        public static ApplicationSettingsDto GetStandardSettings() {
+            return new ApplicationSettingsDto() {
+                Id = Guid.NewGuid(),
+                PostalCode = string.Empty,
+                RegisteredUsers = new List<User>()
+            };
+        }
     }
 }

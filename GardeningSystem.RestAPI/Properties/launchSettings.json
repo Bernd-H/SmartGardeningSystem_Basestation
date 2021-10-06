@@ -7,9 +7,9 @@
       "applicationUrl": "http://localhost:10438",
       "sslPort": 44314
     }
-  },
+  },*/
   "profiles": {
-    "IIS Express": {
+   /* "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
       "launchUrl": "swagger",

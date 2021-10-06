@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="appsettings.json" />
+    <Content Remove="settings.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="appsettings.json" />
+    <EmbeddedResource Include="settings.json" />
   </ItemGroup>
 
   <ItemGroup>

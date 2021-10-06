@@ -11,5 +11,11 @@
         public static string APPLICATIONSETTINGS_FILEPATH = "applicationSettings_path";
 
         public static string WLANINTERFACE_NAME = "wlanInterface_name";
+
+
+        // GardeningSystem.RestAPI
+        // Authentication
+        public static string ISSUER_SIGNINGKEY = "rest_api_jwt:key";
+        public static string ISSUER = "rest_api_jwt:issuer";
     }
 }

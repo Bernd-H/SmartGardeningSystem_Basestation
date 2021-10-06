@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
 
 namespace GardeningSystem.RestAPI.Controllers {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ModulesController : ControllerBase {
 
         private IModulesRepository ModulesRepository;
