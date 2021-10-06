@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Repositories;
 using NLog;
 
@@ -12,8 +13,8 @@ namespace GardeningSystem.DataAccess.Repositories {
 
         private ILogger Logger;
 
-        public WeatherRepository(ILogger logger) {
-            Logger = logger;
+        public WeatherRepository(ILoggerService logger) {
+            Logger = logger.GetLogger<WeatherRepository>();
         }
 
         public Task<WeatherDataDto> GetCurrentWeatherPredictions(string location) {

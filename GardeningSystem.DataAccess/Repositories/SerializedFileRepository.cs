@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.DataObjects;
 using GardeningSystem.Common.Specifications.Repositories;
 using NLog;
@@ -27,8 +28,8 @@ namespace GardeningSystem.DataAccess.Repositories {
             }
         }
 
-        public SerializedFileRepository(ILogger logger) {
-            _logger = logger;
+        public SerializedFileRepository(ILoggerService logger) {
+            _logger = logger.GetLogger<SerializedFileRepository<T>>();
         }
 
         public void Init(string fileName) {

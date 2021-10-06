@@ -4,6 +4,7 @@ using System.Linq;
 using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Specifications.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -18,8 +19,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ISerializedFileRepository<ApplicationSettingsDto> SerializeFileRepository;
 
-        public SettingsManager(ILogger logger, IConfiguration configuration, ISerializedFileRepository<ApplicationSettingsDto> serializeFileRepository) {
-            Logger = logger;
+        public SettingsManager(ILoggerService logger, IConfiguration configuration, ISerializedFileRepository<ApplicationSettingsDto> serializeFileRepository) {
+            Logger = logger.GetLogger<SettingsManager>();
             Configuration = configuration;
             SerializeFileRepository = serializeFileRepository;
             SerializeFileRepository.Init(Configuration[ConfigurationVars.APPLICATIONSETTINGS_FILEPATH]);

@@ -16,8 +16,8 @@ namespace GardeningSystem.DataAccess {
 
         private IConfiguration Configuration;
 
-        public WifiConfigurator(ILogger logger, IConfiguration configuration) {
-            Logger = logger;
+        public WifiConfigurator(ILoggerService logger, IConfiguration configuration) {
+            Logger = logger.GetLogger<WifiConfigurator>();
             Configuration = configuration;
         }
 

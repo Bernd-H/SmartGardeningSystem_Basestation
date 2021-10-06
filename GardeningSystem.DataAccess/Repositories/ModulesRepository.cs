@@ -8,6 +8,7 @@ using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
+using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Repositories;
 using Microsoft.Extensions.Configuration;
 using NLog;
@@ -21,8 +22,8 @@ namespace GardeningSystem.DataAccess.Repositories {
 
         private readonly IConfiguration Configuration;
 
-        public ModulesRepository(ILogger logger, IConfiguration configuration, ISerializedFileRepository<ModuleInfo> modulesFileRepo) {
-            Logger = logger;
+        public ModulesRepository(ILoggerService logger, IConfiguration configuration, ISerializedFileRepository<ModuleInfo> modulesFileRepo) {
+            Logger = logger.GetLogger<ModulesRepository>();
             Configuration = configuration;
             ModulesFileRepo = modulesFileRepo;
             ModulesFileRepo.Init(Configuration[ConfigurationVars.MODULES_FILENAME]);

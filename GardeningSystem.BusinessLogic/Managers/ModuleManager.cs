@@ -11,6 +11,7 @@ using GardeningSystem.Common.Specifications.RfCommunication;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using System.Threading;
+using GardeningSystem.Common.Specifications;
 
 namespace GardeningSystem.BusinessLogic.Managers {
     public class ModuleManager : IModuleManager {
@@ -28,8 +29,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
         //private static readonly object LOCK_OBJEJCT = new object();
         private static SemaphoreSlim LOCKER = new SemaphoreSlim(1);
 
-        public ModuleManager(ILogger logger, IConfiguration configuration, IModulesRepository modulesRepository, IRfCommunicator rfCommunicator) {
-            Logger = logger;
+        public ModuleManager(ILoggerService logger, IConfiguration configuration, IModulesRepository modulesRepository, IRfCommunicator rfCommunicator) {
+            Logger = logger.GetLogger<ModuleManager>();
             Configuration = configuration;
             ModulesRepository = modulesRepository;
             RfCommunicator = rfCommunicator;

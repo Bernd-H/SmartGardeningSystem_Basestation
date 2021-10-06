@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Specifications.Repositories;
 using NLog;
@@ -17,8 +18,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ISettingsManager SettingsManager;
 
-        public WateringManager(ILogger logger, IModuleManager moduleManager, IWeatherRepository weatherRepository, ISettingsManager settingsManager) {
-            Logger = logger;
+        public WateringManager(ILoggerService logger, IModuleManager moduleManager, IWeatherRepository weatherRepository, ISettingsManager settingsManager) {
+            Logger = logger.GetLogger<WateringManager>();
             ModuleManager = moduleManager;
             WeatherRepository = weatherRepository;
             SettingsManager = settingsManager;

@@ -24,8 +24,8 @@ namespace GardeningSystem.DataAccess {
         private StreamWriter _sw;
         private StreamReader _sr;
 
-        public RfCommunicator(ILogger logger, IConfiguration configuration) {
-            Logger = logger;
+        public RfCommunicator(ILoggerService logger, IConfiguration configuration) {
+            Logger = logger.GetLogger<RfCommunicator>();
             Configuration = configuration;
 
             // start rf app (c++ application)

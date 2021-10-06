@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
+using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
 using Microsoft.AspNetCore.Authorization;
@@ -27,10 +28,10 @@ namespace GardeningSystem.RestAPI.Controllers {
 
         private IPasswordHasher PasswordHasher;
 
-        private readonly ILogger Logger;
+        private ILogger Logger;
 
-        public LoginController(ILogger logger, IConfiguration config, ISettingsManager settingsManager, IPasswordHasher passwordHasher) {
-            Logger = logger;
+        public LoginController(ILoggerService logger, IConfiguration config, ISettingsManager settingsManager, IPasswordHasher passwordHasher) {
+            Logger = logger.GetLogger<LoginController>();
             Configuration = config;
             SettingsManager = settingsManager;
             PasswordHasher = passwordHasher;

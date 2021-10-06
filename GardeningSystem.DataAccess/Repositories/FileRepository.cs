@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Repositories;
 using NLog;
 
@@ -11,8 +12,8 @@ namespace GardeningSystem.DataAccess.Repositories {
 
         private ILogger Logger;
 
-        public FileRepository(ILogger logger) {
-            Logger = logger;
+        public FileRepository(ILoggerService logger) {
+            Logger = logger.GetLogger<FileRepository>();
         }
 
         public void Dispose() {

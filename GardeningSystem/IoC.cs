@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using Autofac;
 using Autofac.Extras.NLog;
+using GardeningSystem.BusinessLogic;
 using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.BusinessLogic.Managers;
 using GardeningSystem.Common.Specifications;
@@ -44,9 +45,8 @@ namespace GardeningSystem {
         /// <param name="containerBuilder"></param>
         public static void RegisterToContainerBuilder(ref ContainerBuilder containerBuilder) {
             // Register individual components
-            containerBuilder.Register(c => LogManager.GetLogger("main")).As<ILogger>();
-            //containerBuilder.RegisterModule<NLogModule>();
-            //containerBuilder.Register(c => LogManager.GetCurrentClassLogger()).As<ILogger>();
+            //containerBuilder.Register(c => LogManager.GetLogger("main")).As<ILogger>();
+            containerBuilder.RegisterType<LoggerService>().As<ILoggerService>();
             containerBuilder.Register(c => GetConfigurationObject()).As<IConfiguration>();
 
             containerBuilder.RegisterType<WateringJob>().AsSelf();

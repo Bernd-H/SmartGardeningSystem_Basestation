@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.Entities;
+using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,17 +17,19 @@ namespace GardeningSystem.RestAPI.Controllers {
 
         private ILogger Logger;
 
-        public ModulesController(ILogger logger, IModulesRepository modulesRepository) {
-            Logger = logger;
+        public ModulesController(ILoggerService logger, IModulesRepository modulesRepository) {
+            Logger = logger.GetLogger<ModulesController>();
             ModulesRepository = modulesRepository;
         }
 
         // GET: api/Modules
         [HttpGet]
         public IEnumerable<ModuleInfo> Get() {
+            Logger.Trace("All registered modules requested.");
             try {
                 return ModulesRepository.GetAllRegisteredModules();
-            } catch(Exception ex) {
+            }
+            catch (Exception ex) {
                 Logger.Error(ex, "[RestAPI.ModulesController.Get]");
 
                 return null;
@@ -42,7 +42,8 @@ namespace GardeningSystem.RestAPI.Controllers {
             ModuleInfo module;
             try {
                 module = ModulesRepository.GetModuleById(id);
-            } catch(Exception ex) {
+            }
+            catch (Exception ex) {
                 Logger.Error(ex, "[RestAPI.ModulesController.GetById]");
 
                 return Problem(ex.Message);
@@ -60,7 +61,8 @@ namespace GardeningSystem.RestAPI.Controllers {
         public IActionResult Post([FromBody] ModuleInfo value) {
             try {
                 ModulesRepository.AddModule(value);
-            } catch(Exception ex) {
+            }
+            catch (Exception ex) {
                 Logger.Error(ex, "[RestAPI.ModulesController.Post]");
 
                 return Problem(ex.Message);
@@ -89,7 +91,8 @@ namespace GardeningSystem.RestAPI.Controllers {
             bool deleted = false;
             try {
                 deleted = ModulesRepository.RemoveModule(id);
-            } catch(Exception ex) {
+            }
+            catch (Exception ex) {
                 Logger.Error(ex, "[RestAPI.ModulesController.Delete]");
 
                 return Problem(ex.Message);
@@ -98,7 +101,7 @@ namespace GardeningSystem.RestAPI.Controllers {
             if (deleted) {
                 return Ok();
             }
-            
+
             return NotFound();
         }
     }
