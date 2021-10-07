@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using GardeningSystem.Common.Specifications;
 using Microsoft.Extensions.Hosting;
 using NLog;
 
@@ -13,8 +14,8 @@ namespace GardeningSystem {
         private EventHandler _doWorkHandler;
         private string _serviceName;
 
-        public TimedHostedService(ILogger logger, string serviceName) {
-            _logger = logger;
+        public TimedHostedService(ILoggerService logger, string serviceName) {
+            _logger = logger.GetLogger<TimedHostedService>();
             _serviceName = serviceName;
         }
 

@@ -48,7 +48,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         }
     }
 
-    public sealed class HashingOptions {
+    internal sealed class HashingOptions {
         public int Iterations { get; set; } = 10000;
     }
 }

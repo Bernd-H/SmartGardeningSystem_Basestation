@@ -6,23 +6,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="settings.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="settings.json" />
+    <None Remove="C:\Users\bernd\.nuget\packages\nlog.config\4.7.11\contentFiles\any\any\NLog.config" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.2.0" />
-    <PackageReference Include="Autofac.Extras.NLog" Version="4.0.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="NLog" Version="4.7.11" />
-    <PackageReference Include="NLog.Config" Version="4.7.11" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.14.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GardeningSystem.BusinessLogic\GardeningSystem.BusinessLogic.csproj" />
     <ProjectReference Include="..\GardeningSystem.Common\GardeningSystem.Common.csproj" />
+    <ProjectReference Include="..\GardeningSystem.RestAPI\GardeningSystem.RestAPI.csproj" />
   </ItemGroup>
 </Project>

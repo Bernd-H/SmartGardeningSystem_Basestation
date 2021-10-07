@@ -2,7 +2,6 @@
 using System.IO;
 using System.Reflection;
 using Autofac;
-using Autofac.Extras.NLog;
 using GardeningSystem.BusinessLogic;
 using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.BusinessLogic.Managers;
@@ -29,8 +28,7 @@ namespace GardeningSystem {
         /// Registers all types to a internal containerbuilder.
         /// Does not build the cointainer yet.
         /// </summary>
-        public static void Init()
-        {
+        public static void Init() {
             if (builder != null) {
                 builder = new ContainerBuilder();
 
@@ -102,7 +100,7 @@ namespace GardeningSystem {
                 // load configuration
                 var builder = new ConfigurationBuilder()
                     .AddJsonStream(appSettingsFileStream);
-                    //.AddJsonFile(appSettingsFilePath, optional: true, reloadOnChange: true);
+                //.AddJsonFile(appSettingsFilePath, optional: true, reloadOnChange: true);
                 configuration = builder.Build();
             }
 

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using Autofac;
 using GardeningSystem.Common.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,13 +11,18 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GardeningSystem.RestAPI {
-    public class Startup {
-        public Startup() {
+    public class StartupRestAPI {
+
+        private IConfiguration _configuration;
+
+        public StartupRestAPI() {
+            _configuration = ConfigurationContainer.CONFIGURATION;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
-            var _configuration = IoC.GetConfigurationObject();
+            //var _configuration = GetConfigurationObject();
+            //var _configuration = configuration;
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
@@ -38,9 +44,9 @@ namespace GardeningSystem.RestAPI {
         // with Autofac. This runs after ConfigureServices so the things
         // here will override registrations made in ConfigureServices.
         // Don't build the container; that gets done for you by the factory.
-        public void ConfigureContainer(ContainerBuilder builder) {
-            IoC.RegisterToContainerBuilder(ref builder);
-        }
+        //public void ConfigureContainer(ContainerBuilder builder) {
+        //    IoC.RegisterToContainerBuilder(ref builder);
+        //}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {

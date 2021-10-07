@@ -13,8 +13,8 @@ namespace GardeningSystem.Jobs {
 
         private ILogger Logger;
 
-        public WateringJob(ILogger logger, IWateringManager wateringManager) : base(logger, nameof(WateringJob)) {
-            Logger = logger;
+        public WateringJob(ILoggerService logger, IWateringManager wateringManager) : base(logger, nameof(WateringJob)) {
+            Logger = logger.GetLogger<WateringJob>();
             WateringManager = wateringManager;
 
             base.SetEventHandler(new EventHandler(Start));
@@ -32,7 +32,8 @@ namespace GardeningSystem.Jobs {
 
                     // notify user
                     throw new NotImplementedException();
-                } else if (sensor.IsNeccessary.Value) {
+                }
+                else if (sensor.IsNeccessary.Value) {
                     wateringTasks.Add(WateringManager.StartWatering(sensor));
                 }
             }

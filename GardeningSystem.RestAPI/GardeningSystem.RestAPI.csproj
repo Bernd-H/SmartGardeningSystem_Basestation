@@ -29,7 +29,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GardeningSystem\GardeningSystem.csproj" />
+    <ProjectReference Include="..\GardeningSystem.BusinessLogic\GardeningSystem.BusinessLogic.csproj" />
+    <ProjectReference Include="..\GardeningSystem.Common\GardeningSystem.Common.csproj" />
   </ItemGroup>
 
 </Project>
