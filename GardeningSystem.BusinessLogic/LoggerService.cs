@@ -14,7 +14,7 @@ namespace GardeningSystem.BusinessLogic {
 
         public ILogger GetLogger<T>() where T : class {
             if (!logger.ContainsKey(typeof(T))) {
-                logger.Add(typeof(T), LogManager.GetLogger(typeof(T).FullName));
+                logger.Add(typeof(T), LogManager.GetLogger(typeof(T).Name));
             }
 
             return logger[typeof(T)];

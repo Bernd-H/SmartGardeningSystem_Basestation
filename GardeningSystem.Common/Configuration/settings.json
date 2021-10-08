@@ -1,16 +1,22 @@
 ﻿{
   "basestation_guid": "644675d4-2cd8-4b0c-9663-7a2325573c7c",
 
-  "modules_fileName": "modules.bin",
+  "modules_fileName": "modules.json",
 
-  "rfapp_path": "rfmoduleforwarder",
+  "rfapp_fileName": "rfmoduleforwarder",
 
-  "applicationSettings_path": "userSettings.csv",
+  "applicationSettings_fileName": "userSettings.json",
 
   "wlanInterface_name": "wlp3s0", // standard interface name
 
   "rest_api_jwt": {
     "key": "s22rZuvg-xQn67!Z^?>RTSOp",
     "issuer": "smartgardening.at"
-  }
+  },
+
+  // Service options
+  "wateringJob_enabled": "false",
+
+  // Test Environment options
+  "isTestEnvironment": "true"
 }

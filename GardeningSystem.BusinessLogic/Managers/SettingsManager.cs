@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications;
@@ -23,31 +21,23 @@ namespace GardeningSystem.BusinessLogic.Managers {
             Logger = logger.GetLogger<SettingsManager>();
             Configuration = configuration;
             SerializeFileRepository = serializeFileRepository;
-            SerializeFileRepository.Init(Configuration[ConfigurationVars.APPLICATIONSETTINGS_FILEPATH]);
+            SerializeFileRepository.Init(Configuration[ConfigurationVars.APPLICATIONSETTINGS_FILENAME]);
 
-            if (!File.Exists(Configuration[ConfigurationVars.APPLICATIONSETTINGS_FILEPATH])) {
+            string settingsFilePath = ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.APPLICATIONSETTINGS_FILENAME]);
+            if (!File.Exists(settingsFilePath)) {
+                Logger.Info("[SettingsManager]Creating default settings file.");
+
                 // create default settings file
                 UpdateSettings(ApplicationSettingsDto.GetStandardSettings());
             }
-
-            UpdateCurrentSettings((s) => {
-                var registeredUsers = s.RegisteredUsers.ToList();
-                registeredUsers.Add(new Common.Models.Entities.User() {
-                    Email = "bernd.hatzinger@gmail.com",
-                    HashedPassword = new PasswordHasher().HashPassword("passw1")
-                });
-
-                s.RegisteredUsers = registeredUsers;
-                return s;
-            });
         }
         public ApplicationSettingsDto GetApplicationSettings() {
-            Logger.Info("Loading application settings...");
+            Logger.Info("[GetApplicationSettings]Loading application settings.");
             return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettingsDto>();
         }
 
         private void UpdateSettings(ApplicationSettingsDto newSettings) {
-            Logger.Info("Writing to application settings...");
+            Logger.Info("[UpdateSettings]Writing to application settings.");
             SerializeFileRepository.WriteSingleObjectToFile<ApplicationSettingsDto>(newSettings);
         }
 

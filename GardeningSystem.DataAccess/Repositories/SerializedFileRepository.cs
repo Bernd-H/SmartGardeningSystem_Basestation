@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.DataObjects;
 using GardeningSystem.Common.Specifications.Repositories;
@@ -33,24 +34,28 @@ namespace GardeningSystem.DataAccess.Repositories {
         }
 
         public void Init(string fileName) {
-            _filePath = new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName + "\\" + fileName;
+            _filePath = ConfigurationContainer.GetFullPath(fileName);
+            _logger.Trace($"[Init]Repository filepath set to {_filePath}.");
         }
 
         #region Serilize list of objects
 
         public void AppendToFileList(T o) {
+            _logger.Trace($"[AppendToFileList]Appending object with id={o.Id} to list at {new FileInfo(_filePath).Name}.");
             var fileContent = ReadListFromFile().ToList();
             fileContent.Add(o);
             WriteListToFile(fileContent);
         }
 
         public IEnumerable<T> ReadListFromFile() {
+            _logger.Trace($"[ReadListFromFile]Reading list form file {new FileInfo(_filePath).Name}.");
             var container = ReadSingleObjectFromFile<Container<T>>();
 
             return container?.Elements ?? new List<T>();
         }
 
         public void WriteListToFile(IEnumerable<T> objects) {
+            _logger.Trace($"[WriteListToFile]Writing list of objects to {new FileInfo(_filePath).Name}.");
             Container<T> container = new Container<T>();
             container.Elements = objects;
 
@@ -58,6 +63,7 @@ namespace GardeningSystem.DataAccess.Repositories {
         }
 
         public bool RemoveItemFromFileList(Guid Id) {
+            _logger.Trace($"[RemoveItemFromFileList]Removing object with id={Id} from file {new FileInfo(_filePath).Name}.");
             var fileContent = ReadListFromFile().ToList();
             bool removed = (fileContent.RemoveAll((o) => o.Id == Id) > 0);
             if (removed) {
@@ -69,7 +75,7 @@ namespace GardeningSystem.DataAccess.Repositories {
         }
 
         public bool UpdateItemFromList(T itemToUpdate) {
-
+            _logger.Trace($"[UpdateItemFromList]Updating object with id={itemToUpdate.Id} from file {new FileInfo(_filePath).Name}.");
             var items = ReadListFromFile().ToList();
 
             // find current item
@@ -84,6 +90,8 @@ namespace GardeningSystem.DataAccess.Repositories {
 
                     return true;
                 }
+            } else {
+                _logger.Error($"[UpdateItemFromList]Object not found.");
             }
 
             return false;
@@ -97,6 +105,7 @@ namespace GardeningSystem.DataAccess.Repositories {
 
             //    bf.Serialize(fs, o);
             //}
+            _logger.Trace($"[WriteSingleObjectToFile]Writing object to file {new FileInfo(_filePath).Name}.");
             File.WriteAllText(_filePath, JsonSerializer.Serialize(o));
         }
 
@@ -107,9 +116,11 @@ namespace GardeningSystem.DataAccess.Repositories {
 
                 //    return (T2) bf.Deserialize(fs);
                 //}
+                _logger.Trace($"[ReadSingleObjectFromFile]Reading object from file {new FileInfo(_filePath).Name}.");
                 return JsonSerializer.Deserialize<T2>(File.ReadAllText(_filePath));
             }
             else {
+                _logger.Warn($"[ReadSingleObjectFromFile]File {_filePath} does not exist.");
                 return null;
             }
         }

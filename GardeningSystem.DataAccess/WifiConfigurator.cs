@@ -22,6 +22,8 @@ namespace GardeningSystem.DataAccess {
         }
 
         public bool ConnectToWlan(string essid, byte[] secret) {
+            Logger.Info($"[ConnectToWlan]Trying to connect to wlan wiht essid={essid}.");
+
             // connect to wlan
             ProcessStartInfo startInfo = new ProcessStartInfo() { FileName = "/bin/bash", Arguments = $"/nmcli d wifi connect {essid} password {secret}" };
             Process proc = new Process() { StartInfo = startInfo, };
@@ -32,6 +34,8 @@ namespace GardeningSystem.DataAccess {
         }
 
         public IEnumerable<string> GetAllWlans() {
+            Logger.Info($"[GetAllWlans]Searching for reachable wifis.");
+
             // get all wlans
             string command = $"sudo iwlist {Configuration[ConfigurationVars.WLANINTERFACE_NAME]} scan | grep ESSID";
             ProcessStartInfo startInfo = new ProcessStartInfo() {
@@ -57,10 +61,12 @@ namespace GardeningSystem.DataAccess {
         }
 
         public bool HasInternet() {
+            Logger.Info($"[HasInternet]Checking internet connection.");
             throw new NotImplementedException();
         }
 
         public bool IsConnectedToWlan() {
+            Logger.Info($"[IsConnectedToWlan]Checking wifi connection.");
             throw new NotImplementedException();
         }
     }

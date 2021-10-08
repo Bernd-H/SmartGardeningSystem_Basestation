@@ -36,6 +36,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
             foreach (var measurement in measurements) { // foreach sensor
                 if (double.IsNaN(measurement.Data)) {
+                    Logger.Info($"[IsWateringNeccessary]Could not get measurments from sensor {measurement.Id}.");
                     // couldn't get measurement because of communication errors
                     wateringInfo.Add(new WateringNeccessaryDto() {
                         Id = measurement.Id,
@@ -58,6 +59,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         private TimeSpan wateringAlgo(double soilHumidity, DateTime? lastWateringTime, WeatherDataDto weatherData) {
+            Logger.Trace($"[wateringAlgo]Checking if watering is neccessary.");
             if (soilHumidity < 0.5) {
                 if (lastWateringTime == null || (DateTime.Now - lastWateringTime.Value).TotalHours > 11) {
                     return TimeSpan.FromHours(4);
@@ -68,7 +70,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         public Task StartWatering(WateringNeccessaryDto wateringInfo) {
-            Logger.Info($"Starting to water sensor {wateringInfo.Id.ToString()} for {wateringInfo.ValveOpenTime.TotalHours} hours.");
+            Logger.Info($"[StartWatering]Starting watering for sensor with id={wateringInfo.Id.ToString()} for {wateringInfo.ValveOpenTime.TotalHours} hours.");
 
             return Task.Run(async () => {
                 // open associated valves
@@ -77,7 +79,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     bool changeGotVerified = await ModuleManager.ChangeCorrespondingActorState(valve, 1); // open valve
 
                     if (!changeGotVerified) {
-                        Logger.Error($"Failed to open valve!");
+                        Logger.Error($"[StartWatering]Failed to open valve with id={valve}.");
 
                         // inform user
                         throw new NotImplementedException();
@@ -88,17 +90,18 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                 // close valves
                 foreach (var valve in module.AssociatedModules) {
+                    Logger.Info($"[StartWatering]Trying to close valve with id {valve.ToString()}.");
+
                     // retry 5 times if change did not get verified
                     bool changeGotVerified = false;
                     int attempts = 5;
                     do {
-                        Logger.Info($"Trying to close valve with id {valve.ToString()}.");
                         changeGotVerified = await ModuleManager.ChangeCorrespondingActorState(valve, 0);
                         attempts--;
                     } while (!changeGotVerified && attempts > 0);
 
                     if (!changeGotVerified) {
-                        Logger.Fatal($"Failed to close valve!");
+                        Logger.Error($"[StartWatering]Failed to close valve with id={valve}.");
 
                         // inform user
                         throw new NotImplementedException();

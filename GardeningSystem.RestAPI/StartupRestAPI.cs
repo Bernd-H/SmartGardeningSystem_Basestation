@@ -16,7 +16,7 @@ namespace GardeningSystem.RestAPI {
         private IConfiguration _configuration;
 
         public StartupRestAPI() {
-            _configuration = ConfigurationContainer.CONFIGURATION;
+            _configuration = ConfigurationContainer.Configuration;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

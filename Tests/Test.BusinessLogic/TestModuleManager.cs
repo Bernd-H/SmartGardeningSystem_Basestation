@@ -7,6 +7,7 @@ using Autofac;
 using Autofac.Extras.Moq;
 using GardeningSystem;
 using GardeningSystem.BusinessLogic.Managers;
+using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
@@ -24,7 +25,7 @@ namespace Test.BusinessLogic {
         [TestMethod]
         public async Task GetAllMeasurements_SomeConnected_ListWithAllModulesAndSomeEmptyMeasurements() {
             using (var mock = AutoMock.GetLoose((cb) => {
-                cb.Register(c => IoC.GetConfigurationObject()).As<IConfiguration>();
+                cb.Register(c => ConfigurationContainer.Configuration).As<IConfiguration>();
             })) {
                 // Arrange
                 var module3Guid = Guid.NewGuid(); // not connected module
@@ -65,7 +66,7 @@ namespace Test.BusinessLogic {
                         return new RfMessageDto() { Id = id, Bytes = new byte[12] };
                     }
                 };
-                mock.Mock<IRfCommunicator>().Setup(x => x.SendMessage_ReceiveAnswer(It.IsAny<Guid>(), It.IsAny<byte[]>())).Returns<Guid, byte[]>((id, msg) => {
+                mock.Mock<IRfCommunicator>().Setup(x => x.SendMessage_ReceiveAnswer(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<byte[]>())).Returns<Guid, byte[]>((id, msg) => {
                     return Task<RfMessageDto>.Factory.StartNew(() => calculateReturnAnswerTask(id, msg));
                 });
 
@@ -85,7 +86,7 @@ namespace Test.BusinessLogic {
         [TestMethod]
         public async Task ChangeCorrespondingActorState_ChangeGotVerified() {
             using (var mock = AutoMock.GetLoose((cb) => {
-                cb.Register(c => IoC.GetConfigurationObject()).As<IConfiguration>();
+                cb.Register(c => ConfigurationContainer.Configuration).As<IConfiguration>();
             })) {
                 // Arrange
                 int logcount = 0;
@@ -94,7 +95,7 @@ namespace Test.BusinessLogic {
                     logcount++;
                 });
 
-                mock.Mock<IRfCommunicator>().Setup(x => x.SendMessage_ReceiveAnswer(It.IsAny<Guid>(), It.IsAny<byte[]>())).Returns<Guid, byte[]>((id, msg) => {
+                mock.Mock<IRfCommunicator>().Setup(x => x.SendMessage_ReceiveAnswer(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<byte[]>())).Returns<Guid, byte[]>((id, msg) => {
                     return Task<RfMessageDto>.Factory.StartNew(() => new RfMessageDto() { Id = id, Bytes = new byte[1] { RfCommunication_Codes.ACK } });
                 });
 

@@ -5,7 +5,9 @@ using Autofac;
 using GardeningSystem.BusinessLogic;
 using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.BusinessLogic.Managers;
+using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Specifications.Repositories;
@@ -29,7 +31,7 @@ namespace GardeningSystem {
         /// Does not build the cointainer yet.
         /// </summary>
         public static void Init() {
-            if (builder != null) {
+            if (builder == null) {
                 builder = new ContainerBuilder();
 
                 RegisterToContainerBuilder(ref builder);
@@ -45,7 +47,7 @@ namespace GardeningSystem {
             // Register individual components
             //containerBuilder.Register(c => LogManager.GetLogger("main")).As<ILogger>();
             containerBuilder.RegisterType<LoggerService>().As<ILoggerService>();
-            containerBuilder.Register(c => GetConfigurationObject()).As<IConfiguration>();
+            containerBuilder.Register(c => ConfigurationContainer.Configuration).As<IConfiguration>();
 
             containerBuilder.RegisterType<WateringJob>().AsSelf();
 
@@ -60,6 +62,8 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<ModulesRepository>().As<IModulesRepository>();
             containerBuilder.RegisterType<RfCommunicator>().As<IRfCommunicator>();
             containerBuilder.RegisterType<WeatherRepository>().As<IWeatherRepository>();
+
+            containerBuilder.RegisterType<DevelopmentSetuper>().As<IDevelopmentSetuper>();
         }
 
         /// <summary>
@@ -89,22 +93,6 @@ namespace GardeningSystem {
                 throw new System.Exception("Cannot return a containerbuilder, because a container got already build.");
 
             return builder;
-        }
-
-        private static IConfigurationRoot configuration;
-        public static IConfiguration GetConfigurationObject() {
-            if (configuration == null) {
-                var GardeningSystemAssembly = Assembly.GetExecutingAssembly();
-                var appSettingsFileStream = GardeningSystemAssembly.GetManifestResourceStream("GardeningSystem.settings.json");
-
-                // load configuration
-                var builder = new ConfigurationBuilder()
-                    .AddJsonStream(appSettingsFileStream);
-                //.AddJsonFile(appSettingsFilePath, optional: true, reloadOnChange: true);
-                configuration = builder.Build();
-            }
-
-            return configuration;
         }
     }
 }

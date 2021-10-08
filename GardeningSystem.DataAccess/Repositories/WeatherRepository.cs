@@ -18,6 +18,7 @@ namespace GardeningSystem.DataAccess.Repositories {
         }
 
         public Task<WeatherDataDto> GetCurrentWeatherPredictions(string location) {
+            Logger.Info($"[GetCurrentWeatherPredictions]Requesting weather predictions for location={location}.");
             throw new NotImplementedException();
         }
     }

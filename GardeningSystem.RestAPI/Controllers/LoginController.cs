@@ -5,7 +5,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using GardeningSystem.Common;
 using GardeningSystem.Common.Configuration;
+using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
@@ -40,80 +42,97 @@ namespace GardeningSystem.RestAPI.Controllers {
         [AllowAnonymous]
         [HttpPost]
         public IActionResult Login([FromBody] UserDto login) {
-            Logger.Info($"User with email {login.Email} trying to log in.");
+            Logger.Info($"[Login]User with email {login.Email.Substring(0, login.Email.IndexOf('.'))}.* trying to log in.");
             IActionResult response = Unauthorized();
             var user = AuthenticateUser(login);
 
             if (user != null) {
-                var tokenString = GenerateJSONWebToken(user);
-                response = Ok(new { token = tokenString });
+                response = GenerateJSONWebToken(user);
             }
 
             return response;
         }
 
-        private string GenerateJSONWebToken(UserDto userInfo) {
-            Logger.Info($"Generating json web token for user {userInfo.Email}.");
+        private IActionResult GenerateJSONWebToken(UserDto userInfo) {
+            Logger.Info($"[GenerateJSONWebToken]Generating json web token for user {userInfo.Id}.");
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration[ConfigurationVars.ISSUER_SIGNINGKEY]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            try {
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration[ConfigurationVars.ISSUER_SIGNINGKEY]));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[] {
-                new Claim(JwtRegisteredClaimNames.Email, userInfo.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
+                var claims = new[] {
+                    //new Claim(JwtRegisteredClaimNames.NameId, userInfo.Id.ToString()),
+                    new Claim(JwtClaimTypes.UserID, userInfo.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                };
 
-            var token = new JwtSecurityToken(Configuration[ConfigurationVars.ISSUER],
-                Configuration[ConfigurationVars.ISSUER],
-                claims,
-                expires: DateTime.Now.AddMinutes(120),
-                signingCredentials: credentials);
+                var token = new JwtSecurityToken(Configuration[ConfigurationVars.ISSUER],
+                        Configuration[ConfigurationVars.ISSUER],
+                        claims,
+                        expires: DateTime.Now.AddMinutes(120),
+                        signingCredentials: credentials);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+                return Ok(new { token = tokenString });
+            } catch (Exception ex) {
+                Logger.Fatal(ex, $"[GenerateJSONWebToken]Error by creating Jwt for user {userInfo.Id}.");
+                return base.Problem("Error by creating a json web token.");
+            }
         }
 
         private UserDto AuthenticateUser(UserDto login) {
-            Logger.Trace("In authenticate user methode.");
+            Logger.Trace($"[AuthenticateUser]Checking if user with email {login.Email.Substring(0, login.Email.IndexOf('.'))}.* exists.");
             UserDto result = null;
 
             // check if user is registered
             var user = SettingsManager.GetApplicationSettings().RegisteredUsers.ToList().Find(u => u.Email == login.Email);
             if (user != null) {
+                login.Id = user.Id;
+
                 //Validate the User Credentials    
-                (bool valid, bool needsUpgrade) = PasswordHasher.VerifyHashedPassword(user.HashedPassword, login.PlainTextPassword);
+                (bool valid, bool needsUpgrade) = PasswordHasher.VerifyHashedPassword(user.ToDto(), user.HashedPassword, login.PlainTextPassword);
                 if (valid) {
                     result = login;
 
                     // check if upgrade needed
                     if (needsUpgrade) {
-                        Logger.Info($"Updating hash from user {login.Email}.");
-
-                        // update hash
-                        string newHash = PasswordHasher.HashPassword(login.PlainTextPassword);
-
-                        SettingsManager.UpdateCurrentSettings((currentSettings) => {
-                            var registeredUsers = currentSettings.RegisteredUsers.ToList();
-                            registeredUsers[registeredUsers.IndexOf(user)] = new User() {
-                                Email = login.Email,
-                                HashedPassword = newHash
-                            };
-
-                            // set new registerd users list
-                            currentSettings.RegisteredUsers = registeredUsers;
-                            return currentSettings;
-                        });
+                        UpdateOutdatedHash(login);
                     }
 
-                    Logger.Info("User password got validated.");
+                    Logger.Info($"[AuthenticateUser]User with id {user.Id} logged in.");
                 } else {
-                    Logger.Info("User password got rejected.");
+                    Logger.Info($"[AuthenticateUser]User with id {user.Id} entered wrong password.");
                 }
             }
             else {
-                Logger.Info("User with email not found.");
+                Logger.Info($"User with email {login.Email.Substring(0, login.Email.IndexOf('.'))}.* not found.");
             }
 
             return result;
+        }
+
+        private void UpdateOutdatedHash(UserDto userLogin) {
+            Logger.Info($"[UpdateOutdatedHash]Updating hash from user with id {userLogin.Id}.");
+
+            try {
+                // update hash
+                string newHash = PasswordHasher.HashPassword(userLogin.PlainTextPassword);
+
+                SettingsManager.UpdateCurrentSettings((currentSettings) => {
+                    var registeredUsers = currentSettings.RegisteredUsers.ToList();
+                    var registeredUser = registeredUsers.Find(u => u.Id == userLogin.Id);
+                    registeredUsers[registeredUsers.IndexOf(registeredUser)] = new User() {
+                        Email = userLogin.Email,
+                        HashedPassword = newHash
+                    };
+
+                    // set new registerd users list
+                    currentSettings.RegisteredUsers = registeredUsers;
+                    return currentSettings;
+                });
+            } catch(Exception ex) {
+                Logger.Error(ex, $"[UpdateOutdatedHash]Could not update hash from user {userLogin.Id}.");
+            }
         }
     }
 }

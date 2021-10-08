@@ -24,7 +24,7 @@ namespace GardeningSystem {
         }
 
         public Task StartAsync(CancellationToken stoppingToken) {
-            _logger.Info($"{_serviceName} is starting");
+            _logger.Trace($"[StartAsync]{_serviceName} is starting");
 
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromHours(5));
 
@@ -34,13 +34,13 @@ namespace GardeningSystem {
         protected virtual void DoWork(object state) {
             var count = Interlocked.Increment(ref executionCount);
 
-            _logger.Info($"{_serviceName} started. (execution count: {count})");
+            _logger.Trace($"[DoWork]{_serviceName} started. (execution count: {count})");
 
             _doWorkHandler.Invoke(null, null);
         }
 
         public Task StopAsync(CancellationToken stoppingToken) {
-            _logger.Info($"{_serviceName} is stopping.");
+            _logger.Warn($"[StopAsync]{_serviceName} is stopping.");
 
             _timer?.Change(Timeout.Infinite, 0);
 

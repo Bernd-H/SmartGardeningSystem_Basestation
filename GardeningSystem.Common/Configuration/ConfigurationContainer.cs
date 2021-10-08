@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -14,10 +15,14 @@ namespace GardeningSystem.Common.Configuration {
     public static class ConfigurationContainer {
 
         private static IConfiguration configuration;
-        public static IConfiguration CONFIGURATION {
+        public static IConfiguration Configuration {
             get {
                 return GetConfigurationObject();
             }
+        }
+
+        public static string GetFullPath(string relativePath) {
+            return new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName + "\\" + relativePath;
         }
 
         private static IConfiguration GetConfigurationObject() {

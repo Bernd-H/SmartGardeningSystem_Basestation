@@ -2,6 +2,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
+using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Jobs;
 using GardeningSystem.RestAPI;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +16,12 @@ namespace GardeningSystem {
         public static void Main(string[] args) {
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
             try {
-                //IoC.Init();
+                // development setup
+                if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
+                    logger.Info("Setting up test development/test enviroment.");
+                    IoC.Init();
+                    IoC.Get<IDevelopmentSetuper>().SetupTestEnvironment();
+                }
 
                 logger.Debug("init main");
                 CreateHostBuilder(args).Build().Run();
@@ -50,12 +56,9 @@ namespace GardeningSystem {
                     webBuilder.UseStartup<StartupRestAPI>(); 
                 })
                 .ConfigureServices((hostContext, services) => { // timed jobs
-                    services.AddHostedService<WateringJob>();
+                    if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.WATERINGJOB_ENABLED])) {
+                        services.AddHostedService<WateringJob>();
+                    }
                 });
-        //.ConfigureServices((hostContext, services) => {
-        //    services.AddHostedService<WateringJob>(new Func<IServiceProvider, WateringJob>((isp) => {
-        //        return IoC.Get<WateringJob>();
-        //    }));
-        //});
     }
 }

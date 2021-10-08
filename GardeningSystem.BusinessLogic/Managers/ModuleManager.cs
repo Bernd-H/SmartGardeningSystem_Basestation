@@ -41,10 +41,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
         public async Task<bool> ChangeCorrespondingActorState(Guid sensor, int state) {
             await LOCKER.WaitAsync();
 
+            Logger.Info($"[ChangeCorrespondingActorState]Changing state of sensor {sensor} to {state}.");
+
             int attempts = 10;
             bool success = false;
             do {
-                var rfMessageDto = await RfCommunicator.SendMessage_ReceiveAnswer(sensor, DataAccess.RfCommunicator.BuildActorMessage(basestationGuid, sensor, state));
+                var rfMessageDto = await RfCommunicator.SendMessage_ReceiveAnswer(basestationGuid, sensor, DataAccess.RfCommunicator.BuildActorMessage(basestationGuid, sensor, state));
 
                 if (rfMessageDto.Id == sensor && (rfMessageDto.Bytes.SequenceEqual(new byte[1] { RfCommunication_Codes.ACK }))) {
                     success = true;
@@ -53,7 +55,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     success = false;
                     attempts--;
                     if (attempts > 0)
-                        Logger.Warn("Valve state did not get verified. Retrying - " + (10 - attempts));
+                        Logger.Warn("[ChangeCorrespondingActorState]Valve state did not get verified. Retrying - " + (10 - attempts));
                 }
             } while (!success && attempts > 0);
 
@@ -63,6 +65,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
         public async Task<IEnumerable<ModuleDataDto>> GetAllMeasurements() {
             await LOCKER.WaitAsync();
 
+            Logger.Info($"[GetAllMeasurements]Requesting measuremnts from all sensors.");
+
             var measurements = new List<ModuleDataDto>();
 
             // get guids and send out requests to all sensors
@@ -70,19 +74,21 @@ namespace GardeningSystem.BusinessLogic.Managers {
             foreach (var module in modules) {
                 if (module.ModuleTyp == ModuleTypeEnum.SENSOR) {
                     RfMessageDto answer = null;
-                    int attempts = 10;
+                    int maxAttempts = 10;
+                    int attempts = maxAttempts;
                     
                     // communicate with current module, repeat if something went wrong 
                     do {
+                        Logger.Trace($"[GetAllMeasurements]Getting measurements from sensor {module.Id}. Attempt: {Math.Abs(maxAttempts - attempts)}.");
                         byte[] msg = DataAccess.RfCommunicator.BuildSensorDataMessage(basestationGuid, module.Id);
-                        answer = await RfCommunicator.SendMessage_ReceiveAnswer(module.Id, msg);
+                        answer = await RfCommunicator.SendMessage_ReceiveAnswer(basestationGuid, module.Id, msg);
                         attempts--;
                     } while (answer.Id == Guid.Empty && attempts > 0);
 
                     if (answer.Id == Guid.Empty) {
                         // still no answer
 
-                        Logger.Error("Could not get measurement of module with id " + module.Id.ToString());
+                        Logger.Error($"[GetAllMeasurements]Could not get measurement of module with id {module.Id.ToString()}.");
                         measurements.Add(new ModuleDataDto() {
                             Id = module.Id,
                             Data = double.NaN

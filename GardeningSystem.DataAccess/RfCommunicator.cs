@@ -29,8 +29,10 @@ namespace GardeningSystem.DataAccess {
             Configuration = configuration;
 
             // start rf app (c++ application)
+            Logger.Info($"[RfCommunicator]Starting c++ rf-module application.");
             CheckForFails();
-            _RfApplication = new ProcessStartInfo(Configuration[ConfigurationVars.RFAPP_FILEPATH]) {
+            string filePath = ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.RFAPP_FILENAME]);
+            _RfApplication = new ProcessStartInfo(filePath) {
                 UseShellExecute = true,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true
@@ -43,13 +45,16 @@ namespace GardeningSystem.DataAccess {
             _sr = _process.StandardOutput;
         }
 
-        public async Task<RfMessageDto> SendMessage_ReceiveAnswer(Guid reciever, byte[] msg) {
+        public async Task<RfMessageDto> SendMessage_ReceiveAnswer(Guid sender, Guid reciever, byte[] msg) {
+            Logger.Info($"[SendMessage_ReceiveAnswer]Sening message to receiver {reciever} and awaiting for answer.");
             await _sw.WriteLineAsync($"send {Convert.ToBase64String(msg)}");
 
             string returnmsg = await _sr.ReadToEndAsync();
             byte[] answer = Convert.FromBase64String(returnmsg);
 
-            if (IsExpectedId(reciever, answer)) {
+            if (IsExpectedId(sender, answer)) {
+                Logger.Info($"[SendMessage_ReceiveAnswer]Message received form {reciever}.");
+
                 // remove guid from answer
                 byte[] answerWithoutGuid = new byte[answer.Length - 16];
                 Array.Copy(answer, 16, answerWithoutGuid, 0, answerWithoutGuid.Length);
@@ -88,7 +93,7 @@ namespace GardeningSystem.DataAccess {
             packet.Add(RfCommunication_Codes.GET_MEASUREMENT);
 
             // packet length header - 4 bytes
-            packet.InsertRange(0, BitConverter.GetBytes((int)packet.Count + 4));
+            //packet.InsertRange(0, BitConverter.GetBytes((int)packet.Count + 4));
 
             return packet.ToArray();
         }
@@ -109,7 +114,7 @@ namespace GardeningSystem.DataAccess {
             packet.AddRange(BitConverter.GetBytes((int)status));
 
             // packet length header - 4 bytes
-            packet.InsertRange(0, BitConverter.GetBytes((int)packet.Count + 4));
+            //packet.InsertRange(0, BitConverter.GetBytes((int)packet.Count + 4));
 
             return packet.ToArray();
         }
@@ -124,7 +129,7 @@ namespace GardeningSystem.DataAccess {
         }
 
         private void CheckForFails() {
-            if (!File.Exists(Configuration[ConfigurationVars.RFAPP_FILEPATH])) {
+            if (!File.Exists(ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.RFAPP_FILENAME]))) {
                 throw new FileNotFoundException();
             }
         }
