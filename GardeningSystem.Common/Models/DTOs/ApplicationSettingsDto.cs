@@ -10,12 +10,9 @@ namespace GardeningSystem.Common.Models.DTOs {
 
         public string PostalCode { get; set; }
 
-
-        #region login/registration
-
         public IEnumerable<User> RegisteredUsers { get; set; }
 
-        #endregion
+        public byte[] ServerCertificate { get; set; }
 
 
         public static ApplicationSettingsDto GetStandardSettings() {

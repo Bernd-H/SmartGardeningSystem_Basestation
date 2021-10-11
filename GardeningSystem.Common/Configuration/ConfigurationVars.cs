@@ -12,6 +12,12 @@
 
         public static string WLANINTERFACE_NAME = "wlanInterface_name";
 
+        // Cryptography
+        // Server certificate
+        public static string CERT_PRIVATEKEY_FILENAME = "cert_privateKey_fileName";
+        public static string CERT_ISSUER = "cert_issuer";
+        public static string CERT_SUBJECT = "cert_subject";
+        
 
         // Communication
         // Local mobile app discovery
