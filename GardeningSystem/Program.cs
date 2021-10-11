@@ -55,9 +55,14 @@ namespace GardeningSystem {
                 .ConfigureWebHostDefaults(webBuilder => { // rest api
                     webBuilder.UseStartup<StartupRestAPI>(); 
                 })
-                .ConfigureServices((hostContext, services) => { // timed jobs
+                .ConfigureServices((hostContext, services) => {
+                    // timed jobs
                     if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.WATERINGJOB_ENABLED])) {
                         services.AddHostedService<WateringJob>();
+                    }
+                    // other services
+                    if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.COMMUNICATIONJOB_ENABLED])) {
+                        services.AddHostedService<CommunicationJob>();
                     }
                 });
     }

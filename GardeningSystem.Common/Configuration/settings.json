@@ -14,8 +14,13 @@
     "issuer": "smartgardening.at"
   },
 
+  // Communication
+  // Local mobile app discovery
+  "localMobileAppDiscovery_listenPort": "52138",
+
   // Service options
   "wateringJob_enabled": "false",
+  "communicationJob_enabled": "true",
 
   // Test Environment options
   "isTestEnvironment": "true"

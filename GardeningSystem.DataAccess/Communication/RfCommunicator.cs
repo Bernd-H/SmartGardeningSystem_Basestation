@@ -12,7 +12,7 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using GardeningSystem.Common.Configuration;
 
-namespace GardeningSystem.DataAccess {
+namespace GardeningSystem.DataAccess.Communication {
     public class RfCommunicator : IRfCommunicator, IDisposable {
 
         private ILogger Logger;

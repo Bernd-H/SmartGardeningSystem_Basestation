@@ -13,6 +13,10 @@
         public static string WLANINTERFACE_NAME = "wlanInterface_name";
 
 
+        // Communication
+        // Local mobile app discovery
+        public static string LOCALMOBILEAPPDISCOVERY_LISTENPORT = "localMobileAppDiscovery_listenPort";
+
         // GardeningSystem.RestAPI
         // Authentication
         public static string ISSUER_SIGNINGKEY = "rest_api_jwt:key";
@@ -20,6 +24,7 @@
 
         // Services
         public static string WATERINGJOB_ENABLED = "wateringJob_enabled";
+        public static string COMMUNICATIONJOB_ENABLED = "communicationJob_enabled";
 
         // Test Environment
         public static string IS_TEST_ENVIRONMENT = "isTestEnvironment";
