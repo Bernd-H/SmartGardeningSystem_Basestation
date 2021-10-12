@@ -1,5 +1,6 @@
 ﻿using System;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
 using GardeningSystem.Common.Specifications.Managers;
 using NLog;
@@ -11,14 +12,17 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ILocalMobileAppDiscovery LocalMobileAppDiscovery;
 
-        public LocalMobileAppDiscoveryManager(ILoggerService loggerService, ILocalMobileAppDiscovery localMobileAppDiscovery) {
+        private ISocketSender SocketSender;
+
+        public LocalMobileAppDiscoveryManager(ILoggerService loggerService, ILocalMobileAppDiscovery localMobileAppDiscovery, ISocketSender socketSender) {
             Logger = loggerService.GetLogger<LocalMobileAppDiscoveryManager>();
             LocalMobileAppDiscovery = localMobileAppDiscovery;
             LocalMobileAppDiscovery.MobileAppFound += LocalMobileAppDiscovery_MobileAppFound;
         }
 
         private void LocalMobileAppDiscovery_MobileAppFound(object sender, Common.Events.Communication.LocalMobileAppFoundEventArgs e) {
-            Logger.Info($"[LocalMobileAppDiscovery_MobileAppFound]Mobile app with uri={e.Uri.ToString()} found.");
+            Logger.Info($"[LocalMobileAppDiscovery_MobileAppFound]Mobile app with ip={e.EndPoint.Address.ToString()} found.");
+            var sent = SocketSender.SendAsync(CommunicationCodes.Hello, e.EndPoint).Result;
         }
 
         public void Start() {

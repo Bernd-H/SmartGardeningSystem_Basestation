@@ -30,19 +30,23 @@ namespace GardeningSystem.RestAPI.Controllers {
 
         private IPasswordHasher PasswordHasher;
 
+        private IAesEncrypterDecrypter AesDecrypter;
+
         private ILogger Logger;
 
-        public LoginController(ILoggerService logger, IConfiguration config, ISettingsManager settingsManager, IPasswordHasher passwordHasher) {
+        public LoginController(ILoggerService logger, IConfiguration config, ISettingsManager settingsManager, IPasswordHasher passwordHasher,
+            IAesEncrypterDecrypter aesEncrypterDecrypter) {
             Logger = logger.GetLogger<LoginController>();
             Configuration = config;
             SettingsManager = settingsManager;
             PasswordHasher = passwordHasher;
+            AesDecrypter = aesEncrypterDecrypter;
         }
 
         [AllowAnonymous]
         [HttpPost]
         public IActionResult Login([FromBody] UserDto login) {
-            Logger.Info($"[Login]User with email {login.Email.Substring(0, login.Email.IndexOf('.'))}.* trying to log in.");
+            Logger.Info($"[Login]User trying to log in.");
             IActionResult response = Unauthorized();
             var user = AuthenticateUser(login);
 
@@ -81,48 +85,59 @@ namespace GardeningSystem.RestAPI.Controllers {
         }
 
         private UserDto AuthenticateUser(UserDto login) {
-            Logger.Trace($"[AuthenticateUser]Checking if user with email {login.Email.Substring(0, login.Email.IndexOf('.'))}.* exists.");
             UserDto result = null;
 
-            // check if user is registered
-            var user = SettingsManager.GetApplicationSettings().RegisteredUsers.ToList().Find(u => u.Email == login.Email);
-            if (user != null) {
-                login.Id = user.Id;
+            // user authentication information is encrypted by a shared secret. Thats because the client can't know
+            // in offline scenarios if the server is the real one or is behind a man in the middle.
+            var userEmail = AesDecrypter.Decrypt(login.AesEncryptedEmail);
+            if (!string.IsNullOrEmpty(userEmail)) {
+                Logger.Trace($"[AuthenticateUser]Checking if user with email {userEmail.Substring(0, userEmail.IndexOf('.'))}.* exists.");
 
-                //Validate the User Credentials    
-                (bool valid, bool needsUpgrade) = PasswordHasher.VerifyHashedPassword(user.ToDto(), user.HashedPassword, login.PlainTextPassword);
-                if (valid) {
-                    result = login;
+                // check if user is registered
+                var user = SettingsManager.GetApplicationSettings().RegisteredUsers.ToList().Find(u => u.Email == userEmail);
+                if (user != null) {
+                    login.Id = user.Id;
 
-                    // check if upgrade needed
-                    if (needsUpgrade) {
-                        UpdateOutdatedHash(login);
-                    }
+                    //Validate the User Credentials
+                    var plainTextPassword = AesDecrypter.Decrypt(login.AesEncryptedPassword);
+                    if (!string.IsNullOrEmpty(plainTextPassword)) {
+                        (bool valid, bool needsUpgrade) = PasswordHasher.VerifyHashedPassword(user.ToDto(), user.HashedPassword, plainTextPassword);
+                        if (valid) {
+                            result = login;
 
-                    Logger.Info($"[AuthenticateUser]User with id {user.Id} logged in.");
-                } else {
-                    Logger.Info($"[AuthenticateUser]User with id {user.Id} entered wrong password.");
+                            // check if upgrade needed
+                            if (needsUpgrade) {
+                                UpdateOutdatedHash(login.Id, userEmail, plainTextPassword);
+                            }
+
+                            Logger.Info($"[AuthenticateUser]User with id {user.Id} logged in.");
+                        }
+                        else {
+                            Logger.Info($"[AuthenticateUser]User with id {user.Id} entered wrong password.");
+                        }
+                    } // password null or empty - decryption error / password encrypted with wrong aes key
+                    
                 }
-            }
-            else {
-                Logger.Info($"User with email {login.Email.Substring(0, login.Email.IndexOf('.'))}.* not found.");
+                else {
+                    Logger.Info($"User with email {userEmail.Substring(0, userEmail.IndexOf('.'))}.* not found.");
+                }
             }
 
             return result;
         }
 
-        private void UpdateOutdatedHash(UserDto userLogin) {
-            Logger.Info($"[UpdateOutdatedHash]Updating hash from user with id {userLogin.Id}.");
+        private void UpdateOutdatedHash(Guid userId, string email, string plaintextPassword) {
+            Logger.Info($"[UpdateOutdatedHash]Updating hash from user with id {userId}.");
 
             try {
                 // update hash
-                string newHash = PasswordHasher.HashPassword(userLogin.PlainTextPassword);
+                string newHash = PasswordHasher.HashPassword(plaintextPassword);
 
                 SettingsManager.UpdateCurrentSettings((currentSettings) => {
                     var registeredUsers = currentSettings.RegisteredUsers.ToList();
-                    var registeredUser = registeredUsers.Find(u => u.Id == userLogin.Id);
+                    var registeredUser = registeredUsers.Find(u => u.Id == userId);
                     registeredUsers[registeredUsers.IndexOf(registeredUser)] = new User() {
-                        Email = userLogin.Email,
+                        Email = email,
                         HashedPassword = newHash
                     };
 
@@ -131,7 +146,7 @@ namespace GardeningSystem.RestAPI.Controllers {
                     return currentSettings;
                 });
             } catch(Exception ex) {
-                Logger.Error(ex, $"[UpdateOutdatedHash]Could not update hash from user {userLogin.Id}.");
+                Logger.Error(ex, $"[UpdateOutdatedHash]Could not update hash from user {userId}.");
             }
         }
     }

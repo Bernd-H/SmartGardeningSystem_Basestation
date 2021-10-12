@@ -23,7 +23,7 @@
 
   // Communication
   // Local mobile app discovery
-  "localMobileAppDiscovery_listenPort": "52138",
+  "localMobileAppDiscovery_listenPort": "52138", // only for client
 
   // Service options
   "wateringJob_enabled": "false",

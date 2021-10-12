@@ -14,6 +14,17 @@ namespace GardeningSystem.Common.Models.DTOs {
 
         public byte[] ServerCertificate { get; set; }
 
+        /// <summary>
+        /// Exchanged to the mobile app securley. Used to decrypt
+        /// the authentication information (in RestAPI) sent by the mobile app.
+        /// </summary>
+        public byte[] AesKey { get; set; }
+
+        /// <summary>
+        /// Exchanged to the mobile app securley. Used to decrypt
+        /// the authentication information (in RestAPI) sent by the mobile app.
+        /// </summary>
+        public byte[] AesIV { get; set; }
 
         public static ApplicationSettingsDto GetStandardSettings() {
             return new ApplicationSettingsDto() {

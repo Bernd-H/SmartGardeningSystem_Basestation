@@ -7,6 +7,7 @@ using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.BusinessLogic.Managers;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
@@ -65,6 +66,7 @@ namespace GardeningSystem {
 
             // cryptography
             containerBuilder.RegisterType<PasswordHasher>().As<IPasswordHasher>();
+            containerBuilder.RegisterType<AesEncrypterDecrypter>().As<IAesEncrypterDecrypter>();
 
             /// data access
             // repositories
@@ -76,6 +78,7 @@ namespace GardeningSystem {
 
             // communication
             containerBuilder.RegisterType<LocalMobileAppDiscovery>().As<ILocalMobileAppDiscovery>();
+            containerBuilder.RegisterType<SocketSender>().As<ISocketSender>();
         }
 
         /// <summary>
