@@ -63,10 +63,12 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<ModuleManager>().As<IModuleManager>();
             containerBuilder.RegisterType<SettingsManager>().As<ISettingsManager>();
             containerBuilder.RegisterType<LocalMobileAppDiscoveryManager>().As<ILocalMobileAppDiscoveryManager>();
+            containerBuilder.RegisterType<AesKeyExchangeManager>().As<IAesKeyExchangeManager>();
 
             // cryptography
             containerBuilder.RegisterType<PasswordHasher>().As<IPasswordHasher>();
             containerBuilder.RegisterType<AesEncrypterDecrypter>().As<IAesEncrypterDecrypter>();
+            containerBuilder.RegisterType<CertificateHandler>().As<ICertificateHandler>();
 
             /// data access
             // repositories
@@ -79,6 +81,7 @@ namespace GardeningSystem {
             // communication
             containerBuilder.RegisterType<LocalMobileAppDiscovery>().As<ILocalMobileAppDiscovery>();
             containerBuilder.RegisterType<SocketSender>().As<ISocketSender>();
+            containerBuilder.RegisterType<SslListener>().As<ISslListener>();
         }
 
         /// <summary>

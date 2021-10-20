@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
 
-namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
+namespace GardeningSystem.DataAccess.Communication {
     public abstract class Listener : IListener {
         public event EventHandler<EventArgs> StatusChanged;
 
@@ -35,7 +37,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
                 Start(Cancellation.Token);
                 RaiseStatusChanged(ListenerStatus.Listening);
             }
-            catch {
+            catch (SocketException) {
                 RaiseStatusChanged(ListenerStatus.PortNotFree);
             }
 

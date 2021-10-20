@@ -101,7 +101,7 @@ namespace GardeningSystem.RestAPI.Controllers {
                     //Validate the User Credentials
                     var plainTextPassword = AesDecrypter.Decrypt(login.AesEncryptedPassword);
                     if (!string.IsNullOrEmpty(plainTextPassword)) {
-                        (bool valid, bool needsUpgrade) = PasswordHasher.VerifyHashedPassword(user.ToDto(), user.HashedPassword, plainTextPassword);
+                        (bool valid, bool needsUpgrade) = PasswordHasher.VerifyHashedPassword(user.Id, user.HashedPassword, plainTextPassword);
                         if (valid) {
                             result = login;
 

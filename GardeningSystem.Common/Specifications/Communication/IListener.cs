@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery {
+namespace GardeningSystem.Common.Specifications.Communication {
     public enum ListenerStatus {
         Listening,
         PortNotFree,

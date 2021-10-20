@@ -17,6 +17,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         public LocalMobileAppDiscoveryManager(ILoggerService loggerService, ILocalMobileAppDiscovery localMobileAppDiscovery, ISocketSender socketSender) {
             Logger = loggerService.GetLogger<LocalMobileAppDiscoveryManager>();
             LocalMobileAppDiscovery = localMobileAppDiscovery;
+            SocketSender = socketSender;
             LocalMobileAppDiscovery.MobileAppFound += LocalMobileAppDiscovery_MobileAppFound;
         }
 

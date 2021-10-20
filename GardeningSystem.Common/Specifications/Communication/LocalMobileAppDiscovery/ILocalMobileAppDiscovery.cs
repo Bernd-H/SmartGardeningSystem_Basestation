@@ -11,12 +11,5 @@ namespace GardeningSystem.Common.Specifications.Communication.LocalMobileAppDisc
         /// This event is raised whenever a peer is discovered.
         /// </summary>
         event EventHandler<LocalMobileAppFoundEventArgs> MobileAppFound;
-
-        /// <summary>
-        /// Send an announce request for this InfoHash to all available network adapters.
-        /// </summary>
-        /// <param name="infoHash"></param>
-        /// <returns></returns>
-        //Task Announce(InfoHash infoHash);
     }
 }

@@ -28,11 +28,11 @@ namespace GardeningSystem.Common.Models {
             };
         }
 
-        public static UserDto ToDto(this User user) {
-            return new UserDto() {
-                Id = user.Id,
-                Email = user.Email
-            };
-        }
+        //public static UserDto ToDto(this User user) {
+        //    return new UserDto() {
+        //        Id = user.Id,
+        //        Email = user.Email
+        //    };
+        //}
     }
 }

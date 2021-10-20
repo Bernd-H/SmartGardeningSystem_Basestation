@@ -1,7 +1,9 @@
 ﻿using System.Net;
 
-namespace GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery {
+namespace GardeningSystem.Common.Specifications.Communication {
     public interface ISocketListener : IListener {
         IPEndPoint EndPoint { get; }
+
+        IPEndPoint OriginalEndPoint { get; }
     }
 }

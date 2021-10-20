@@ -9,7 +9,7 @@
 
   "wlanInterface_name": "wlp3s0", // standard interface name
 
-  // cryptography
+  ///////////////////////// cryptography
   // rest api token
   "rest_api_jwt": {
     "key": "s22rZuvg-xQn67!Z^?>RTSOp",
@@ -21,14 +21,17 @@
   "cert_issuer": "Bernd Hatzinger",
   "cert_subject": "smartgardening.at",
 
-  // Communication
+  ///////////////////////// Communication
   // Local mobile app discovery
   "localMobileAppDiscovery_listenPort": "52138", // only for client
 
-  // Service options
+  // Aes key exchange
+  "aesKeyExchange_listenPort": "52143",
+
+  ///////////////////////// Service options
   "wateringJob_enabled": "false",
   "communicationJob_enabled": "true",
 
-  // Test Environment options
+  ///////////////////////// Test Environment options
   "isTestEnvironment": "true"
 }

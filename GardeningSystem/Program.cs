@@ -28,7 +28,7 @@ namespace GardeningSystem {
             }
             catch (Exception exception) {
                 //NLog: catch setup errors
-                logger.Error(exception, "Stopped program because of exception");
+                logger.Fatal(exception, "Stopped program because of exception");
                 throw;
             }
             finally {

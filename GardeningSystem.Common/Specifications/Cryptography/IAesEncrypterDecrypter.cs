@@ -20,5 +20,11 @@ namespace GardeningSystem.Common.Specifications.Cryptography {
         /// <param name="data"></param>
         /// <returns>string.Empty when data made no sense.</returns>
         string Decrypt(byte[] data);
+
+        /// <summary>
+        /// Creates and stores a new aes key if no one has been created.
+        /// </summary>
+        /// <returns>Returns the aes server key.</returns>
+        (byte[], byte[]) GetServerAesKey();
     }
 }

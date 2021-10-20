@@ -32,12 +32,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
         public ApplicationSettingsDto GetApplicationSettings() {
-            Logger.Info("[GetApplicationSettings]Loading application settings.");
+            Logger.Trace("[GetApplicationSettings]Loading application settings.");
             return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettingsDto>();
         }
 
         private void UpdateSettings(ApplicationSettingsDto newSettings) {
-            Logger.Info("[UpdateSettings]Writing to application settings.");
+            Logger.Trace("[UpdateSettings]Writing to application settings.");
             SerializeFileRepository.WriteSingleObjectToFile<ApplicationSettingsDto>(newSettings);
         }
 

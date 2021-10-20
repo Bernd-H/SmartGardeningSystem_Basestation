@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Managers;
@@ -13,11 +10,17 @@ namespace GardeningSystem.Jobs {
 
         private ILocalMobileAppDiscoveryManager LocalMobileAppDiscoveryManager;
 
+        private IAesKeyExchangeManager AesKeyExchangeManager;
+
+        private ISettingsManager SettingsManager;
+
         private ILogger Logger;
 
-        public CommunicationJob(ILoggerService logger, ILocalMobileAppDiscoveryManager localMobileAppDiscoveryManager) {
+        public CommunicationJob(ILoggerService logger, ISettingsManager settingsManager, ILocalMobileAppDiscoveryManager localMobileAppDiscoveryManager, IAesKeyExchangeManager aesKeyExchangeManager) {
             Logger = logger.GetLogger<CommunicationJob>();
+            SettingsManager = settingsManager;
             LocalMobileAppDiscoveryManager = localMobileAppDiscoveryManager;
+            AesKeyExchangeManager = aesKeyExchangeManager;
         }
 
         public Task StartAsync(CancellationToken cancellationToken) {
@@ -25,6 +28,10 @@ namespace GardeningSystem.Jobs {
                 Logger.Info($"[StartAsync]Starting Communication-Setup routine.");
 
                 LocalMobileAppDiscoveryManager.Start();
+
+                if (SettingsManager.GetApplicationSettings().ConfigurationModeEnabled) {
+                    AesKeyExchangeManager.StartListener();
+                }
             });
         }
 
@@ -33,6 +40,7 @@ namespace GardeningSystem.Jobs {
                 Logger.Info($"[StopAsync]Stop requested.");
 
                 LocalMobileAppDiscoveryManager.Stop();
+                AesKeyExchangeManager.Stop();
 
                 Logger.Trace($"[StopAsync]All communication connections closed.");
             });

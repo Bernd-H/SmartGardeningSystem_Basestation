@@ -29,7 +29,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             }
         }
 
-        public (bool, bool) VerifyHashedPassword(UserDto user, string hashedPassword, string providedPassword) {
+        public (bool, bool) VerifyHashedPassword(Guid userId, string hashedPassword, string providedPassword) {
             try {
                 var parts = hashedPassword.Split('.', 3);
 
@@ -52,9 +52,9 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
                     return (verified, needsUpgrade);
                 }
             } catch (FormatException ex) {
-                Logger.Fatal(ex, $"[VerifyHashedPassword]Wrong stored hash format by user {user.Id}.");
+                Logger.Fatal(ex, $"[VerifyHashedPassword]Wrong stored hash format by user {userId}.");
             } catch (Exception ex) {
-                Logger.Error(ex, $"[VerifyHashedPassword]Exception while verifying password from user {user.Id}.");
+                Logger.Error(ex, $"[VerifyHashedPassword]Exception while verifying password from user {userId}.");
             }
 
             return (false, false);

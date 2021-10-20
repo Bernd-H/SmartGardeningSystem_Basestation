@@ -23,6 +23,9 @@
         // Local mobile app discovery
         public static string LOCALMOBILEAPPDISCOVERY_LISTENPORT = "localMobileAppDiscovery_listenPort";
 
+        // Aes key exchange
+        public static string AESKEYEXCHANGE_LISTENPORT = "aesKeyExchange_listenPort";
+
         // GardeningSystem.RestAPI
         // Authentication
         public static string ISSUER_SIGNINGKEY = "rest_api_jwt:key";

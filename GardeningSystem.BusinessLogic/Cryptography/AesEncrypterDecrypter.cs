@@ -17,9 +17,9 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             SettingsManager = settingsManager;
             Logger = loggerService.GetLogger<AesEncrypterDecrypter>();
 
-            if (SettingsManager.GetApplicationSettings().AesKey != null && SettingsManager.GetApplicationSettings().AesIV != null) {
-                GenerateAndStoreSymmetricKey();
-            }
+            //if (SettingsManager.GetApplicationSettings().AesKey == null || SettingsManager.GetApplicationSettings().AesIV == null) {
+            //    GenerateAndStoreSymmetricKey();
+            //}
         }
 
         public string Decrypt(byte[] data) {
@@ -40,6 +40,16 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
                 Logger.Fatal(ex, $"[Encrypt]Error while encrypting data.");
                 throw;
             }
+        }
+
+        public (byte[], byte[]) GetServerAesKey() {
+            Logger.Info($"[GetSymmetricServerKey]Server aes key requested.");
+            // create an aes key when there is not one yet.
+            if (SettingsManager.GetApplicationSettings().AesKey == null || SettingsManager.GetApplicationSettings().AesIV == null) {
+                GenerateAndStoreSymmetricKey();
+            }
+
+            return (SettingsManager.GetApplicationSettings().AesKey, SettingsManager.GetApplicationSettings().AesIV);
         }
 
         private void GenerateAndStoreSymmetricKey() {
