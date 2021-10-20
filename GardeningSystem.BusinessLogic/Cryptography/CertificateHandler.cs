@@ -72,7 +72,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             const string password = "Rand0mPa55word!";
             X509Store _CertificateStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             _CertificateStore.Open(OpenFlags.ReadOnly);
-            var encryptedCert = _CertificateStore.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: true)[0]; ///////////ACHTUNG exception handling...
+            var encryptedCert = _CertificateStore.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false)[0]; ///////////ACHTUNG exception handling...
             currentCert = new X509Certificate2(encryptedCert.RawData, password);
             _CertificateStore.Close();
 

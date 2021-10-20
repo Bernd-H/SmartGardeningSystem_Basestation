@@ -61,6 +61,9 @@ namespace GardeningSystem.DataAccess.Communication {
             catch (ObjectDisposedException odex) {
                 Logger.Error(odex, "[AcceptTcpClientCallback]Connection got unexpectedly closed.");
             }
+            catch (Exception ex) {
+
+            }
             finally {
                 // The client stream will be closed with the sslStream
                 // because we specified this behavior when creating
@@ -93,6 +96,7 @@ namespace GardeningSystem.DataAccess.Communication {
         public static byte[] ReadMessage(SslStream sslStream) {
             int bytes = -1;
             int packetLength = -1;
+            int readBytes = 0;
             List<byte> packet = new List<byte>();
 
             do {
@@ -103,12 +107,13 @@ namespace GardeningSystem.DataAccess.Communication {
                 if (packetLength == -1) {
                     byte[] length = new byte[4];
                     Array.Copy(buffer, 0, length, 0, 4);
-                    packetLength = BitConverter.ToInt32(length);
+                    packetLength = BitConverter.ToInt32(length, 0);
                 }
 
+                readBytes += bytes;
                 packet.AddRange(buffer);
 
-            } while (bytes != 0);
+            } while (bytes != 0 && packetLength - readBytes > 0);
 
             // remove length information and attached bytes
             packet.RemoveRange(packetLength, packet.Count - packetLength);
