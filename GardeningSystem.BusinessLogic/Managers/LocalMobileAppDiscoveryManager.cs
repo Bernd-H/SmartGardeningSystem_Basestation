@@ -14,16 +14,21 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ISocketSender SocketSender;
 
-        public LocalMobileAppDiscoveryManager(ILoggerService loggerService, ILocalMobileAppDiscovery localMobileAppDiscovery, ISocketSender socketSender) {
+        private ISettingsManager SettingsManager;
+
+        public LocalMobileAppDiscoveryManager(ILoggerService loggerService, ILocalMobileAppDiscovery localMobileAppDiscovery, ISocketSender socketSender,
+            ISettingsManager settingsManager) {
             Logger = loggerService.GetLogger<LocalMobileAppDiscoveryManager>();
             LocalMobileAppDiscovery = localMobileAppDiscovery;
             SocketSender = socketSender;
+            SettingsManager = settingsManager;
             LocalMobileAppDiscovery.MobileAppFound += LocalMobileAppDiscovery_MobileAppFound;
         }
 
         private void LocalMobileAppDiscovery_MobileAppFound(object sender, Common.Events.Communication.LocalMobileAppFoundEventArgs e) {
             Logger.Info($"[LocalMobileAppDiscovery_MobileAppFound]Mobile app with ip={e.EndPoint.Address.ToString()} found.");
-            var sent = SocketSender.SendAsync(CommunicationCodes.Hello, e.EndPoint).Result;
+            var settings = SettingsManager.GetApplicationSettings();
+            var sent = SocketSender.SendAsync(settings.Id.ToByteArray(), e.EndPoint).Result; // send 16 byte id
         }
 
         public void Start() {

@@ -53,7 +53,13 @@ namespace GardeningSystem {
                 })
                 // configure services
                 .ConfigureWebHostDefaults(webBuilder => { // rest api
-                    webBuilder.UseStartup<StartupRestAPI>(); 
+                    webBuilder.UseStartup<StartupRestAPI>();
+                    webBuilder.UseKestrel(opts =>
+                    {
+                        // Bind directly to a socket handle or Unix socket
+                        opts.ListenAnyIP(5001, opts => opts.UseHttps());
+                        opts.ListenAnyIP(5000);
+                    });
                 })
                 .ConfigureServices((hostContext, services) => {
                     // timed jobs

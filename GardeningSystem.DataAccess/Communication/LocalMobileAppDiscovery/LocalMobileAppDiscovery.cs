@@ -88,6 +88,8 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             while (!token.IsCancellationRequested) {
                 try {
                     UdpReceiveResult result = await client.ReceiveAsync().ConfigureAwait(false);
+                    Logger.Trace($"[ReceiveAsync]Received multicast traffic from {result.RemoteEndPoint.ToString()}.");
+
                     string[] receiveString = Encoding.ASCII.GetString(result.Buffer)
                         .Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -96,7 +98,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
                     string cookieString = receiveString.FirstOrDefault(t => t.StartsWith("cookie", StringComparison.Ordinal));
 
                     // An invalid response was received if these are missing.
-                    if (portString == null || systemString != $"GS - SEARCH * HTTP / 1.1 {GardeningSystemIdentificationString}")
+                    if (portString == null || systemString != $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString}")
                         continue;
 
                     // If we received our own cookie we can ignore the message.
