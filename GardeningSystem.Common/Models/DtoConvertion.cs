@@ -28,6 +28,16 @@ namespace GardeningSystem.Common.Models {
             };
         }
 
+        public static ModuleInfo ToDo(this ModuleInfoDto moduleDto) {
+            return new ModuleInfo() {
+                Id = moduleDto.Id,
+                AssociatedModules = moduleDto.AssociatedModules,
+                ModuleTyp = moduleDto.ModuleTyp,
+                Name = moduleDto.Name,
+                LastWaterings = moduleDto.LastWaterings
+            };
+        }
+
         //public static UserDto ToDto(this User user) {
         //    return new UserDto() {
         //        Id = user.Id,

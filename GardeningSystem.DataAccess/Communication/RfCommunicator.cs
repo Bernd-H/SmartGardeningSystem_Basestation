@@ -30,19 +30,20 @@ namespace GardeningSystem.DataAccess.Communication {
 
             // start rf app (c++ application)
             Logger.Info($"[RfCommunicator]Starting c++ rf-module application.");
-            CheckForFails();
-            string filePath = ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.RFAPP_FILENAME]);
-            _RfApplication = new ProcessStartInfo(filePath) {
-                UseShellExecute = true,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true
-            };
+            Logger.Warn($"[RfCommunicator]Important lines commented out for test reasons.");
+            //CheckForFails();
+            //string filePath = ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.RFAPP_FILENAME]);
+            //_RfApplication = new ProcessStartInfo(filePath) {
+            //    UseShellExecute = true,
+            //    RedirectStandardInput = true,
+            //    RedirectStandardOutput = true
+            //};
 
-            _process = new Process();
-            _process.StartInfo = _RfApplication;
-            _process.Start();
-            _sw = _process.StandardInput;
-            _sr = _process.StandardOutput;
+            //_process = new Process();
+            //_process.StartInfo = _RfApplication;
+            //_process.Start();
+            //_sw = _process.StandardInput;
+            //_sr = _process.StandardOutput;
         }
 
         public async Task<RfMessageDto> SendMessage_ReceiveAnswer(Guid sender, Guid reciever, byte[] msg) {
@@ -76,7 +77,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
 
         public void Dispose() {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         #region Packet builder

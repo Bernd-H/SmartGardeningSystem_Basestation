@@ -11,7 +11,7 @@ namespace GardeningSystem.Common.Specifications.Repositories {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="location">postal code</param>
+        /// <param name="location">city name</param>
         /// <returns></returns>
         Task<WeatherDataDto> GetCurrentWeatherPredictions(string location);
     }

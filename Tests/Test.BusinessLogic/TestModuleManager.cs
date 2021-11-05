@@ -41,7 +41,7 @@ namespace Test.BusinessLogic {
                     modules.Add(new ModuleInfo() {
                         Id = Guid.NewGuid(),
                         Name = "Test2",
-                        ModuleTyp = ModuleTypeEnum.ACTOR
+                        ModuleTyp = ModuleTypeEnum.VALVE
                     });
                     modules.Add(new ModuleInfo() {
                         Id = module3Guid,

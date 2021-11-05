@@ -74,8 +74,8 @@ namespace GardeningSystem {
             // repositories
             containerBuilder.RegisterType<FileRepository>().As<IFileRepository>();
             containerBuilder.RegisterGeneric(typeof(SerializedFileRepository<>)).As(typeof(ISerializedFileRepository<>)).InstancePerDependency();
-            containerBuilder.RegisterType<ModulesRepository>().As<IModulesRepository>();
-            containerBuilder.RegisterType<RfCommunicator>().As<IRfCommunicator>();
+            containerBuilder.RegisterType<ModulesRepository>().As<IModulesRepository>().SingleInstance();
+            containerBuilder.RegisterType<RfCommunicator>().As<IRfCommunicator>().SingleInstance();
             containerBuilder.RegisterType<WeatherRepository>().As<IWeatherRepository>();
 
             // communication

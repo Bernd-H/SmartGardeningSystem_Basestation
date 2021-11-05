@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 using System.Threading;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Models.Entities;
 
 namespace GardeningSystem.BusinessLogic.Managers {
     public class ModuleManager : IModuleManager {
@@ -59,6 +60,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 }
             } while (!success && attempts > 0);
 
+            LOCKER.Release();
+
             return success;
         }
 
@@ -103,25 +106,43 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 }
             }
 
+            LOCKER.Release();
+
             return measurements;
+        }
+
+        public async Task AddModule(ModuleInfoDto module) {
+            await LOCKER.WaitAsync();
+            ModulesRepository.AddModule(module.ToDo());
+            LOCKER.Release();
         }
 
         public async Task<IEnumerable<ModuleInfoDto>> GetAllModules() {
             await LOCKER.WaitAsync();
-
-            return ModulesRepository.GetAllRegisteredModules().ToDtos();
+            var result = ModulesRepository.GetAllRegisteredModules().ToDtos();
+            LOCKER.Release();
+            return result;
         }
-
-        //public async Task<ModuleInfoDto> GetModuleById(Guid id) {
-        //    await LOCKER.WaitAsync();
-
-        //    return (await GetAllModules()).Where(m => m.Id == id).First();
-        //}
 
         public async Task<ModuleInfoDto> GetModuleById(Guid id) {
             await LOCKER.WaitAsync();
+            var result = ModulesRepository.GetModuleById(id).ToDto();
+            LOCKER.Release();
+            return result;
+        }
 
-            return ModulesRepository.GetModuleById(id).ToDto();
+        public async Task<bool> RemoveModule(Guid moduleId) {
+            await LOCKER.WaitAsync();
+            var result = ModulesRepository.RemoveModule(moduleId);
+            LOCKER.Release();
+            return result;
+        }
+
+        public async Task<bool> UpdateModule(ModuleInfoDto module) {
+            await LOCKER.WaitAsync();
+            var result = ModulesRepository.UpdateModule(module.ToDo());
+            LOCKER.Release();
+            return result;
         }
     }
 }

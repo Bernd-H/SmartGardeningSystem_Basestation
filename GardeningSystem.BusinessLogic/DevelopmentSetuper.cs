@@ -60,20 +60,20 @@ namespace GardeningSystem.BusinessLogic {
                 var valve2Guid = Guid.NewGuid();
                 ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
                     Id = valve1Guid,
-                    ModuleTyp = ModuleTypeEnum.ACTOR,
+                    ModuleTyp = ModuleTypeEnum.VALVE,
                     Name = "Valve1",
                     LastWaterings = null,
                     AssociatedModules = null
                 });
                 ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
-                    Id = valve1Guid,
-                    ModuleTyp = ModuleTypeEnum.ACTOR,
+                    Id = valve2Guid,
+                    ModuleTyp = ModuleTypeEnum.VALVE,
                     Name = "Valve2",
                     LastWaterings = null,
                     AssociatedModules = null
                 });
                 ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
-                    Id = valve2Guid,
+                    Id = Guid.NewGuid(),
                     ModuleTyp = ModuleTypeEnum.SENSOR,
                     Name = "Sensor1",
                     LastWaterings = null,

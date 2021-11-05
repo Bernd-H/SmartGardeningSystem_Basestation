@@ -25,6 +25,7 @@ namespace GardeningSystem {
 
                 logger.Debug("init main");
                 CreateHostBuilder(args).Build().Run();
+                //var r = IoC.Get<Common.Specifications.Repositories.IWeatherRepository>().GetCurrentWeatherPredictions("Unterstinkenbrunn").Result;
             }
             catch (Exception exception) {
                 //NLog: catch setup errors

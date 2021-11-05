@@ -38,7 +38,7 @@ namespace Test.DataAccess
                     File.Delete("tempModules.bin");
                 var moduleToAdd = new ModuleInfo() {
                     Id = Guid.NewGuid(),
-                    ModuleTyp = ModuleTypeEnum.ACTOR,
+                    ModuleTyp = ModuleTypeEnum.VALVE,
                     Name = "Valve 1"
                 };
                 var m = mock.Create<ModulesRepository>();

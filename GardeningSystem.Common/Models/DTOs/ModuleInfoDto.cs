@@ -4,6 +4,7 @@ using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.DataObjects;
 
 namespace GardeningSystem.Common.Models.DTOs {
+    [Serializable]
     public class ModuleInfoDto : IDO {
         public Guid Id { get; set; }
 

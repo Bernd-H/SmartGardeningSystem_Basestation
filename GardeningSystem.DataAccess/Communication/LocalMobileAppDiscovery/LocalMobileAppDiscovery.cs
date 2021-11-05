@@ -113,6 +113,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
                     var replyEndPoint = new IPEndPoint(result.RemoteEndPoint.Address, portcheck);
                     MobileAppFound?.Invoke(this, new LocalMobileAppFoundEventArgs(replyEndPoint));
                 }
+                catch (ObjectDisposedException) { }
                 catch (Exception ex) {
                     Logger.Error(ex, "[ReceiveAsync]An exception accourd while processing message from multicast group.");
                 }
