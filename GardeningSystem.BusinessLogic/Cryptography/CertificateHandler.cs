@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Security;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -93,6 +94,52 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             return CreateCertificateV3();
             //return cert.Export(X509ContentType.Cert);
             //return cert;
+        }
+
+        public IntPtr DecryptData(byte[] encryptedData) {
+            X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
+            using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
+                var rsa = (RSA)x509Certificate2.PrivateKey;
+                RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: true));
+                rsa.Clear(); // TODO: safe?
+
+                byte[] decryptedDta = RSAalg.Decrypt(encryptedData, fOAEP: true);
+
+                // store data in unmanaged memory and obfuscate byte array
+                return CryptoUtils.MoveDataToUnmanagedMemory(decryptedDta);
+            }
+        }
+
+        public byte[] EncryptDataAndObfuscateSource(byte[] data) {
+            X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
+            using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
+                var rsa = (RSA)x509Certificate2.PrivateKey;
+                RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
+                rsa.Clear(); // TODO: safe?
+
+                byte[] encryptedData = RSAalg.Encrypt(data, fOAEP: true);
+
+                CryptoUtils.ObfuscateByteArray(data);
+                return encryptedData;
+            }
+        }
+
+        public byte[] EncryptData(IntPtr dataPtr, int dataLength) {
+            X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
+            using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
+                var rsa = (RSA)x509Certificate2.PrivateKey;
+                RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
+                rsa.Clear(); // TODO: safe?
+
+                byte[] data = new byte[dataLength];
+                CryptoUtils.GetByteArrayFromUM(data, dataPtr, dataLength);
+
+                byte[] encryptedData = RSAalg.Encrypt(data, fOAEP: true);
+
+                CryptoUtils.ObfuscateByteArray(data);
+
+                return encryptedData;
+            }
         }
 
         //private enum PemStringType {

@@ -11,5 +11,11 @@ namespace GardeningSystem.Common.Specifications.Cryptography {
         X509Certificate2 GetCurrentServerCertificate();
 
         void CheckForCertificateUpdate();
+
+        IntPtr DecryptData(byte[] encryptedData);
+
+        byte[] EncryptDataAndObfuscateSource(byte[] data);
+
+        byte[] EncryptData(IntPtr dataPtr, int dataLength);
     }
 }

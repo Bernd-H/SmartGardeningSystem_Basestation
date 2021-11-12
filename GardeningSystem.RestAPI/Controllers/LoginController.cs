@@ -89,7 +89,7 @@ namespace GardeningSystem.RestAPI.Controllers {
 
             // user authentication information is encrypted by a shared secret. Thats because the client can't know
             // in offline scenarios if the server is the real one or is behind a man in the middle.
-            var userEmail = AesDecrypter.Decrypt(login.AesEncryptedEmail);
+            var userEmail = Encoding.UTF8.GetString(AesDecrypter.DecryptToByteArray(login.AesEncryptedEmail));
             if (!string.IsNullOrEmpty(userEmail)) {
                 Logger.Trace($"[AuthenticateUser]Checking if user with email {userEmail.Substring(0, userEmail.IndexOf('.'))}.* exists.");
 
@@ -99,7 +99,7 @@ namespace GardeningSystem.RestAPI.Controllers {
                     login.Id = user.Id;
 
                     //Validate the User Credentials
-                    var plainTextPassword = AesDecrypter.Decrypt(login.AesEncryptedPassword);
+                    var plainTextPassword = Encoding.UTF8.GetString(AesDecrypter.DecryptToByteArray(login.AesEncryptedPassword)); // TODO: unsafe
                     if (!string.IsNullOrEmpty(plainTextPassword)) {
                         (bool valid, bool needsUpgrade) = PasswordHasher.VerifyHashedPassword(user.Id, user.HashedPassword, plainTextPassword);
                         if (valid) {

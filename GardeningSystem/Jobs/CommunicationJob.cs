@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Managers;
@@ -14,35 +15,50 @@ namespace GardeningSystem.Jobs {
 
         private ISettingsManager SettingsManager;
 
+        private ICommandManager CommandManager;
+
         private ILogger Logger;
 
-        public CommunicationJob(ILoggerService logger, ISettingsManager settingsManager, ILocalMobileAppDiscoveryManager localMobileAppDiscoveryManager, IAesKeyExchangeManager aesKeyExchangeManager) {
+        public CommunicationJob(ILoggerService logger, ISettingsManager settingsManager, ILocalMobileAppDiscoveryManager localMobileAppDiscoveryManager,
+            IAesKeyExchangeManager aesKeyExchangeManager, ICommandManager commandManager) {
             Logger = logger.GetLogger<CommunicationJob>();
             SettingsManager = settingsManager;
             LocalMobileAppDiscoveryManager = localMobileAppDiscoveryManager;
             AesKeyExchangeManager = aesKeyExchangeManager;
+            CommandManager = commandManager;
         }
 
         public Task StartAsync(CancellationToken cancellationToken) {
             return Task.Run(() => {
-                Logger.Info($"[StartAsync]Starting Communication-Setup routine.");
+                try {
+                    Logger.Info($"[StartAsync]Starting Communication-Setup routine.");
 
-                LocalMobileAppDiscoveryManager.Start();
+                    LocalMobileAppDiscoveryManager.Start();
 
-                if (SettingsManager.GetApplicationSettings().ConfigurationModeEnabled) {
-                    AesKeyExchangeManager.StartListener();
+                    if (SettingsManager.GetApplicationSettings().ConfigurationModeEnabled) {
+                        AesKeyExchangeManager.StartListener();
+                    }
+
+                    CommandManager.Start();
+                } catch (Exception ex) {
+                    Logger.Fatal(ex, "[StartAsync]An exception occured.");
                 }
             });
         }
 
         public Task StopAsync(CancellationToken cancellationToken) {
             return Task.Run(() => {
-                Logger.Info($"[StopAsync]Stop requested.");
+                try {
+                    Logger.Info($"[StopAsync]Stop requested.");
 
-                LocalMobileAppDiscoveryManager.Stop();
-                AesKeyExchangeManager.Stop();
+                    LocalMobileAppDiscoveryManager.Stop();
+                    AesKeyExchangeManager.Stop();
+                    CommandManager.Stop();
 
-                Logger.Trace($"[StopAsync]All communication connections closed.");
+                    Logger.Trace($"[StopAsync]All communication connections closed.");
+                } catch (Exception ex) {
+                    Logger.Fatal(ex, "[StopAsync]Exception while stopping communication services.");
+                }
             });
         }
     }

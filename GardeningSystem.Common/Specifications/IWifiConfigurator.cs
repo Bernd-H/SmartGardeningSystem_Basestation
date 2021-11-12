@@ -13,6 +13,6 @@ namespace GardeningSystem.Common.Specifications {
 
         IEnumerable<string> GetAllWlans();
 
-        bool ConnectToWlan(string essid, byte[] secret);
+        bool ConnectToWlan(string essid, string secret);
     }
 }

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#shutdown dhc
+dhclient -r
+#shutdown wpa_supplicant
+killall wpa_supplicant
+#down interface
+ifdown --force wlan0
+sleep 1
+#your wpa startup here:
+wpa_passphrase "$1" "$2" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf
+wpa_supplicant -c /etc/wpa_supplicant/wpa_supplicant.conf -B -i wlan0
+#wpa_supplicant -t -fYOUR_LOG_FILE -cYOUR_wpa_supplicant.conf -B -iwlan0
+
+#write new wlan info to connect to to file which gets executed on startup
+#touch /boot/wpa_supplicant.conf
+echo "country=AT
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+network={
+    ssid=\"$1\"
+    psk=\"$2\"
+    key_mgmt=WPA-PSK
+}" > /etc/wpa_supplicant/wpa_supplicant.conf
+
+sleep 1
+#restart dhc
+dhclient -nw

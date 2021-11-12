@@ -15,4 +15,10 @@
     <ProjectReference Include="..\GardeningSystem.Common\GardeningSystem.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="changeWlanScript">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

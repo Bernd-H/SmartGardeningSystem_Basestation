@@ -7,7 +7,7 @@
 
   "applicationSettings_fileName": "userSettings.json",
 
-  "wlanInterface_name": "wlp3s0", // standard interface name
+  "wlanInterface_name": "wlan0", // standard interface name
 
   ///////////////////////// cryptography
   // rest api token
@@ -27,6 +27,9 @@
 
   // Aes key exchange
   "aesKeyExchange_listenPort": "52143",
+
+  // Command listener
+  "commandListener_listenPort": "52240",
 
   ///////////////////////// Service options
   "wateringJob_enabled": "false",

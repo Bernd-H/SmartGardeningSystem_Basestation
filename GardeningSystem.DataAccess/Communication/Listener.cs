@@ -33,13 +33,13 @@ namespace GardeningSystem.DataAccess.Communication {
             Cancellation = new CancellationTokenSource();
             Cancellation.Token.Register(() => RaiseStatusChanged(ListenerStatus.NotListening));
 
-            try {
+            //try {
                 Start(Cancellation.Token);
                 RaiseStatusChanged(ListenerStatus.Listening);
-            }
-            catch (SocketException) {
-                RaiseStatusChanged(ListenerStatus.PortNotFree);
-            }
+            //}
+            //catch (SocketException soex) {
+            //    RaiseStatusChanged(ListenerStatus.PortNotFree);
+            //}
 
         }
 

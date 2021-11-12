@@ -26,8 +26,8 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private ILogger Logger;
 
-        public SslListener(ILoggerService loggerService, IConfiguration configuration)
-            : base(new IPEndPoint(IPAddress.Any, Convert.ToInt32(configuration[ConfigurationVars.AESKEYEXCHANGE_LISTENPORT]))) {
+        public SslListener(IPEndPoint listenerEndPoint, ILoggerService loggerService, IConfiguration configuration)
+            : base(listenerEndPoint) {
             Logger = loggerService.GetLogger<SslListener>();
         }
 
@@ -62,7 +62,7 @@ namespace GardeningSystem.DataAccess.Communication {
                 Logger.Error(odex, "[AcceptTcpClientCallback]Connection got unexpectedly closed.");
             }
             catch (Exception ex) {
-
+                // TODO: do something
             }
             finally {
                 // The client stream will be closed with the sslStream
@@ -120,6 +120,24 @@ namespace GardeningSystem.DataAccess.Communication {
             packet.RemoveRange(0, 4);
 
             return packet.ToArray();
+        }
+
+        public static void SendConfidentialInformation(SslStream sslStream, byte[] msg) {
+            byte[] packet = new byte[msg.Length + 4];
+
+            // add length of packet - 4B
+            var header = BitConverter.GetBytes(msg.Length + 4);
+            Array.Copy(header, 0, packet, 0, header.Length);
+
+            // add content
+            Array.Copy(msg, 0, packet, 4, msg.Length);
+
+            sslStream.Write(packet);
+            sslStream.Flush();
+
+            for (int i = 0; i < packet.Length; i++) {
+                packet[i] = 0xFF;
+            }
         }
 
         public static void SendMessage(SslStream sslStream, byte[] msg) {

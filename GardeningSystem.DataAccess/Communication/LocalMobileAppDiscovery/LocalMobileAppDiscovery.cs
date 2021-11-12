@@ -18,6 +18,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         /// <summary>
         /// The IPAddress and port of the IPV4 multicast group.
         /// </summary>
+        //static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("224.0.7.1"), 6771);
         static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("239.192.152.143"), 6771);
 
         /// <summary>
@@ -127,9 +128,28 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             //token.Register(() => UdpClient.SafeDispose());
             token.Register(() => UdpClient.Dispose());
 
-            UdpClient.JoinMulticastGroup(MulticastAddressV4.Address);
+            joinTheMulticastGroupOnAllInterfaces();
             Logger.Info($"[Start]Starting listening for mobile apps on {MulticastAddressV4.ToString()}.");
             ReceiveAsync(UdpClient, token);
+        }
+
+        private void joinTheMulticastGroupOnAllInterfaces() {
+            NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (NetworkInterface adapter in nics) {
+                IPInterfaceProperties ip_properties = adapter.GetIPProperties();
+                if (!adapter.GetIPProperties().MulticastAddresses.Any())
+                    continue; // most of VPN adapters will be skipped
+                if (!adapter.SupportsMulticast)
+                    continue; // multicast is meaningless for this type of connection
+                if (OperationalStatus.Up != adapter.OperationalStatus)
+                    continue; // this adapter is off or not connected
+                IPv4InterfaceProperties p = adapter.GetIPProperties().GetIPv4Properties();
+                if (null == p)
+                    continue; // IPv4 is not configured on this adapter
+
+                Logger.Info($"[joinTheMulticastGroupOnAllInterfaces]Joining multicast group on interface {adapter.GetPhysicalAddress().ToString()}.");
+                UdpClient.JoinMulticastGroup((int)IPAddress.HostToNetworkOrder(p.Index), MulticastAddressV4.Address);
+            }
         }
     }
 }

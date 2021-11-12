@@ -26,6 +26,9 @@
         // Aes key exchange
         public static string AESKEYEXCHANGE_LISTENPORT = "aesKeyExchange_listenPort";
 
+        // Command listener
+        public static string COMMANDLISTENER_LISTENPORT = "commandListener_listenPort";
+
         // GardeningSystem.RestAPI
         // Authentication
         public static string ISSUER_SIGNINGKEY = "rest_api_jwt:key";

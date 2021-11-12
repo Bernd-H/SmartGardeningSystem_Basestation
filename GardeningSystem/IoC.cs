@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using Autofac;
 using GardeningSystem.BusinessLogic;
@@ -20,6 +21,7 @@ using GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery;
 using GardeningSystem.DataAccess.Repositories;
 using GardeningSystem.Jobs;
 using Microsoft.Extensions.Configuration;
+using MobileApp.DataAccess.Communication;
 using NLog;
 
 namespace GardeningSystem {
@@ -56,6 +58,7 @@ namespace GardeningSystem {
 
             /// jobs
             containerBuilder.RegisterType<WateringJob>().AsSelf();
+            containerBuilder.RegisterType<CommunicationJob>().AsSelf();
 
             /// business logic
             // managers
@@ -64,6 +67,7 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<SettingsManager>().As<ISettingsManager>();
             containerBuilder.RegisterType<LocalMobileAppDiscoveryManager>().As<ILocalMobileAppDiscoveryManager>();
             containerBuilder.RegisterType<AesKeyExchangeManager>().As<IAesKeyExchangeManager>();
+            containerBuilder.RegisterType<CommandManager>().As<ICommandManager>();
 
             // cryptography
             containerBuilder.RegisterType<PasswordHasher>().As<IPasswordHasher>();
@@ -79,9 +83,15 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<WeatherRepository>().As<IWeatherRepository>();
 
             // communication
+            containerBuilder.RegisterType<WifiConfigurator>().As<IWifiConfigurator>();
             containerBuilder.RegisterType<LocalMobileAppDiscovery>().As<ILocalMobileAppDiscovery>();
             containerBuilder.RegisterType<SocketSender>().As<ISocketSender>();
-            containerBuilder.RegisterType<SslListener>().As<ISslListener>();
+            var aesKeyExchangePort = Convert.ToInt32(ConfigurationContainer.Configuration[ConfigurationVars.AESKEYEXCHANGE_LISTENPORT]);
+            containerBuilder.RegisterType<SslListener>().As<ISslListener>()
+                .WithParameter("listenerEndPoint", new IPEndPoint(IPAddress.Any, aesKeyExchangePort));
+            var commandListenerPort = Convert.ToInt32(ConfigurationContainer.Configuration[ConfigurationVars.COMMANDLISTENER_LISTENPORT]);
+            containerBuilder.RegisterType<AesTcpListener>().As<IAesTcpListener>()
+                .WithParameter("listenerEndPoint", new IPEndPoint(IPAddress.Any, commandListenerPort));
         }
 
         /// <summary>

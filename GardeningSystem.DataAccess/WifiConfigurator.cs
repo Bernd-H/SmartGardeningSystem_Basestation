@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.NetworkInformation;
+using System.Threading;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +11,9 @@ using NLog;
 
 namespace GardeningSystem.DataAccess {
     public class WifiConfigurator : IWifiConfigurator {
+
+        static string changeWlanScriptName = "changeWlanScript";
+
 
         private ILogger Logger;
 
@@ -21,40 +24,60 @@ namespace GardeningSystem.DataAccess {
             Configuration = configuration;
         }
 
-        public bool ConnectToWlan(string essid, byte[] secret) {
+        public bool ConnectToWlan(string essid, string secret) {
             Logger.Info($"[ConnectToWlan]Trying to connect to wlan wiht essid={essid}.");
+            setScriptExecutionRights();
 
             // connect to wlan
-            ProcessStartInfo startInfo = new ProcessStartInfo() { FileName = "/bin/bash", Arguments = $"/nmcli d wifi connect {essid} password {secret}" };
-            Process proc = new Process() { StartInfo = startInfo, };
-            proc.Start();
+            executeCommand($"sudo ./{changeWlanScriptName} \"{essid}\" \"{secret}\"");
 
             // check if connected
-            return IsConnectedToWlan();
+            bool success = false;
+            int attempts = 5;
+            do {
+                if (attempts != 5) {
+                    Thread.Sleep(2000);
+                }
+                success = IsConnectedToWlan();
+                attempts--;
+            } while (!success && attempts >= 0);
+
+            if (!success) {
+                // TODO: establish connection 
+            }
+
+            return success;
         }
 
         public IEnumerable<string> GetAllWlans() {
             Logger.Info($"[GetAllWlans]Searching for reachable wifis.");
-
-            // get all wlans
-            string command = $"sudo iwlist {Configuration[ConfigurationVars.WLANINTERFACE_NAME]} scan | grep ESSID";
-            ProcessStartInfo startInfo = new ProcessStartInfo() {
-                FileName = "/bin/bash",
-                Arguments = "/" + command,
-                RedirectStandardOutput = true
-            };
-            Process proc = new Process() { StartInfo = startInfo };
-            proc.Start();
-            var streamReader = proc.StandardOutput;
-
-            string allWlans = streamReader.ReadToEnd();
-
-            // parse essids
             var finalIds = new List<string>();
-            var essids = allWlans.Split("ESSID:\"").ToList();
-            essids.RemoveAt(0);
-            foreach (var id in essids) {
-                finalIds.Add(id.Substring(0, id.IndexOf("\"")));
+
+            try { 
+                // get all wlans
+                string command = $"sudo iwlist {Configuration[ConfigurationVars.WLANINTERFACE_NAME]} scan | grep ESSID";
+                ProcessStartInfo startInfo = new ProcessStartInfo() {
+                    FileName = "/bin/bash",
+                    Arguments = "/" + command,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+                Process proc = new Process() { StartInfo = startInfo };
+                proc.Start();
+                var streamReader = proc.StandardOutput;
+
+                string allWlans = streamReader.ReadToEnd();
+
+                // parse essids
+                var essids = allWlans.Split("ESSID:\"").ToList();
+                essids.RemoveAt(0);
+                foreach (var id in essids) {
+                    finalIds.Add(id.Substring(0, id.IndexOf("\"")));
+                }
+
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, "[GetAllWlans]Exception while getting/pareing ssids.");
             }
 
             return finalIds;
@@ -62,12 +85,47 @@ namespace GardeningSystem.DataAccess {
 
         public bool HasInternet() {
             Logger.Info($"[HasInternet]Checking internet connection.");
-            throw new NotImplementedException();
+            return pingHost("google.com");
         }
 
         public bool IsConnectedToWlan() {
             Logger.Info($"[IsConnectedToWlan]Checking wifi connection.");
+
             throw new NotImplementedException();
+        }
+
+        private static bool pingHost(string nameOrAddress) {
+            bool pingable = false;
+            Ping pinger = null;
+
+            try {
+                pinger = new Ping();
+                PingReply reply = pinger.Send(nameOrAddress);
+                pingable = reply.Status == IPStatus.Success;
+            }
+            catch (PingException) {
+                // Discard PingExceptions and return false;
+            }
+            finally {
+                if (pinger != null) {
+                    pinger.Dispose();
+                }
+            }
+
+            return pingable;
+        }
+
+        private static void setScriptExecutionRights() {
+            try {
+                executeCommand($"chmod +x {changeWlanScriptName}");
+            }
+            catch (Exception) { }
+        }
+
+        private static void executeCommand(string command) {
+            ProcessStartInfo startInfo = new ProcessStartInfo() { FileName = "/bin/bash", Arguments = $"/{command}", UseShellExecute = false };
+            Process proc = new Process() { StartInfo = startInfo, };
+            proc.Start();
         }
     }
 }
