@@ -73,7 +73,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             const string password = "Rand0mPa55word!";
             X509Store _CertificateStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             _CertificateStore.Open(OpenFlags.ReadOnly);
-            var encryptedCert = _CertificateStore.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false)[0]; ///////////ACHTUNG exception handling...
+            var encryptedCert = _CertificateStore.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false)[0]; //TODO: exception handling...
             currentCert = new X509Certificate2(encryptedCert.RawData, password);
             _CertificateStore.Close();
 
@@ -99,7 +99,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         public IntPtr DecryptData(byte[] encryptedData) {
             X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
             using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
-                var rsa = (RSA)x509Certificate2.PrivateKey;
+                var rsa = x509Certificate2.GetRSAPrivateKey();
                 RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: true));
                 rsa.Clear(); // TODO: safe?
 
@@ -113,7 +113,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         public byte[] EncryptDataAndObfuscateSource(byte[] data) {
             X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
             using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
-                var rsa = (RSA)x509Certificate2.PrivateKey;
+                var rsa = x509Certificate2.GetRSAPrivateKey();
                 RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
                 rsa.Clear(); // TODO: safe?
 
@@ -127,7 +127,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         public byte[] EncryptData(IntPtr dataPtr, int dataLength) {
             X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
             using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
-                var rsa = (RSA)x509Certificate2.PrivateKey;
+                var rsa = x509Certificate2.GetRSAPrivateKey();
                 RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
                 rsa.Clear(); // TODO: safe?
 
