@@ -62,7 +62,6 @@ namespace GardeningSystem.DataAccess.Communication {
                 Logger.Error(odex, "[AcceptTcpClientCallback]Connection got unexpectedly closed.");
             }
             catch (Exception ex) {
-                // TODO: do something
             }
             finally {
                 // The client stream will be closed with the sslStream

@@ -12,8 +12,15 @@ using NLog;
 namespace GardeningSystem.BusinessLogic.Cryptography {
     public class AesEncrypterDecrypter : IAesEncrypterDecrypter {
 
-        public static int KEY_SIZE = 256;
-        public static int IV_SIZE = 16;
+        /// <summary>
+        /// Key size in bytes.
+        /// </summary>
+        public static int KEY_SIZE = 256 / 8;
+
+        /// <summary>
+        /// IV size in bytes
+        /// </summary>
+        public static int IV_SIZE = 128 / 8;
 
         private ISettingsManager SettingsManager;
 
@@ -42,8 +49,8 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
 
         public byte[] DecryptToByteArray(byte[] data) {
             byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
-            CryptoUtils.GetByteArrayFromUM(aesKey, SettingsManager.GetApplicationSettings().AesKey, KEY_SIZE);
-            CryptoUtils.GetByteArrayFromUM(aesIv, SettingsManager.GetApplicationSettings().AesIV, IV_SIZE);
+            CryptoUtils.GetByteArrayFromUM(aesKey, getAllApplicationSettings().AesKey, KEY_SIZE);
+            CryptoUtils.GetByteArrayFromUM(aesIv, getAllApplicationSettings().AesIV, IV_SIZE);
 
             var result = DecryptByteArray(data, aesKey, aesIv);
 
@@ -64,8 +71,8 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
 
         public byte[] EncryptByteArray(byte[] data) {
             byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
-            CryptoUtils.GetByteArrayFromUM(aesKey, SettingsManager.GetApplicationSettings().AesKey, KEY_SIZE);
-            CryptoUtils.GetByteArrayFromUM(aesIv, SettingsManager.GetApplicationSettings().AesIV, IV_SIZE);
+            CryptoUtils.GetByteArrayFromUM(aesKey, getAllApplicationSettings().AesKey, KEY_SIZE);
+            CryptoUtils.GetByteArrayFromUM(aesIv, getAllApplicationSettings().AesIV, IV_SIZE);
 
             byte[] result = EncryptByteArray(data, aesKey, aesIv);
 
@@ -87,7 +94,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         private void GenerateAndStoreSymmetricKey() {
             Logger.Info($"[GenerateAndStoreSymmetricKey]Generating and storing an aes key.");
             using (var myRijndael = new RijndaelManaged()) {
-                myRijndael.KeySize = KEY_SIZE;
+                myRijndael.KeySize = KEY_SIZE * 8;
                 myRijndael.GenerateKey();
                 myRijndael.GenerateIV();
 

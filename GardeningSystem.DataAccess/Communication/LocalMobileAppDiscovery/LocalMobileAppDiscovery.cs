@@ -163,21 +163,26 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         }
 
         private void ReceiveCallback(IAsyncResult ar) {
-            // Retrieve the state object and the handler socket  
-            // from the asynchronous state object.  
-            StateObject state = (StateObject)ar.AsyncState;
-            Socket handler = state.workSocket;
-            //var remoteEndpoint = (IPEndPoint)state.remoteEndpoint;
+            try {
+                // Retrieve the state object and the handler socket  
+                // from the asynchronous state object.  
+                StateObject state = (StateObject)ar.AsyncState;
+                Socket handler = state.workSocket;
+                //var remoteEndpoint = (IPEndPoint)state.remoteEndpoint;
 
-            // Read data from the client socket.
-            int bytesRead = handler.EndReceive(ar);
-            // Signal the main thread to continue.  
-            allDone.Set();
+                // Read data from the client socket.
+                int bytesRead = handler.EndReceive(ar);
+                // Signal the main thread to continue.  
+                allDone.Set();
 
-            if (bytesRead > 0) {
-                // buffer is big enough for the hole multicast message, no need to receive more...
+                if (bytesRead > 0) {
+                    // buffer is big enough for the hole multicast message, no need to receive more...
 
-                ProcessReceivedMulticastMessage(state.buffer);
+                    ProcessReceivedMulticastMessage(state.buffer);
+                }
+            }
+            catch (ObjectDisposedException) {
+
             }
         }
 

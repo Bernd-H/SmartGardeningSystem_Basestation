@@ -42,7 +42,10 @@ namespace GardeningSystem.Common.Models.DTOs {
                 Id = Guid.NewGuid(),
                 PostalCode = string.Empty,
                 RegisteredUsers = new List<User>(),
-                ConfigurationModeEnabled = true
+                ConfigurationModeEnabled = true,
+                AesKey = IntPtr.Zero,
+                AesIV = IntPtr.Zero,
+                ServerCertificate = string.Empty
             };
         }
     }

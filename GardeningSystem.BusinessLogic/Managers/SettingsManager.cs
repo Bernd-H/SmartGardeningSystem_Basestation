@@ -59,5 +59,18 @@ namespace GardeningSystem.BusinessLogic.Managers {
         public void UpdateCurrentSettings(Func<ApplicationSettingsDto, ApplicationSettingsDto> updateFunc, ICertificateHandler CertificateHandler = null) {
             UpdateSettings(updateFunc(GetApplicationSettings(CertificateHandler)), CertificateHandler);
         }
+
+        public void DeleteSettings() {
+            string settingsFilePath = ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.APPLICATIONSETTINGS_FILENAME]);
+            if (File.Exists(settingsFilePath)) {
+                Logger.Info($"[DeleteSettings]Deleting settings file.");
+                File.Delete(settingsFilePath);
+            }
+
+            Logger.Info("[DeleteSettings]Creating default settings file.");
+
+            // create default settings file
+            UpdateSettings(ApplicationSettingsDto.GetStandardSettings());
+        }
     }
 }

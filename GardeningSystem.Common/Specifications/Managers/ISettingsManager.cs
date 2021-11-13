@@ -19,5 +19,7 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <param name="updateFunc">gets current settings and must return the changed settings</param>
         /// <param name="CertificateHandler">Must be set when confidential information should get decrypted.</param>
         void UpdateCurrentSettings(Func<ApplicationSettingsDto, ApplicationSettingsDto> updateFunc, ICertificateHandler CertificateHandler = null);
+
+        void DeleteSettings();
     }
 }

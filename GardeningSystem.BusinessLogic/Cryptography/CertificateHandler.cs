@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Security;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.DataAccess.Repositories;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using Org.BouncyCastle.Asn1;
@@ -49,13 +43,12 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
 
         public X509Certificate2 GetCurrentServerCertificate() {
             var applicationSettings = SettingsManager.GetApplicationSettings();
-            //X509Certificate2 currentCert = new X509Certificate2();
             X509Certificate2 currentCert = null;
 
             // check if certificate already exists
             if (string.IsNullOrEmpty(applicationSettings.ServerCertificate)) {
                 // create and store certificate
-                string certThumbprint = CreateServerCertificate();
+                string certThumbprint = CertificateRepository.CreateSelfSignedCertificate("localhost").Thumbprint;
                 Logger.Info($"[GetCurrentServerCertificate]Creating a new certificate.");
                 SettingsManager.UpdateCurrentSettings((currentApplicationSettings) => {
                     currentApplicationSettings.ServerCertificate = certThumbprint;
@@ -64,49 +57,107 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             }
 
             Logger.Info($"[GetCurrentServerCertificate]Importing server certificate.");
-            //currentCert.Import(SettingsManager.GetApplicationSettings().ServerCertificate);
-            //currentCert = new X509Certificate2(SettingsManager.GetApplicationSettings().ServerCertificate);
-            //currentCert = SettingsManager.GetApplicationSettings().ServerCertificate;
             var thumbprint = SettingsManager.GetApplicationSettings().ServerCertificate;
 
             // load cert from store
-            const string password = "Rand0mPa55word!";
-            X509Store _CertificateStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            _CertificateStore.Open(OpenFlags.ReadOnly);
-            var encryptedCert = _CertificateStore.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false)[0]; //TODO: exception handling...
-            currentCert = new X509Certificate2(encryptedCert.RawData, password);
-            _CertificateStore.Close();
+            currentCert = CertificateRepository.GetCertificate(thumbprint);
 
             return currentCert;
         }
 
-        private string CreateServerCertificate() {
-            string subjectName = $"CN={Configuration[ConfigurationVars.CERT_SUBJECT]}";
-            string issuerName = $"CN={Configuration[ConfigurationVars.CERT_ISSUER]}";
+        #region old
+        //public X509Certificate2 GetCurrentServerCertificate() {
+        //    var applicationSettings = SettingsManager.GetApplicationSettings();
+        //    //X509Certificate2 currentCert = new X509Certificate2();
+        //    X509Certificate2 currentCert = null;
 
-            //var caPrivKey = GenerateCACertificate(subjectName);
-            //var cert = GenerateSelfSignedCertificate(subjectName, issuerName, caPrivKey);
+        //    // check if certificate already exists
+        //    if (string.IsNullOrEmpty(applicationSettings.ServerCertificate)) {
+        //        // create and store certificate
+        //        string certThumbprint = CreateServerCertificate();
+        //        Logger.Info($"[GetCurrentServerCertificate]Creating a new certificate.");
+        //        SettingsManager.UpdateCurrentSettings((currentApplicationSettings) => {
+        //            currentApplicationSettings.ServerCertificate = certThumbprint;
+        //            return currentApplicationSettings;
+        //        });
+        //    }
 
-            //addCertToStore(cert, StoreName.My, StoreLocation.CurrentUser);
-            //return cert.Export(X509ContentType.Cert);
+        //    Logger.Info($"[GetCurrentServerCertificate]Importing server certificate.");
+        //    //currentCert.Import(SettingsManager.GetApplicationSettings().ServerCertificate);
+        //    //currentCert = new X509Certificate2(SettingsManager.GetApplicationSettings().ServerCertificate);
+        //    //currentCert = SettingsManager.GetApplicationSettings().ServerCertificate;
+        //    var thumbprint = SettingsManager.GetApplicationSettings().ServerCertificate;
 
-            //var cert = CreateSelfSignedCertificateV2(subjectName);
-            return CreateCertificateV3();
-            //return cert.Export(X509ContentType.Cert);
-            //return cert;
-        }
+        //    // load cert from store
+        //    const string password = "Rand0mPa55word!";
+        //    X509Store _CertificateStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+        //    _CertificateStore.Open(OpenFlags.ReadOnly);
+        //    var encryptedCert = _CertificateStore.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validOnly: false)[0]; //TODO: exception handling...
+        //    currentCert = new X509Certificate2(encryptedCert.RawData, password);
+        //    _CertificateStore.Close();
+
+        //    return currentCert;
+        //}
+
+        //private string CreateServerCertificate() {
+        //    string subjectName = $"CN={Configuration[ConfigurationVars.CERT_SUBJECT]}";
+        //    string issuerName = $"CN={Configuration[ConfigurationVars.CERT_ISSUER]}";
+
+        //    //var caPrivKey = GenerateCACertificate(subjectName);
+        //    //var cert = GenerateSelfSignedCertificate(subjectName, issuerName, caPrivKey);
+
+        //    //addCertToStore(cert, StoreName.My, StoreLocation.CurrentUser);
+        //    //return cert.Export(X509ContentType.Cert);
+
+        //    //var cert = CreateSelfSignedCertificateV2(subjectName);
+        //    return CreateCertificateV3();
+        //    //return cert.Export(X509ContentType.Cert);
+        //    //return cert;
+        //}
+
+        #endregion
 
         public IntPtr DecryptData(byte[] encryptedData) {
             X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
-            using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
-                var rsa = x509Certificate2.GetRSAPrivateKey();
-                RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: true));
-                rsa.Clear(); // TODO: safe?
+            //RSA rsa = (RSA)x509Certificate2.PrivateKey;
+            //(x509Certificate2.PrivateKey as RSA).Key.SetProperty(
+            //    new CngProperty(
+            //        "Export Policy",
+            //        BitConverter.GetBytes((int)CngExportPolicies.AllowPlaintextExport),
+            //        CngPropertyOptions.Persist));
 
-                byte[] decryptedDta = RSAalg.Decrypt(encryptedData, fOAEP: true);
+            //RSAParameters RSAParameters = rsa.ExportParameters(true);
 
-                // store data in unmanaged memory and obfuscate byte array
-                return CryptoUtils.MoveDataToUnmanagedMemory(decryptedDta);
+            //using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
+            //    var rsa = x509Certificate2.GetRSAPrivateKey();
+            //RSAalg.ImportParameters(exportRSAParametersWithPrivateKey(rsa));
+            //rsa.Clear(); // TODO: safe?
+
+            //byte[] decryptedDta = RSAalg.Decrypt(encryptedData, fOAEP: true);
+            RSA csp = (RSA)x509Certificate2.PrivateKey;
+            var privateKey = x509Certificate2.PrivateKey as RSACryptoServiceProvider;
+            var decryptedData = csp.Decrypt(encryptedData, RSAEncryptionPadding.Pkcs1);
+
+            // store data in unmanaged memory and obfuscate byte array
+            return CryptoUtils.MoveDataToUnmanagedMemory(decryptedData);
+            //}
+        }
+
+        private RSAParameters exportRSAParametersWithPrivateKey(RSA rsa) {
+            using (RSA exportRewriter = RSA.Create()) {
+                // Only one KDF iteration is being used here since it's immediately being
+                // imported again.  Use more if you're actually exporting encrypted keys.
+                exportRewriter.ImportEncryptedPkcs8PrivateKey(
+                    "password",
+                    rsa.ExportEncryptedPkcs8PrivateKey(
+                        "password",
+                        new PbeParameters(
+                            PbeEncryptionAlgorithm.Aes128Cbc,
+                            HashAlgorithmName.SHA256,
+                            1)),
+                    out _);
+
+                return exportRewriter.ExportParameters(true);
             }
         }
 
@@ -117,7 +168,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
                 RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
                 rsa.Clear(); // TODO: safe?
 
-                byte[] encryptedData = RSAalg.Encrypt(data, fOAEP: true);
+                byte[] encryptedData = RSAalg.Encrypt(data, fOAEP: false);
 
                 CryptoUtils.ObfuscateByteArray(data);
                 return encryptedData;
@@ -134,7 +185,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
                 byte[] data = new byte[dataLength];
                 CryptoUtils.GetByteArrayFromUM(data, dataPtr, dataLength);
 
-                byte[] encryptedData = RSAalg.Encrypt(data, fOAEP: true);
+                byte[] encryptedData = RSAalg.Encrypt(data, fOAEP: false);
 
                 CryptoUtils.ObfuscateByteArray(data);
 
@@ -179,6 +230,8 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         //    int end = pemString.IndexOf(footer, start) - start;
         //    return Convert.FromBase64String(pemString.Substring(start, end));
         //}
+
+
 
         #region self signed certifiate generation V2
 
@@ -329,10 +382,8 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             var stream = new MemoryStream();
             store.Save(stream, password.ToCharArray(), _random);
 
-            var convertedCertificate =
-                new X509Certificate2(stream.ToArray(),
-                                        password,
-                                        X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+            //var convertedCertificate = new X509Certificate2(stream.ToArray(), password, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+            var convertedCertificate = new X509Certificate2(stream.ToArray(), password, X509KeyStorageFlags.PersistKeySet);
 
             // Add the certificate to the certificate store
             X509Store _CertificateStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
@@ -342,6 +393,23 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
 
             return publicCert.Thumbprint;
         }
+
+        //private static X509Certificate2 StoreCertificateWithPrivateKey(X509Certificate2 cert, RSA rsa, string password) {
+        //    using (var certWithKey = cert.CopyWithPrivateKey(rsa)) {
+        //        var persistable = new X509Certificate2(certWithKey.Export(X509ContentType.Pfx), "", X509KeyStorageFlags.PersistKeySet);
+        //        // Add the certificate with associated key to the operating system key store
+
+        //        var store = new X509Store(DefaultStoreName, DefaultStoreLocation, OpenFlags.ReadWrite);
+        //        try {
+        //            store.Add(persistable);
+        //        }
+        //        finally {
+        //            store.Close();
+        //        }
+
+        //        return persistable;
+        //    }
+        //}
 
         #endregion
 
