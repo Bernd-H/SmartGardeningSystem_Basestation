@@ -12,7 +12,7 @@ namespace GardeningSystem.Common.Specifications.Cryptography {
 
         void CheckForCertificateUpdate();
 
-        IntPtr DecryptData(byte[] encryptedData);
+        (int, IntPtr) DecryptData(byte[] encryptedData);
 
         byte[] EncryptDataAndObfuscateSource(byte[] data);
 

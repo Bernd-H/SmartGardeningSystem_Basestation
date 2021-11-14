@@ -40,8 +40,8 @@ namespace GardeningSystem.Common.Models {
             
             if (applicationSettings.AesKey != null && applicationSettings.AesIV != null && certificateHandler != null) {
                 // decrypt aes key/iv
-                appSettingsDto.AesKey = certificateHandler.DecryptData(applicationSettings.AesKey);
-                appSettingsDto.AesIV = certificateHandler.DecryptData(applicationSettings.AesIV);
+                appSettingsDto.AesKey = certificateHandler.DecryptData(applicationSettings.AesKey).Item2; // TODO: make appSettingsDto a class with length and pointer
+                appSettingsDto.AesIV = certificateHandler.DecryptData(applicationSettings.AesIV).Item2;
             }
 
             return appSettingsDto;

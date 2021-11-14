@@ -46,15 +46,21 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 // receive command
                 var command = await AesTcpListener.ReceiveData(networkStream);
 
-                bool success = false;
-                if (command.SequenceEqual(CommunicationCodes.WlanCommand)) {
-                    // send ack and get login information
-                    await AesTcpListener.SendData(CommunicationCodes.ACK, networkStream);
-                    var connectInfo_json = Encoding.UTF8.GetString(await AesTcpListener.ReceiveData(networkStream));
-                    var connectInfo = JsonConvert.DeserializeObject<WlanInfoDto>(connectInfo_json);
+                // send ack
+                await AesTcpListener.SendData(CommunicationCodes.ACK, networkStream);
 
-                    success = processCommand_ConnectToWlan(connectInfo);
+                 bool success = false;
+                try {
+                    if (command.SequenceEqual(CommunicationCodes.WlanCommand)) {
+                        // get login information
+                        var connectInfo_json = Encoding.UTF8.GetString(await AesTcpListener.ReceiveData(networkStream));
+                        var connectInfo = JsonConvert.DeserializeObject<WlanInfoDto>(connectInfo_json);
+
+                        success = processCommand_ConnectToWlan(connectInfo);
+                    }
+                    // process other commands here
                 }
+                catch (Exception) { }
 
                 // send return code
                 await AesTcpListener.SendData(BitConverter.GetBytes(success), networkStream);
@@ -63,8 +69,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 Logger.Error(ex, $"[OnCommandReceivedEvent]An error occured while processing a received command.");
             }
             finally {
-                networkStream?.Close();
-                e.TcpClient?.Close();
+                // let client close the connection
+                //networkStream?.Close();
+                //e.TcpClient?.Close();
             }
         }
 
@@ -74,6 +81,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private bool processCommand_ConnectToWlan(WlanInfoDto connectInfo) {
             string decryptedSecret = Encoding.UTF8.GetString(AesEncrypterDecrypter.DecryptToByteArray(connectInfo.EncryptedPassword));
+            Logger.Info($"[processCommand_ConnectToWlan]Password for wlan {connectInfo.Ssid} = {decryptedSecret}.");
             //return WifiConfigurator.ConnectToWlan(connectInfo.Ssid, decryptedSecret);
             return true;
         }

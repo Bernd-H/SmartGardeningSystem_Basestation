@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using GardeningSystem.Common.Models.DTOs;
@@ -37,16 +38,6 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             Logger = loggerService.GetLogger<AesEncrypterDecrypter>();
         }
 
-        //public string Decrypt(byte[] data) {
-        //    try {
-        //        Logger.Info($"[Decrypt]Decrypting byte array with length={data.Length}.");
-        //        return DecryptStringFromBytes(data, SettingsManager.GetApplicationSettings().AesKey, SettingsManager.GetApplicationSettings().AesIV);
-        //    } catch (Exception ex) {
-        //        Logger.Error(ex, $"[Decrypt]Failed to decrypt data.");
-        //        return string.Empty;
-        //    }
-        //}
-
         public byte[] DecryptToByteArray(byte[] data) {
             byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
             CryptoUtils.GetByteArrayFromUM(aesKey, getAllApplicationSettings().AesKey, KEY_SIZE);
@@ -58,16 +49,6 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             CryptoUtils.ObfuscateByteArray(aesIv);
             return result;
         }
-
-        //public byte[] Encrypt(string data) {
-        //    try {
-        //        Logger.Info($"[Encrypt]Encrypting string with length={data.Length}.");
-        //        return EncryptStringToBytes(data, SettingsManager.GetApplicationSettings().AesKey, SettingsManager.GetApplicationSettings().AesIV);
-        //    } catch (Exception ex) {
-        //        Logger.Fatal(ex, $"[Encrypt]Error while encrypting data.");
-        //        throw;
-        //    }
-        //}
 
         public byte[] EncryptByteArray(byte[] data) {
             byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
@@ -111,14 +92,10 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             return SettingsManager.GetApplicationSettings(CertificateHandler);
         }
 
-        static byte[] EncryptByteArray(byte[] plainText, byte[] Key, byte[] IV) {
-            byte[] encrypted;
-
-            // Create an RijndaelManaged object 
-            // with the specified key and IV. 
+        static byte[] EncryptByteArray(byte[] data, byte[] key, byte[] iv) {
             using (RijndaelManaged rijAlg = new RijndaelManaged()) {
-                rijAlg.Key = Key;
-                rijAlg.IV = IV;
+                rijAlg.Key = key;
+                rijAlg.IV = iv;
 
                 // Create a decryptor to perform the stream transform.
                 ICryptoTransform encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
@@ -126,46 +103,33 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
                 // Create the streams used for encryption. 
                 using (MemoryStream msEncrypt = new MemoryStream()) {
                     using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write)) {
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt)) {
-
-                            //Write all data to the stream.
-                            swEncrypt.Write(plainText);
-                        }
-                        encrypted = msEncrypt.ToArray();
+                        csEncrypt.Write(data, 0, data.Length);
+                        csEncrypt.FlushFinalBlock();
+                        return msEncrypt.ToArray().Prepend(BitConverter.GetBytes(data.Length));
                     }
                 }
             }
-
-
-            // Return the encrypted bytes from the memory stream. 
-            return encrypted;
         }
 
-        static byte[] DecryptByteArray(byte[] cipherText, byte[] Key, byte[] IV) {
-            // Create an RijndaelManaged object 
-            // with the specified key and IV. 
+        static byte[] DecryptByteArray(byte[] encryptedBytesWithLength, byte[] key, byte[] iv) {
+            // get length of data
+            (byte[] lengthBytes, byte[] encryptedData) = encryptedBytesWithLength.Shift(4);
+            var length = BitConverter.ToInt32(lengthBytes, 0);
+
             using (RijndaelManaged rijAlg = new RijndaelManaged()) {
-                rijAlg.Key = Key;
-                rijAlg.IV = IV;
+                rijAlg.Key = key;
+                rijAlg.IV = iv;
 
                 // Create a decrytor to perform the stream transform.
                 ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
 
                 // Create the streams used for decryption. 
-                using (MemoryStream msDecrypt = new MemoryStream(cipherText)) {
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read)) {
-                        using (BinaryReader brDecrypt = new BinaryReader(csDecrypt)) {
-
-                            // Read the decrypted bytes from the decrypting stream
-                            byte[] buffer = new byte[16 * 1024];
-                            using (MemoryStream ms = new MemoryStream()) {
-                                int read;
-                                while ((read = brDecrypt.Read(buffer, 0, buffer.Length)) > 0) {
-                                    ms.Write(buffer, 0, read);
-                                }
-                                return ms.ToArray();
-                            }
-                        }
+                using (MemoryStream mstream = new MemoryStream(encryptedData)) {
+                    using (CryptoStream cryptoStream = new CryptoStream(mstream, decryptor, CryptoStreamMode.Read)) {
+                        byte[] decryptedData = new byte[length];
+                        cryptoStream.Read(decryptedData, 0, length);
+                        cryptoStream.Flush();
+                        return decryptedData;
                     }
                 }
             }
@@ -213,82 +177,82 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         }
 
         #region string encryption / decryption
-        static byte[] EncryptStringToBytes(string plainText, byte[] Key, byte[] IV) {
-            // Check arguments. 
-            if (plainText == null || plainText.Length <= 0)
-                throw new ArgumentNullException("plainText");
-            if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
-                throw new ArgumentNullException("IV");
-            byte[] encrypted;
-            // Create an RijndaelManaged object 
-            // with the specified key and IV. 
-            using (RijndaelManaged rijAlg = new RijndaelManaged()) {
-                rijAlg.Key = Key;
-                rijAlg.IV = IV;
+        //static byte[] EncryptStringToBytes(string plainText, byte[] Key, byte[] IV) {
+        //    // Check arguments. 
+        //    if (plainText == null || plainText.Length <= 0)
+        //        throw new ArgumentNullException("plainText");
+        //    if (Key == null || Key.Length <= 0)
+        //        throw new ArgumentNullException("Key");
+        //    if (IV == null || IV.Length <= 0)
+        //        throw new ArgumentNullException("IV");
+        //    byte[] encrypted;
+        //    // Create an RijndaelManaged object 
+        //    // with the specified key and IV. 
+        //    using (RijndaelManaged rijAlg = new RijndaelManaged()) {
+        //        rijAlg.Key = Key;
+        //        rijAlg.IV = IV;
 
-                // Create a decryptor to perform the stream transform.
-                ICryptoTransform encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
+        //        // Create a decryptor to perform the stream transform.
+        //        ICryptoTransform encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
 
-                // Create the streams used for encryption. 
-                using (MemoryStream msEncrypt = new MemoryStream()) {
-                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write)) {
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt)) {
+        //        // Create the streams used for encryption. 
+        //        using (MemoryStream msEncrypt = new MemoryStream()) {
+        //            using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write)) {
+        //                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt)) {
 
-                            //Write all data to the stream.
-                            swEncrypt.Write(plainText);
-                        }
-                        encrypted = msEncrypt.ToArray();
-                    }
-                }
-            }
+        //                    //Write all data to the stream.
+        //                    swEncrypt.Write(plainText);
+        //                }
+        //                encrypted = msEncrypt.ToArray();
+        //            }
+        //        }
+        //    }
 
 
-            // Return the encrypted bytes from the memory stream. 
-            return encrypted;
+        //    // Return the encrypted bytes from the memory stream. 
+        //    return encrypted;
 
-        }
+        //}
 
-        static string DecryptStringFromBytes(byte[] cipherText, byte[] Key, byte[] IV) {
-            // Check arguments. 
-            if (cipherText == null || cipherText.Length <= 0)
-                throw new ArgumentNullException("cipherText");
-            if (Key == null || Key.Length <= 0)
-                throw new ArgumentNullException("Key");
-            if (IV == null || IV.Length <= 0)
-                throw new ArgumentNullException("IV");
+        //static string DecryptStringFromBytes(byte[] cipherText, byte[] Key, byte[] IV) {
+        //    // Check arguments. 
+        //    if (cipherText == null || cipherText.Length <= 0)
+        //        throw new ArgumentNullException("cipherText");
+        //    if (Key == null || Key.Length <= 0)
+        //        throw new ArgumentNullException("Key");
+        //    if (IV == null || IV.Length <= 0)
+        //        throw new ArgumentNullException("IV");
 
-            // Declare the string used to hold 
-            // the decrypted text. 
-            string plaintext = null;
+        //    // Declare the string used to hold 
+        //    // the decrypted text. 
+        //    string plaintext = null;
 
-            // Create an RijndaelManaged object 
-            // with the specified key and IV. 
-            using (RijndaelManaged rijAlg = new RijndaelManaged()) {
-                rijAlg.Key = Key;
-                rijAlg.IV = IV;
+        //    // Create an RijndaelManaged object 
+        //    // with the specified key and IV. 
+        //    using (RijndaelManaged rijAlg = new RijndaelManaged()) {
+        //        rijAlg.Key = Key;
+        //        rijAlg.IV = IV;
 
-                // Create a decrytor to perform the stream transform.
-                ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
+        //        // Create a decrytor to perform the stream transform.
+        //        ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
 
-                // Create the streams used for decryption. 
-                using (MemoryStream msDecrypt = new MemoryStream(cipherText)) {
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read)) {
-                        using (StreamReader srDecrypt = new StreamReader(csDecrypt)) {
+        //        // Create the streams used for decryption. 
+        //        using (MemoryStream msDecrypt = new MemoryStream(cipherText)) {
+        //            using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read)) {
+        //                using (StreamReader srDecrypt = new StreamReader(csDecrypt)) {
 
-                            // Read the decrypted bytes from the decrypting stream 
-                            // and place them in a string.
-                            plaintext = srDecrypt.ReadToEnd();
-                        }
-                    }
-                }
+        //                    // Read the decrypted bytes from the decrypting stream 
+        //                    // and place them in a string.
+        //                    plaintext = srDecrypt.ReadToEnd();
+        //                }
+        //            }
+        //        }
 
-            }
+        //    }
 
-            return plaintext;
+        //    return plaintext;
 
-        }
+        //}
         #endregion
 
     }

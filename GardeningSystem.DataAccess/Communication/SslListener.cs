@@ -44,7 +44,7 @@ namespace GardeningSystem.DataAccess.Communication {
                 client = listener.EndAcceptTcpClient(ar);
 
                 // open ssl stream
-                sslStream = new SslStream(client.GetStream(), false);
+                sslStream = new SslStream(client.GetStream(), true);
 
                 sslStream.AuthenticateAsServer(serverCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
 
@@ -68,7 +68,7 @@ namespace GardeningSystem.DataAccess.Communication {
                 // because we specified this behavior when creating
                 // the sslStream.
                 sslStream?.Close();
-                client?.Close();
+                //client?.Close();
             }
         }
 
@@ -84,7 +84,7 @@ namespace GardeningSystem.DataAccess.Communication {
             }
 
             listener = new TcpListener(OriginalEndPoint);
-            listener.Start(backlog: 100);
+            listener.Start(backlog: 10);
             Logger.Info($"[Start]Listening on {OriginalEndPoint.ToString()}.");
 
             token.Register(() => listener.Stop());

@@ -67,11 +67,11 @@ namespace MobileApp.DataAccess.Communication {
             Logger.Trace($"[SendData] Sending data with length {msg.Length}.");
             List<byte> packet = new List<byte>();
 
-            // add length of packet - 4B
-            packet.AddRange(BitConverter.GetBytes(msg.Length + 4));
-
             // encrypt message
             var encryptedMsg = AesEncrypterDecrypter.EncryptByteArray(msg);
+
+            // add length of packet - 4B
+            packet.AddRange(BitConverter.GetBytes(encryptedMsg.Length + 4));
 
             // add content
             packet.AddRange(encryptedMsg);

@@ -39,7 +39,7 @@ namespace Test.BusinessLogic {
                     });
                 });
 
-                mock.Mock<ISettingsManager>().Setup(x => x.GetApplicationSettings()).Returns(() => {
+                mock.Mock<ISettingsManager>().Setup(x => x.GetApplicationSettings(null)).Returns(() => {
                     return new ApplicationSettingsDto() {
                         PostalCode = "2020"
                     };

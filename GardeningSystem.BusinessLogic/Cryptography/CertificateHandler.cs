@@ -117,7 +117,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
 
         #endregion
 
-        public IntPtr DecryptData(byte[] encryptedData) {
+        public (int, IntPtr) DecryptData(byte[] encryptedData) {
             X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
             //RSA rsa = (RSA)x509Certificate2.PrivateKey;
             //(x509Certificate2.PrivateKey as RSA).Key.SetProperty(
@@ -134,12 +134,13 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             //rsa.Clear(); // TODO: safe?
 
             //byte[] decryptedDta = RSAalg.Decrypt(encryptedData, fOAEP: true);
-            RSA csp = (RSA)x509Certificate2.PrivateKey;
+            RSA csp = (RSA)x509Certificate2.PrivateKey; // https://www.c-sharpcorner.com/blogs/asp-net-core-encrypt-and-decrypt-public-key-and-private-key
             var privateKey = x509Certificate2.PrivateKey as RSACryptoServiceProvider;
             var decryptedData = csp.Decrypt(encryptedData, RSAEncryptionPadding.Pkcs1);
+            //var decryptedData = privateKey.Decrypt(encryptedData, false);
 
             // store data in unmanaged memory and obfuscate byte array
-            return CryptoUtils.MoveDataToUnmanagedMemory(decryptedData);
+            return (decryptedData.Length, CryptoUtils.MoveDataToUnmanagedMemory(decryptedData));
             //}
         }
 
