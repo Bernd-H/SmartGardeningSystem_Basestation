@@ -5,12 +5,9 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
-using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
@@ -34,8 +31,8 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         /// <summary>
         /// The IPAddress and port of the IPV4 multicast group.
         /// </summary>
-        //static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("224.0.7.1"), 6771);
-        static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("239.192.152.143"), 6771);
+        static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("224.20.21.18"), 6771);
+        //static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("239.192.152.143"), 6771);
 
         /// <summary>
         /// String to search for in a message received from the multicast group, indicating that this message is for a
@@ -82,7 +79,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
 
                 // If we received our own cookie we can ignore the message.
                 //if (cookieString != null && cookieString.Contains(Cookie))
-                    //return;
+                //return;
 
                 // If the port is invalid, ignore it!
                 int portcheck = int.Parse(portString.Split(' ').Last());
@@ -150,7 +147,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
                 allDone.Reset();
 
                 // Start an asynchronous socket to listen for connections.  
-                Logger.Trace("[StartListening]Waiting for a connection.");;
+                Logger.Trace("[StartListening]Waiting for a connection."); ;
                 var state = new StateObject();
                 state.workSocket = UdpListener;
                 //state.remoteEndpoint = new IPEndPoint(IPAddress.Any, 0);

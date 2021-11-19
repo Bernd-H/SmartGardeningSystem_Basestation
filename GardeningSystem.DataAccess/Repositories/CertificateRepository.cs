@@ -1,13 +1,19 @@
-﻿using Org.BouncyCastle.Asn1;
+﻿using GardeningSystem.Common.Models.Entities;
+using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.DataObjects;
+using GardeningSystem.Common.Specifications.Repositories;
+using NLog;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.X509;
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace GardeningSystem.DataAccess.Repositories {
-    public class CertificateRepository {
+    public class CertificateRepository : ICertificateRepository {
 
         private const string SignatureAlgorithmOid = "1.2.840.113549.1.1.11"; // SHA-256 with RSA
         private const int KeySize = 4096;
@@ -18,6 +24,35 @@ namespace GardeningSystem.DataAccess.Repositories {
         private static StoreName DefaultStoreName = StoreName.My;
 
         private static StoreLocation DefaultStoreLocation = StoreLocation.CurrentUser;
+
+
+        private IDictionary<string, ICachedObject> CachedCertificates;
+
+        private ILogger Logger;
+
+        public CertificateRepository(ILoggerService loggerService) {
+            Logger = loggerService.GetLogger<CertificateRepository>();
+            CachedCertificates = new Dictionary<string, ICachedObject>();
+        }
+
+        public X509Certificate2 GetCertificate(string certThumbprint) {
+            if (CachedCertificates.ContainsKey(certThumbprint)) {
+                // check lifespan
+                if (CachedCertificates[certThumbprint].Lifetime.TotalDays < 5) {
+                    return CachedCertificates[certThumbprint].Object as X509Certificate2;
+                }
+                else {
+                    // delete cached object and load cert from store
+                    CachedCertificates.Remove(certThumbprint);
+                    return GetCertificate(certThumbprint);
+                }
+            } else {
+                Logger.Info("[GetCertificate]Loading certificate from X509Store.");
+                var cert = GetCertificateFromStore(certThumbprint);
+                CachedCertificates.Add(certThumbprint, new CachedObject(cert));
+                return cert;
+            }
+        }
 
         /// <summary>
         /// Creates a self-signed X509 certificate and stores it in the specified StoreLocation
@@ -40,7 +75,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             certGen.SetSubject(subjectName);
             certGen.SetSerialNumber(new DerInteger(new Org.BouncyCastle.Math.BigInteger(1, Guid.NewGuid().ToByteArray())));
             certGen.SetStartDate(new Time(DateTime.UtcNow));
-            certGen.SetEndDate(new Time(DateTime.UtcNow.AddYears(10)));
+            certGen.SetEndDate(new Time(DateTime.UtcNow.AddYears(100)));
             certGen.SetSignature(signatureAlgIdentifier);
             certGen.SetSubjectPublicKeyInfo(SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(new RsaKeyParameters(
                 false,
@@ -80,7 +115,7 @@ namespace GardeningSystem.DataAccess.Repositories {
         /// <summary>
         /// Gets certificate with specified certThumbprint from the specified StoreLocation
         /// </summary>
-        public static X509Certificate2 GetCertificate(string certThumbprint) {
+        private static X509Certificate2 GetCertificateFromStore(string certThumbprint) {
             X509Certificate2 cert;
             var store = new X509Store(DefaultStoreName, DefaultStoreLocation);
             store.Open(OpenFlags.ReadOnly);

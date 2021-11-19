@@ -44,7 +44,7 @@ namespace GardeningSystem.BusinessLogic {
                     registeredUsers.Add(new Common.Models.Entities.User() {
                         Id = Guid.NewGuid(),
                         Email = email,
-                        HashedPassword = PasswordHasher.HashPassword("passw1")
+                        HashedPassword = PasswordHasher.HashPassword("123")
                     });
 
                     s.RegisteredUsers = registeredUsers;

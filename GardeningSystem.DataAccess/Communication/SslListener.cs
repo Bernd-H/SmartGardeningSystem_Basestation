@@ -16,8 +16,6 @@ using NLog;
 namespace GardeningSystem.DataAccess.Communication {
     public class SslListener : SocketListener, ISslListener {
 
-        //public event EventHandler<MessageReceivedEventArgs> MessageReceived;
-
         private TcpListener listener;
 
         private SslStreamOpenCallback sslStreamOpenCallback;
@@ -25,6 +23,11 @@ namespace GardeningSystem.DataAccess.Communication {
         private X509Certificate serverCertificate;
 
         private ILogger Logger;
+
+
+        private ManualResetEvent listenForClients_allDone = new ManualResetEvent(false);
+
+        private Thread acceptingClientsThread;
 
         public SslListener(IPEndPoint listenerEndPoint, ILoggerService loggerService, IConfiguration configuration)
             : base(listenerEndPoint) {
@@ -43,8 +46,10 @@ namespace GardeningSystem.DataAccess.Communication {
                 // Get the client
                 client = listener.EndAcceptTcpClient(ar);
 
+                listenForClients_allDone.Set();
+
                 // open ssl stream
-                sslStream = new SslStream(client.GetStream(), true);
+                sslStream = new SslStream(client.GetStream(), false);
 
                 sslStream.AuthenticateAsServer(serverCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
 
@@ -68,7 +73,6 @@ namespace GardeningSystem.DataAccess.Communication {
                 // because we specified this behavior when creating
                 // the sslStream.
                 sslStream?.Close();
-                //client?.Close();
             }
         }
 
@@ -78,9 +82,11 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         protected override void Start(CancellationToken token) {
-            //Logger.Warn($"[Start]Some important lines concerning the server certificate are currently missing.");
             if (sslStreamOpenCallback == null || serverCertificate == null) {
                 throw new Exception("SslListener.Init() must be called first.");
+            }
+            if ((acceptingClientsThread?.ThreadState ?? ThreadState.Stopped) == ThreadState.Running) {
+                throw new Exception("SslListener has already been started.");
             }
 
             listener = new TcpListener(OriginalEndPoint);
@@ -89,7 +95,16 @@ namespace GardeningSystem.DataAccess.Communication {
 
             token.Register(() => listener.Stop());
 
-            listener.BeginAcceptTcpClient(AcceptTcpClientCallback, token);
+            acceptingClientsThread = new Thread(() => {
+                do {
+                    listenForClients_allDone.Reset();
+
+                    listener.BeginAcceptTcpClient(AcceptTcpClientCallback, token);
+
+                    listenForClients_allDone.WaitOne();
+                } while (!token.IsCancellationRequested);
+            });
+            acceptingClientsThread.Start();
         }
 
         public static byte[] ReadMessage(SslStream sslStream) {

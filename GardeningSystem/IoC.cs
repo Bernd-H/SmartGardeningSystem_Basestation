@@ -81,6 +81,7 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<ModulesRepository>().As<IModulesRepository>().SingleInstance();
             containerBuilder.RegisterType<RfCommunicator>().As<IRfCommunicator>().SingleInstance();
             containerBuilder.RegisterType<WeatherRepository>().As<IWeatherRepository>();
+            containerBuilder.RegisterType<CertificateRepository>().As<ICertificateRepository>().SingleInstance();
 
             // communication
             containerBuilder.RegisterType<WifiConfigurator>().As<IWifiConfigurator>();

@@ -70,8 +70,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
             finally {
                 // let client close the connection
-                //networkStream?.Close();
-                //e.TcpClient?.Close();
+                networkStream?.Close();
+                e.TcpClient?.Close();
             }
         }
 

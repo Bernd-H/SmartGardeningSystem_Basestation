@@ -5,7 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
-using GardeningSystem.DataAccess.Repositories;
+using GardeningSystem.Common.Specifications.Repositories;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using Org.BouncyCastle.Asn1;
@@ -31,10 +31,13 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
 
         private ISettingsManager SettingsManager;
 
-        public CertificateHandler(ILoggerService loggerService, IConfiguration configuration, ISettingsManager settingsManager) {
+        private ICertificateRepository CertificateRepository;
+
+        public CertificateHandler(ILoggerService loggerService, IConfiguration configuration, ISettingsManager settingsManager, ICertificateRepository certificateRepository) {
             Logger = loggerService.GetLogger<CertificateHandler>();
             Configuration = configuration;
             SettingsManager = settingsManager;
+            CertificateRepository = certificateRepository;
         }
 
         public void CheckForCertificateUpdate() {
@@ -42,13 +45,14 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         }
 
         public X509Certificate2 GetCurrentServerCertificate() {
+            Logger.Trace("[GetCurrentServerCertificate]Certificate requested.");
             var applicationSettings = SettingsManager.GetApplicationSettings();
             X509Certificate2 currentCert = null;
 
             // check if certificate already exists
             if (string.IsNullOrEmpty(applicationSettings.ServerCertificate)) {
                 // create and store certificate
-                string certThumbprint = CertificateRepository.CreateSelfSignedCertificate("localhost").Thumbprint;
+                string certThumbprint = DataAccess.Repositories.CertificateRepository.CreateSelfSignedCertificate("localhost").Thumbprint;
                 Logger.Info($"[GetCurrentServerCertificate]Creating a new certificate.");
                 SettingsManager.UpdateCurrentSettings((currentApplicationSettings) => {
                     currentApplicationSettings.ServerCertificate = certThumbprint;
@@ -56,7 +60,6 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
                 });
             }
 
-            Logger.Info($"[GetCurrentServerCertificate]Importing server certificate.");
             var thumbprint = SettingsManager.GetApplicationSettings().ServerCertificate;
 
             // load cert from store

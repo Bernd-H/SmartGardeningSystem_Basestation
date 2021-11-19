@@ -28,7 +28,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private void LocalMobileAppDiscovery_MobileAppFound(object sender, Common.Events.Communication.LocalMobileAppFoundEventArgs e) {
             Logger.Info($"[LocalMobileAppDiscovery_MobileAppFound]Mobile app with ip={e.EndPoint.Address.ToString()} found.");
             var settings = SettingsManager.GetApplicationSettings();
-            var sent = SocketSender.SendAsync(settings.Id.ToByteArray(), e.EndPoint).Result; // send 16 byte id
+            SocketSender.SendToAllInterfacesAsync(settings.Id.ToByteArray(), e.EndPoint).Wait(); // send 16 byte id
         }
 
         public void Start() {
