@@ -46,24 +46,37 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
 
         public X509Certificate2 GetCurrentServerCertificate() {
             Logger.Trace("[GetCurrentServerCertificate]Certificate requested.");
-            var applicationSettings = SettingsManager.GetApplicationSettings();
             X509Certificate2 currentCert = null;
+            int retryAttempt = 0;
 
-            // check if certificate already exists
-            if (string.IsNullOrEmpty(applicationSettings.ServerCertificate)) {
-                // create and store certificate
-                string certThumbprint = DataAccess.Repositories.CertificateRepository.CreateSelfSignedCertificate("localhost").Thumbprint;
-                Logger.Info($"[GetCurrentServerCertificate]Creating a new certificate.");
-                SettingsManager.UpdateCurrentSettings((currentApplicationSettings) => {
-                    currentApplicationSettings.ServerCertificate = certThumbprint;
-                    return currentApplicationSettings;
-                });
-            }
+            do {
+                var applicationSettings = SettingsManager.GetApplicationSettings();
 
-            var thumbprint = SettingsManager.GetApplicationSettings().ServerCertificate;
+                // check if certificate already exists
+                if (string.IsNullOrEmpty(applicationSettings.ServerCertificate)) {
+                    // create and store certificate
+                    string certThumbprint = DataAccess.Repositories.CertificateRepository.CreateSelfSignedCertificate("localhost").Thumbprint;
+                    Logger.Info($"[GetCurrentServerCertificate]Creating a new certificate.");
+                    SettingsManager.UpdateCurrentSettings((currentApplicationSettings) => {
+                        currentApplicationSettings.ServerCertificate = certThumbprint;
+                        return currentApplicationSettings;
+                    });
+                }
 
-            // load cert from store
-            currentCert = CertificateRepository.GetCertificate(thumbprint);
+                var thumbprint = SettingsManager.GetApplicationSettings().ServerCertificate;
+
+                // load cert from store
+                currentCert = CertificateRepository.GetCertificate(thumbprint);
+
+                // delete stored thumbprint in settings and retry 1 more time
+                if (currentCert == null) {
+                    Logger.Info($"[GetCurrentServerCertificate]Deleting stored thumbprint.");
+                    SettingsManager.UpdateCurrentSettings((currentSettings) => {
+                        currentSettings.ServerCertificate = string.Empty;
+                        return currentSettings;
+                    });
+                }
+            } while (currentCert == null && (++retryAttempt <= 1));
 
             return currentCert;
         }

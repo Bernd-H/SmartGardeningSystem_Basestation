@@ -118,24 +118,28 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         }
 
         private void joinTheMulticastGroupOnAllInterfaces() {
-            NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (NetworkInterface adapter in nics) {
-                IPInterfaceProperties ip_properties = adapter.GetIPProperties();
-                if (!adapter.GetIPProperties().MulticastAddresses.Any())
-                    continue; // most of VPN adapters will be skipped
-                if (!adapter.SupportsMulticast)
-                    continue; // multicast is meaningless for this type of connection
-                if (OperationalStatus.Up != adapter.OperationalStatus)
-                    continue; // this adapter is off or not connected
-                IPv4InterfaceProperties p = adapter.GetIPProperties().GetIPv4Properties();
-                if (null == p)
-                    continue; // IPv4 is not configured on this adapter
+            try {
+                NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (NetworkInterface adapter in nics) {
+                    IPInterfaceProperties ip_properties = adapter.GetIPProperties();
+                    //if (!adapter.GetIPProperties().MulticastAddresses.Any())
+                        //continue; // most of VPN adapters will be skipped
+                    if (!adapter.SupportsMulticast)
+                        continue; // multicast is meaningless for this type of connection
+                    if (OperationalStatus.Up != adapter.OperationalStatus)
+                        continue; // this adapter is off or not connected
+                    IPv4InterfaceProperties p = adapter.GetIPProperties().GetIPv4Properties();
+                    if (null == p)
+                        continue; // IPv4 is not configured on this adapter
 
-                Logger.Info($"[joinTheMulticastGroupOnAllInterfaces]Joining multicast group on interface {adapter.GetPhysicalAddress().ToString()}.");
-                //var mcastOption = new MulticastOption(MulticastAddressV4.Address, (int)IPAddress.HostToNetworkOrder(p.Index));
-                var mcastOption = new MulticastOption(MulticastAddressV4.Address, p.Index);
-                UdpListener.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, mcastOption);
-                //UdpClient.JoinMulticastGroup((int)IPAddress.HostToNetworkOrder(p.Index), MulticastAddressV4.Address);
+                    Logger.Info($"[joinTheMulticastGroupOnAllInterfaces]Joining multicast group on interface {adapter.GetPhysicalAddress().ToString()}.");
+                    //var mcastOption = new MulticastOption(MulticastAddressV4.Address, (int)IPAddress.HostToNetworkOrder(p.Index));
+                    var mcastOption = new MulticastOption(MulticastAddressV4.Address, p.Index);
+                    UdpListener.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, mcastOption);
+                    //UdpClient.JoinMulticastGroup((int)IPAddress.HostToNetworkOrder(p.Index), MulticastAddressV4.Address);
+                }
+            } catch (Exception ex) {
+                Logger.Fatal(ex, $"[joinTheMulticastGroupOnAllInterfaces]An error occured.");
             }
         }
 

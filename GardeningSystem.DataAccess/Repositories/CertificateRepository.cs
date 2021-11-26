@@ -49,7 +49,9 @@ namespace GardeningSystem.DataAccess.Repositories {
             } else {
                 Logger.Info("[GetCertificate]Loading certificate from X509Store.");
                 var cert = GetCertificateFromStore(certThumbprint);
-                CachedCertificates.Add(certThumbprint, new CachedObject(cert));
+                if (cert != null) {
+                    CachedCertificates.Add(certThumbprint, new CachedObject(cert));
+                }
                 return cert;
             }
         }
@@ -113,7 +115,8 @@ namespace GardeningSystem.DataAccess.Repositories {
         }
 
         /// <summary>
-        /// Gets certificate with specified certThumbprint from the specified StoreLocation
+        /// Gets certificate with specified certThumbprint from the specified StoreLocation.
+        /// Returns null when no certificate with the given Thumbprint was found.
         /// </summary>
         private static X509Certificate2 GetCertificateFromStore(string certThumbprint) {
             X509Certificate2 cert;
@@ -122,7 +125,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             try {
                 var certCollection = store.Certificates.Find(X509FindType.FindByThumbprint, certThumbprint, false);
                 if (certCollection.Count == 0) {
-                    throw new Exception(certThumbprint);
+                    return null;
                 }
                 cert = certCollection[0];
             }

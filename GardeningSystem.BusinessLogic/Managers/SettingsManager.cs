@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Exceptions;
@@ -22,6 +23,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ISerializedFileRepository<ApplicationSettings> SerializeFileRepository;
 
+        private static SemaphoreSlim LOCKER = new SemaphoreSlim(1);
+
         public SettingsManager(ILoggerService logger, IConfiguration configuration, ISerializedFileRepository<ApplicationSettings> serializeFileRepository) {
             Logger = logger.GetLogger<SettingsManager>();
             Configuration = configuration;
@@ -33,34 +36,30 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 Logger.Info("[SettingsManager]Creating default settings file.");
 
                 // create default settings file
-                UpdateSettings(ApplicationSettingsDto.GetStandardSettings());
+                updateSettings(ApplicationSettingsDto.GetStandardSettings());
             }
         }
+
         public ApplicationSettingsDto GetApplicationSettings(ICertificateHandler CertificateHandler = null) {
-            try {
-                Logger.Trace("[GetApplicationSettings]Loading application settings.");
-                return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettings>().ToDto(CertificateHandler);
-            }
-            catch (Exception ex) {
-                Logger.Error(ex, "[GetApplicationSettings]Creating default settings and retrying.");
+            LOCKER.Wait();
 
-                // create default settings file
-                UpdateSettings(ApplicationSettingsDto.GetStandardSettings());
+            var result = getApplicationSettings(CertificateHandler);
 
-                return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettings>().ToDto(CertificateHandler);
-            }
-        }
-
-        private void UpdateSettings(ApplicationSettingsDto newSettings, ICertificateHandler CertificateHandler = null) {
-            Logger.Trace("[UpdateSettings]Writing to application settings.");
-            SerializeFileRepository.WriteSingleObjectToFile<ApplicationSettings>(newSettings.ToDo(CertificateHandler, AesEncrypterDecrypter.KEY_SIZE, AesEncrypterDecrypter.IV_SIZE));
+            LOCKER.Release();
+            return result;
         }
 
         public void UpdateCurrentSettings(Func<ApplicationSettingsDto, ApplicationSettingsDto> updateFunc, ICertificateHandler CertificateHandler = null) {
-            UpdateSettings(updateFunc(GetApplicationSettings(CertificateHandler)), CertificateHandler);
+            LOCKER.Wait();
+
+            updateSettings(updateFunc(GetApplicationSettings(CertificateHandler)), CertificateHandler);
+
+            LOCKER.Release();
         }
 
         public void DeleteSettings() {
+            LOCKER.Wait();
+
             string settingsFilePath = ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.APPLICATIONSETTINGS_FILENAME]);
             if (File.Exists(settingsFilePath)) {
                 Logger.Info($"[DeleteSettings]Deleting settings file.");
@@ -70,7 +69,29 @@ namespace GardeningSystem.BusinessLogic.Managers {
             Logger.Info("[DeleteSettings]Creating default settings file.");
 
             // create default settings file
-            UpdateSettings(ApplicationSettingsDto.GetStandardSettings());
+            updateSettings(ApplicationSettingsDto.GetStandardSettings());
+
+            LOCKER.Release();
+        }
+
+        private void updateSettings(ApplicationSettingsDto newSettings, ICertificateHandler CertificateHandler = null) {
+            Logger.Trace("[UpdateSettings]Writing to application settings.");
+            SerializeFileRepository.WriteSingleObjectToFile<ApplicationSettings>(newSettings.ToDo(CertificateHandler, AesEncrypterDecrypter.KEY_SIZE, AesEncrypterDecrypter.IV_SIZE));
+        }
+
+        private ApplicationSettingsDto getApplicationSettings(ICertificateHandler CertificateHandler = null) {
+            try {
+                Logger.Trace("[GetApplicationSettings]Loading application settings.");
+                return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettings>().ToDto(CertificateHandler);
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, "[GetApplicationSettings]Creating default settings and retrying.");
+
+                // create default settings file
+                updateSettings(ApplicationSettingsDto.GetStandardSettings());
+
+                return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettings>().ToDto(CertificateHandler);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
+using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Jobs;
 using GardeningSystem.RestAPI;
 using Microsoft.AspNetCore.Hosting;
@@ -16,15 +17,16 @@ namespace GardeningSystem {
         public static void Main(string[] args) {
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
             try {
+                IoC.Init();
+
                 // development setup
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
                     logger.Info("Setting up test development/test enviroment.");
-                    IoC.Init();
                     IoC.Get<IDevelopmentSetuper>().SetupTestEnvironment();
                 }
 
                 logger.Debug("init main");
-                CreateHostBuilder(args).Build().Run();
+                CreateHostBuilder(args, IoC.Get<ICertificateHandler>()).Build().Run();
                 //var r = IoC.Get<Common.Specifications.Repositories.IWeatherRepository>().GetCurrentWeatherPredictions("Unterstinkenbrunn").Result;
             }
             catch (Exception exception) {
@@ -38,7 +40,7 @@ namespace GardeningSystem {
             }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilder(string[] args, ICertificateHandler certificateHandler) =>
             Host.CreateDefaultBuilder(args)
                 // configure logging
                 .ConfigureLogging(config => {
@@ -58,7 +60,7 @@ namespace GardeningSystem {
                     webBuilder.UseKestrel(opts =>
                     {
                         // Bind directly to a socket handle or Unix socket
-                        opts.ListenAnyIP(5001, opts => opts.UseHttps());
+                        opts.ListenAnyIP(5001, opts => opts.UseHttps(certificateHandler.GetCurrentServerCertificate()));
                         opts.ListenAnyIP(5000);
                     });
                 })
