@@ -68,6 +68,7 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<LocalMobileAppDiscoveryManager>().As<ILocalMobileAppDiscoveryManager>();
             containerBuilder.RegisterType<AesKeyExchangeManager>().As<IAesKeyExchangeManager>();
             containerBuilder.RegisterType<CommandManager>().As<ICommandManager>();
+            containerBuilder.RegisterType<APIManager>().As<IAPIManager>();
 
             // cryptography
             containerBuilder.RegisterType<PasswordHasher>().As<IPasswordHasher>();

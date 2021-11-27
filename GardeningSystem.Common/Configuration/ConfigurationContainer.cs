@@ -34,9 +34,22 @@ namespace GardeningSystem.Common.Configuration {
                 var builder = new ConfigurationBuilder().AddJsonStream(appSettingsFileStream);
                 //.AddJsonFile(appSettingsFilePath, optional: true, reloadOnChange: true);
                 configuration = builder.Build();
+
+                // changes some configurations if test environment is set
+                OverwriteSomeSettings(configuration);
             }
 
             return configuration;
+        }
+
+        /// <summary>
+        /// Overwrites some settings when test environment is set
+        /// </summary>
+        private static void OverwriteSomeSettings(IConfiguration conf) {
+            if (conf[ConfigurationVars.IS_TEST_ENVIRONMENT] == "true") {
+                conf[ConfigurationVars.EXTERNALSERVER_DOMAIN] = "192.168.1.48";
+                conf[ConfigurationVars.EXTERNALSERVER_LOCALIP] = "192.168.1.48";
+            }
         }
     }
 }

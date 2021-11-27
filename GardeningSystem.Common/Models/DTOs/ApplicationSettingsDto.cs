@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.DataObjects;
 
 namespace GardeningSystem.Common.Models.DTOs {
@@ -10,8 +7,6 @@ namespace GardeningSystem.Common.Models.DTOs {
         public Guid Id { get; set; }
 
         public string PostalCode { get; set; }
-
-        public IEnumerable<User> RegisteredUsers { get; set; }
 
         /// <summary>
         /// Thumbprint of the certificate
@@ -37,15 +32,22 @@ namespace GardeningSystem.Common.Models.DTOs {
         /// </summary>
         public bool ConfigurationModeEnabled { get; set; }
 
+
+        /// <summary>
+        /// Token needed for API request on the external server.
+        /// This token get's exchanged in the assembly line and doesn't expire.
+        /// </summary>
+        public string APIToken { get; set; }
+
         public static ApplicationSettingsDto GetStandardSettings() {
             return new ApplicationSettingsDto() {
                 Id = Guid.NewGuid(),
                 PostalCode = string.Empty,
-                RegisteredUsers = new List<User>(),
                 ConfigurationModeEnabled = true,
                 AesKey = IntPtr.Zero,
                 AesIV = IntPtr.Zero,
-                ServerCertificate = string.Empty
+                ServerCertificate = string.Empty,
+                APIToken = string.Empty
             };
         }
     }

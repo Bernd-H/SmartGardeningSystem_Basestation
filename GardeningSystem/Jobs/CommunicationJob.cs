@@ -17,21 +17,29 @@ namespace GardeningSystem.Jobs {
 
         private ICommandManager CommandManager;
 
+        private IAPIManager APIManager;
+
         private ILogger Logger;
 
         public CommunicationJob(ILoggerService logger, ISettingsManager settingsManager, ILocalMobileAppDiscoveryManager localMobileAppDiscoveryManager,
-            IAesKeyExchangeManager aesKeyExchangeManager, ICommandManager commandManager) {
+            IAesKeyExchangeManager aesKeyExchangeManager, ICommandManager commandManager, IAPIManager _APIManager) {
             Logger = logger.GetLogger<CommunicationJob>();
             SettingsManager = settingsManager;
             LocalMobileAppDiscoveryManager = localMobileAppDiscoveryManager;
             AesKeyExchangeManager = aesKeyExchangeManager;
             CommandManager = commandManager;
+            APIManager = _APIManager;
         }
 
         public Task StartAsync(CancellationToken cancellationToken) {
-            return Task.Run(() => {
+            return Task.Run(async () => {
                 try {
                     Logger.Info($"[StartAsync]Starting Communication-Setup routine.");
+
+                    if (string.IsNullOrEmpty(SettingsManager.GetApplicationSettings().APIToken)) {
+                        // get api token from local server if system got started in the production network, from where the token server is reachable
+                        await APIManager.GetToken();
+                    }
 
                     LocalMobileAppDiscoveryManager.Start();
 

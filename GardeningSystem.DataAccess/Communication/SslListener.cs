@@ -45,17 +45,18 @@ namespace GardeningSystem.DataAccess.Communication {
 
                 // Get the client
                 client = listener.EndAcceptTcpClient(ar);
+                client.Client.Blocking = true;
 
                 listenForClients_allDone.Set();
 
                 // open ssl stream
                 sslStream = new SslStream(client.GetStream(), false);
 
-                sslStream.AuthenticateAsServer(serverCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
+                // Set timeouts for the read and write to 1 second.
+                sslStream.ReadTimeout = 1000;
+                sslStream.WriteTimeout = 1000;
 
-                // Set timeouts for the read and write to 5 seconds.
-                sslStream.ReadTimeout = 5000;
-                sslStream.WriteTimeout = 5000;
+                sslStream.AuthenticateAsServer(serverCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
 
                 // communicate
                 sslStreamOpenCallback.Invoke(sslStream);
@@ -67,6 +68,7 @@ namespace GardeningSystem.DataAccess.Communication {
                 Logger.Error(odex, "[AcceptTcpClientCallback]Connection got unexpectedly closed.");
             }
             catch (Exception ex) {
+                Logger.Error(ex, "[AcceptTcpClientCallback]An excpetion occured.");
             }
             finally {
                 // The client stream will be closed with the sslStream

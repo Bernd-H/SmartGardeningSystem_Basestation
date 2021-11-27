@@ -29,6 +29,14 @@
         // Command listener
         public static string COMMANDLISTENER_LISTENPORT = "commandListener_listenPort";
 
+        // External Server API
+        public static string EXTERNALSERVER_DOMAIN = "externalServer_domain";
+        public static string EXTERNALSERVER_LOCALIP = "externalServer_localIp";
+        public static string EXTERNALSERVER_APIPORT = "externalServer_apiPort";
+        public static string EXTERNALSERVER_USER_URL = "externalServer_userUrl";
+        public static string EXTERNALSERVER_GETTOKEN_URL = "externalServer_getTokenUrl";
+
+
         // GardeningSystem.RestAPI
         // Authentication
         public static string ISSUER_SIGNINGKEY = "rest_api_jwt:key";

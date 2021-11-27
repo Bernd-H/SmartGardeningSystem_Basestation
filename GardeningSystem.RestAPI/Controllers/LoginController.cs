@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.Common;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Models;
@@ -13,6 +14,7 @@ using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.Common.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -32,15 +34,21 @@ namespace GardeningSystem.RestAPI.Controllers {
 
         private IAesEncrypterDecrypter AesDecrypter;
 
+        private IWifiConfigurator WifiConfigurator;
+
+        private IAPIManager APIManager;
+
         private ILogger Logger;
 
         public LoginController(ILoggerService logger, IConfiguration config, ISettingsManager settingsManager, IPasswordHasher passwordHasher,
-            IAesEncrypterDecrypter aesEncrypterDecrypter) {
+            IAesEncrypterDecrypter aesEncrypterDecrypter, IWifiConfigurator wifiConfigurator, IAPIManager _APIManager) {
             Logger = logger.GetLogger<LoginController>();
             Configuration = config;
             SettingsManager = settingsManager;
             PasswordHasher = passwordHasher;
             AesDecrypter = aesEncrypterDecrypter;
+            WifiConfigurator = wifiConfigurator;
+            APIManager = _APIManager;
         }
 
         [AllowAnonymous]
@@ -48,10 +56,12 @@ namespace GardeningSystem.RestAPI.Controllers {
         public IActionResult Login([FromBody] UserDto login) {
             Logger.Info($"[Login]User trying to log in.");
             IActionResult response = Unauthorized();
-            var user = AuthenticateUser(login);
 
-            if (user != null) {
-                response = GenerateJSONWebToken(user);
+            bool hasInternet = WifiConfigurator.HasInternet();
+
+            // no login requierd if the basestation has no internet
+            if (!hasInternet || AuthenticateUser(login)) {
+                response = GenerateJSONWebToken(login);
             }
 
             return response;
@@ -84,26 +94,26 @@ namespace GardeningSystem.RestAPI.Controllers {
             }
         }
 
-        private UserDto AuthenticateUser(UserDto login) {
-            UserDto result = null;
+        private bool AuthenticateUser(UserDto login) {
+            bool result = false;
 
             // user authentication information is encrypted by a shared secret. Thats because the client can't know
             // in offline scenarios if the server is the real one or is behind a man in the middle.
-            var userEmail = Encoding.UTF8.GetString(AesDecrypter.DecryptToByteArray(login.AesEncryptedEmail));
-            if (!string.IsNullOrEmpty(userEmail)) {
-                Logger.Trace($"[AuthenticateUser]Checking if user with email {userEmail.Substring(0, userEmail.IndexOf('.'))}.* exists.");
+            var userEmail = AesDecrypter.DecryptToByteArray(login.AesEncryptedEmail);
+            if (userEmail.Length > 0) {
+                Logger.Trace($"[AuthenticateUser]Checking if user with id={login.Id} exists.");
 
-                // check if user is registered
-                var user = SettingsManager.GetApplicationSettings().RegisteredUsers.ToList().Find(u => u.Email == userEmail);
+                // request userinformation from external server which holds all identities
+                var user = APIManager.GetUserInfo(userEmail).Result;
                 if (user != null) {
                     login.Id = user.Id;
 
                     //Validate the User Credentials
-                    var plainTextPassword = Encoding.UTF8.GetString(AesDecrypter.DecryptToByteArray(login.AesEncryptedPassword)); // TODO: unsafe
-                    if (!string.IsNullOrEmpty(plainTextPassword)) {
+                    var plainTextPassword = AesDecrypter.DecryptToByteArray(login.AesEncryptedPassword);
+                    if (plainTextPassword.Length > 0) {
                         (bool valid, bool needsUpgrade) = PasswordHasher.VerifyHashedPassword(user.Id, user.HashedPassword, plainTextPassword);
                         if (valid) {
-                            result = login;
+                            result = true;
 
                             // check if upgrade needed
                             if (needsUpgrade) {
@@ -115,35 +125,30 @@ namespace GardeningSystem.RestAPI.Controllers {
                         else {
                             Logger.Info($"[AuthenticateUser]User with id {user.Id} entered wrong password.");
                         }
-                    } // password null or empty - decryption error / password encrypted with wrong aes key
-                    
+                    }
+
+                    CryptoUtils.ObfuscateByteArray(plainTextPassword);
                 }
                 else {
-                    Logger.Info($"User with email {userEmail.Substring(0, userEmail.IndexOf('.'))}.* not found.");
+                    Logger.Info($"[AuthenticateUser]User with id={login.Id} not found.");
                 }
             }
 
             return result;
         }
 
-        private void UpdateOutdatedHash(Guid userId, string email, string plaintextPassword) {
+        private void UpdateOutdatedHash(Guid userId, byte[] email, byte[] plaintextPassword) {
             Logger.Info($"[UpdateOutdatedHash]Updating hash from user with id {userId}.");
 
             try {
                 // update hash
                 string newHash = PasswordHasher.HashPassword(plaintextPassword);
 
-                SettingsManager.UpdateCurrentSettings((currentSettings) => {
-                    var registeredUsers = currentSettings.RegisteredUsers.ToList();
-                    var registeredUser = registeredUsers.Find(u => u.Id == userId);
-                    registeredUsers[registeredUsers.IndexOf(registeredUser)] = new User() {
-                        Email = email,
-                        HashedPassword = newHash
-                    };
-
-                    // set new registerd users list
-                    currentSettings.RegisteredUsers = registeredUsers;
-                    return currentSettings;
+                var updated = APIManager.UpdateHash(new ChangeUserInfoDto {
+                    Id = userId,
+                    Email = email,
+                    PlainTextPassword = plaintextPassword,
+                    NewPasswordHash = newHash
                 });
             } catch(Exception ex) {
                 Logger.Error(ex, $"[UpdateOutdatedHash]Could not update hash from user {userId}.");

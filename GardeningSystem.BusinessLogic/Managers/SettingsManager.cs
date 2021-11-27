@@ -41,12 +41,18 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         public ApplicationSettingsDto GetApplicationSettings(ICertificateHandler CertificateHandler = null) {
-            LOCKER.Wait();
+            try {
+                Logger.Trace("[GetApplicationSettings]Loading application settings.");
+                return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettings>().ToDto(CertificateHandler);
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, "[GetApplicationSettings]Creating default settings and retrying.");
 
-            var result = getApplicationSettings(CertificateHandler);
+                // create default settings file
+                updateSettings(ApplicationSettingsDto.GetStandardSettings());
 
-            LOCKER.Release();
-            return result;
+                return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettings>().ToDto(CertificateHandler);
+            }
         }
 
         public void UpdateCurrentSettings(Func<ApplicationSettingsDto, ApplicationSettingsDto> updateFunc, ICertificateHandler CertificateHandler = null) {
@@ -77,21 +83,6 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private void updateSettings(ApplicationSettingsDto newSettings, ICertificateHandler CertificateHandler = null) {
             Logger.Trace("[UpdateSettings]Writing to application settings.");
             SerializeFileRepository.WriteSingleObjectToFile<ApplicationSettings>(newSettings.ToDo(CertificateHandler, AesEncrypterDecrypter.KEY_SIZE, AesEncrypterDecrypter.IV_SIZE));
-        }
-
-        private ApplicationSettingsDto getApplicationSettings(ICertificateHandler CertificateHandler = null) {
-            try {
-                Logger.Trace("[GetApplicationSettings]Loading application settings.");
-                return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettings>().ToDto(CertificateHandler);
-            }
-            catch (Exception ex) {
-                Logger.Error(ex, "[GetApplicationSettings]Creating default settings and retrying.");
-
-                // create default settings file
-                updateSettings(ApplicationSettingsDto.GetStandardSettings());
-
-                return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettings>().ToDto(CertificateHandler);
-            }
         }
     }
 }

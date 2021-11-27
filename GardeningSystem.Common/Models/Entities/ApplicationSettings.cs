@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using GardeningSystem.Common.Specifications.DataObjects;
 
 namespace GardeningSystem.Common.Models.Entities {
@@ -8,7 +7,6 @@ namespace GardeningSystem.Common.Models.Entities {
 
         public string PostalCode { get; set; }
 
-        public IEnumerable<User> RegisteredUsers { get; set; }
 
         public string ServerCertificate { get; set; }
 
@@ -32,5 +30,11 @@ namespace GardeningSystem.Common.Models.Entities {
         /// This mode was created for the first configuration of the raspberry with the mobile app.
         /// </summary>
         public bool ConfigurationModeEnabled { get; set; }
+
+        /// <summary>
+        /// Token needed for API request on the external server.
+        /// This token get's exchanged in the assembly line and doesn't expire.
+        /// </summary>
+        public string APIToken { get; set; }
     }
 }

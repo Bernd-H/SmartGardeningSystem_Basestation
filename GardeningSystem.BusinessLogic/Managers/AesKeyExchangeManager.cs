@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.Common.Utilities;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
@@ -52,30 +48,36 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         private void SslStreamOpenCallback(SslStream openStream) {
-            Logger.Info("[SslStreamOpenCallback]Sending aes key to client.");
             (IntPtr keyPtr, IntPtr ivPtr) = AesEncrypterDecrypter.GetServerAesKey();
             byte[] key = new byte[Cryptography.AesEncrypterDecrypter.KEY_SIZE], iv = new byte[Cryptography.AesEncrypterDecrypter.IV_SIZE];
             CryptoUtils.GetByteArrayFromUM(key, keyPtr, key.Length);
             CryptoUtils.GetByteArrayFromUM(iv, ivPtr, iv.Length);
 
+            Logger.Info("[SslStreamOpenCallback]Sending aes key to client.");
             try {
                 // send key
                 DataAccess.Communication.SslListener.SendConfidentialInformation(openStream, key);
 
                 // get ack
                 var msg = DataAccess.Communication.SslListener.ReadMessage(openStream);
-                if (!msg.SequenceEqual(CommunicationCodes.ACK))
+                if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
+                    Logger.Info($"[SslStreamOpenCallback]Received ACK was incorrect.");
                     return; // abort
+                }
 
                 // send iv
                 DataAccess.Communication.SslListener.SendConfidentialInformation(openStream, iv);
 
                 // get ack
                 msg = DataAccess.Communication.SslListener.ReadMessage(openStream);
-                if (!msg.SequenceEqual(CommunicationCodes.ACK))
+                if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
+                    Logger.Info($"[SslStreamOpenCallback]2. received ACK was incorrect.");
                     return; // abort
+                }
             }
-            catch (Exception) { }
+            catch (Exception ex) {
+                Logger.Error(ex, "[SslStreamOpenCallback]An exception occured.");
+            }
             finally {
                 CryptoUtils.ObfuscateByteArray(key);
                 CryptoUtils.ObfuscateByteArray(iv);

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Cryptography;
-using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Cryptography;
 using NLog;
@@ -20,16 +19,18 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             Options = new HashingOptions();
         }
 
-        public string HashPassword(string password) {
-            using (var algorithm = new Rfc2898DeriveBytes(password, SaltSize, Options.Iterations, HashAlgorithmName.SHA512)) {
-                var key = Convert.ToBase64String(algorithm.GetBytes(KeySize));
-                var salt = Convert.ToBase64String(algorithm.Salt);
+        public string HashPassword(byte[] password) {
+            byte[] salt = new byte[SaltSize];
+            new Random().NextBytes(salt);
 
-                return $"{Options.Iterations}.{salt}.{key}";
+            using (var algorithm = new Rfc2898DeriveBytes(password, salt, Options.Iterations, HashAlgorithmName.SHA512)) {
+                var key = algorithm.GetBytes(KeySize);
+
+                return $"{Options.Iterations}.{Convert.ToBase64String(salt)}.{Convert.ToBase64String(key)}";
             }
         }
 
-        public (bool, bool) VerifyHashedPassword(Guid userId, string hashedPassword, string providedPassword) {
+        public (bool, bool) VerifyHashedPassword(Guid userId, string hashedPassword, byte[] providedPassword) {
             try {
                 var parts = hashedPassword.Split('.', 3);
 
@@ -51,9 +52,11 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
 
                     return (verified, needsUpgrade);
                 }
-            } catch (FormatException ex) {
+            }
+            catch (FormatException ex) {
                 Logger.Fatal(ex, $"[VerifyHashedPassword]Wrong stored hash format by user {userId}.");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 Logger.Error(ex, $"[VerifyHashedPassword]Exception while verifying password from user {userId}.");
             }
 

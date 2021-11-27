@@ -34,9 +34,9 @@ namespace GardeningSystem.Common.Models {
 
             appSettingsDto.Id = applicationSettings.Id;
             appSettingsDto.PostalCode = applicationSettings.PostalCode;
-            appSettingsDto.RegisteredUsers = applicationSettings.RegisteredUsers;
             appSettingsDto.ConfigurationModeEnabled = applicationSettings.ConfigurationModeEnabled;
             appSettingsDto.ServerCertificate = applicationSettings.ServerCertificate;
+            appSettingsDto.APIToken = applicationSettings.APIToken;
             
             if (applicationSettings.AesKey != null && applicationSettings.AesIV != null && certificateHandler != null) {
                 // decrypt aes key/iv
@@ -52,9 +52,9 @@ namespace GardeningSystem.Common.Models {
 
             appSettings.Id = applicationSettingsDto.Id;
             appSettings.PostalCode = applicationSettingsDto.PostalCode;
-            appSettings.RegisteredUsers = applicationSettingsDto.RegisteredUsers;
             appSettings.ConfigurationModeEnabled = applicationSettingsDto.ConfigurationModeEnabled;
             appSettings.ServerCertificate = applicationSettingsDto.ServerCertificate;
+            appSettings.APIToken = applicationSettingsDto.APIToken;
 
             if (applicationSettingsDto.AesKey != IntPtr.Zero && applicationSettingsDto.AesIV != IntPtr.Zero && certificateHandler != null) {
                 // encrypt aes key/iv

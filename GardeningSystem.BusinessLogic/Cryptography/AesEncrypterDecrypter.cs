@@ -8,6 +8,7 @@ using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.Common.Utilities;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Cryptography {
@@ -39,27 +40,36 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         }
 
         public byte[] DecryptToByteArray(byte[] data) {
-            byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
-            CryptoUtils.GetByteArrayFromUM(aesKey, getAllApplicationSettings().AesKey, KEY_SIZE);
-            CryptoUtils.GetByteArrayFromUM(aesIv, getAllApplicationSettings().AesIV, IV_SIZE);
+            try {
+                byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
+                CryptoUtils.GetByteArrayFromUM(aesKey, getAllApplicationSettings().AesKey, KEY_SIZE);
+                CryptoUtils.GetByteArrayFromUM(aesIv, getAllApplicationSettings().AesIV, IV_SIZE);
 
-            var result = DecryptByteArray(data, aesKey, aesIv);
+                var result = DecryptByteArray(data, aesKey, aesIv);
 
-            CryptoUtils.ObfuscateByteArray(aesKey);
-            CryptoUtils.ObfuscateByteArray(aesIv);
-            return result;
+                CryptoUtils.ObfuscateByteArray(aesKey);
+                CryptoUtils.ObfuscateByteArray(aesIv);
+                return result;
+            } catch (Exception) {
+                return new byte[0];
+            }
         }
 
         public byte[] EncryptByteArray(byte[] data) {
-            byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
-            CryptoUtils.GetByteArrayFromUM(aesKey, getAllApplicationSettings().AesKey, KEY_SIZE);
-            CryptoUtils.GetByteArrayFromUM(aesIv, getAllApplicationSettings().AesIV, IV_SIZE);
+            try {
+                byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
+                CryptoUtils.GetByteArrayFromUM(aesKey, getAllApplicationSettings().AesKey, KEY_SIZE);
+                CryptoUtils.GetByteArrayFromUM(aesIv, getAllApplicationSettings().AesIV, IV_SIZE);
 
-            byte[] result = EncryptByteArray(data, aesKey, aesIv);
+                byte[] result = EncryptByteArray(data, aesKey, aesIv);
 
-            CryptoUtils.ObfuscateByteArray(aesKey);
-            CryptoUtils.ObfuscateByteArray(aesIv);
-            return result;
+                CryptoUtils.ObfuscateByteArray(aesKey);
+                CryptoUtils.ObfuscateByteArray(aesIv);
+                return result;
+            }
+            catch (Exception) {
+                return new byte[0];
+            }
         }
 
         public (IntPtr, IntPtr) GetServerAesKey() {

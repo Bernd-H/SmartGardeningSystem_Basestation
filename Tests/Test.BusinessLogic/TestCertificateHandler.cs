@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using Autofac;
 using Autofac.Extras.Moq;
 using GardeningSystem;
 using GardeningSystem.BusinessLogic.Cryptography;
-using GardeningSystem.BusinessLogic.Managers;
+using GardeningSystem.Common.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NLog;

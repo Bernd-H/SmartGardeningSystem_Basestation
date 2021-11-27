@@ -16,6 +16,11 @@ using NLog;
 namespace GardeningSystem.DataAccess.Repositories {
     public class SerializedFileRepository<T> : ISerializedFileRepository<T> where T : IDO {
 
+        private static object OBJECT_LOCKER = new object();
+
+        private static object LIST_LOCKER = new object();
+
+
         private string _filePath;
 
         private ILogger _logger;
@@ -41,20 +46,67 @@ namespace GardeningSystem.DataAccess.Repositories {
         #region Serilize list of objects
 
         public void AppendToFileList(T o) {
-            _logger.Trace($"[AppendToFileList]Appending object with id={o.Id} to list at {new FileInfo(_filePath).Name}.");
-            var fileContent = ReadListFromFile().ToList();
-            fileContent.Add(o);
-            WriteListToFile(fileContent);
+            lock (LIST_LOCKER) {
+                _logger.Trace($"[AppendToFileList]Appending object with id={o.Id} to list at {new FileInfo(_filePath).Name}.");
+                var fileContent = readListFromFile().ToList();
+                fileContent.Add(o);
+                writeListToFile(fileContent);
+            }
         }
 
         public IEnumerable<T> ReadListFromFile() {
-            _logger.Trace($"[ReadListFromFile]Reading list form file {new FileInfo(_filePath).Name}.");
-            var container = ReadSingleObjectFromFile<Container<T>>();
-
-            return container?.Elements ?? new List<T>();
+            lock (LIST_LOCKER) {
+                return readListFromFile();
+            }
         }
 
         public void WriteListToFile(IEnumerable<T> objects) {
+            lock(LIST_LOCKER) {
+                writeListToFile(objects);
+            }
+        }
+
+        public bool RemoveItemFromFileList(Guid Id) {
+            lock (LIST_LOCKER) {
+                _logger.Trace($"[RemoveItemFromFileList]Removing object with id={Id} from file {new FileInfo(_filePath).Name}.");
+                var fileContent = readListFromFile().ToList();
+                bool removed = (fileContent.RemoveAll((o) => o.Id == Id) > 0);
+                if (removed) {
+                    // update file
+                    writeListToFile(fileContent);
+                }
+
+                return removed;
+            }
+        }
+
+        public bool UpdateItemFromList(T itemToUpdate) {
+            lock (LIST_LOCKER) {
+                _logger.Trace($"[UpdateItemFromList]Updating object with id={itemToUpdate.Id} from file {new FileInfo(_filePath).Name}.");
+                var items = readListFromFile().ToList();
+
+                // find current item
+                var oldItem = items.Find(i => i.Id == itemToUpdate.Id);
+                if (oldItem != null) {
+                    bool removed = items.Remove(oldItem);
+                    if (removed) {
+                        items.Add(itemToUpdate);
+
+                        // update file
+                        writeListToFile(items);
+
+                        return true;
+                    }
+                }
+                else {
+                    _logger.Error($"[UpdateItemFromList]Object not found.");
+                }
+
+                return false;
+            }
+        }
+
+        private void writeListToFile(IEnumerable<T> objects) {
             _logger.Trace($"[WriteListToFile]Writing list of objects to {new FileInfo(_filePath).Name}.");
             Container<T> container = new Container<T>();
             container.Elements = objects;
@@ -62,66 +114,32 @@ namespace GardeningSystem.DataAccess.Repositories {
             WriteSingleObjectToFile(container);
         }
 
-        public bool RemoveItemFromFileList(Guid Id) {
-            _logger.Trace($"[RemoveItemFromFileList]Removing object with id={Id} from file {new FileInfo(_filePath).Name}.");
-            var fileContent = ReadListFromFile().ToList();
-            bool removed = (fileContent.RemoveAll((o) => o.Id == Id) > 0);
-            if (removed) {
-                // update file
-                WriteListToFile(fileContent);
-            }
+        private IEnumerable<T> readListFromFile() {
+            _logger.Trace($"[ReadListFromFile]Reading list form file {new FileInfo(_filePath).Name}.");
+            var container = ReadSingleObjectFromFile<Container<T>>();
 
-            return removed;
-        }
-
-        public bool UpdateItemFromList(T itemToUpdate) {
-            _logger.Trace($"[UpdateItemFromList]Updating object with id={itemToUpdate.Id} from file {new FileInfo(_filePath).Name}.");
-            var items = ReadListFromFile().ToList();
-
-            // find current item
-            var oldItem = items.Find(i => i.Id == itemToUpdate.Id);
-            if (oldItem != null) {
-                bool removed = items.Remove(oldItem);
-                if (removed) {
-                    items.Add(itemToUpdate);
-
-                    // update file
-                    WriteListToFile(items);
-
-                    return true;
-                }
-            } else {
-                _logger.Error($"[UpdateItemFromList]Object not found.");
-            }
-
-            return false;
+            return container?.Elements ?? new List<T>();
         }
 
         #endregion
 
         public void WriteSingleObjectToFile<T2>(T2 o) {
-            //using (FileStream fs = new FileStream(_filePath, FileMode.Create)) {
-            //    BinaryFormatter bf = new BinaryFormatter();
-
-            //    bf.Serialize(fs, o);
-            //}
-            _logger.Trace($"[WriteSingleObjectToFile]Writing object to file {new FileInfo(_filePath).Name}.");
-            File.WriteAllText(_filePath, JsonSerializer.Serialize(o));
+            lock (OBJECT_LOCKER) {
+                _logger.Trace($"[WriteSingleObjectToFile]Writing object to file {new FileInfo(_filePath).Name}.");
+                File.WriteAllText(_filePath, JsonSerializer.Serialize(o));
+            }
         }
 
         public T2 ReadSingleObjectFromFile<T2>() where T2 : class {
-            if (File.Exists(_filePath)) {
-                //using (FileStream fs = new FileStream(_filePath, FileMode.Open)) {
-                //    BinaryFormatter bf = new BinaryFormatter();
-
-                //    return (T2) bf.Deserialize(fs);
-                //}
-                _logger.Trace($"[ReadSingleObjectFromFile]Reading object from file {new FileInfo(_filePath).Name}.");
-                return JsonSerializer.Deserialize<T2>(File.ReadAllText(_filePath));
-            }
-            else {
-                _logger.Warn($"[ReadSingleObjectFromFile]File {_filePath} does not exist.");
-                return null;
+            lock (OBJECT_LOCKER) {
+                if (File.Exists(_filePath)) {
+                    _logger.Trace($"[ReadSingleObjectFromFile]Reading object from file {new FileInfo(_filePath).Name}.");
+                    return JsonSerializer.Deserialize<T2>(File.ReadAllText(_filePath));
+                }
+                else {
+                    _logger.Warn($"[ReadSingleObjectFromFile]File {_filePath} does not exist.");
+                    return null;
+                }
             }
         }
     }

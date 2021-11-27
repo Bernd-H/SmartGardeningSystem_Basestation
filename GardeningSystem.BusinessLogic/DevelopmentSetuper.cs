@@ -32,25 +32,25 @@ namespace GardeningSystem.BusinessLogic {
         public void SetupTestEnvironment() {
             Logger.Info($"[SetupTestEnvironment]Setting up test/development environment.");
 
-            // add rest api authentication password
-            string email = "bernd.hatzinger@gmail.com";
-            // check if user already exists
-            Logger.Info($"[SetupTestEnvironment]Checking if user is already registered.");
-            if ((SettingsManager.GetApplicationSettings().RegisteredUsers?.ToList().Find(u => u.Email == email) ?? null) == null) {
-                // add user to settings
-                Logger.Info($"[SetupTestEnvironment]Adding a new user to the system.");
-                SettingsManager.UpdateCurrentSettings((s) => {
-                    var registeredUsers = s.RegisteredUsers.ToList();
-                    registeredUsers.Add(new Common.Models.Entities.User() {
-                        Id = Guid.NewGuid(),
-                        Email = email,
-                        HashedPassword = PasswordHasher.HashPassword("123")
-                    });
+            //// add rest api authentication password
+            //string email = "bernd.hatzinger@gmail.com";
+            //// check if user already exists
+            //Logger.Info($"[SetupTestEnvironment]Checking if user is already registered.");
+            //if ((SettingsManager.GetApplicationSettings().RegisteredUsers?.ToList().Find(u => u.Email == email) ?? null) == null) {
+            //    // add user to settings
+            //    Logger.Info($"[SetupTestEnvironment]Adding a new user to the system.");
+            //    SettingsManager.UpdateCurrentSettings((s) => {
+            //        var registeredUsers = s.RegisteredUsers.ToList();
+            //        registeredUsers.Add(new Common.Models.Entities.User() {
+            //            Id = Guid.NewGuid(),
+            //            Email = email,
+            //            HashedPassword = PasswordHasher.HashPassword("123")
+            //        });
 
-                    s.RegisteredUsers = registeredUsers;
-                    return s;
-                });
-            }
+            //        s.RegisteredUsers = registeredUsers;
+            //        return s;
+            //    });
+            //}
 
             // register some modules
             Logger.Info($"[SetupTestEnvironment]Checking if there are some registered modules.");
