@@ -37,6 +37,7 @@
   "externalServer_apiPort": "5001",
   "externalServer_userUrl": "https://{0}:{1}/api/User/",
   "externalServer_getTokenUrl": "https://{0}:{1}/api/Token/",
+  "externalServer_ipLookupUrl": "https://{0}:{1}/api/IPLookup/",
 
   ///////////////////////// Service options
   "wateringJob_enabled": "false",

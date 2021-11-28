@@ -91,7 +91,32 @@ namespace GardeningSystem.DataAccess {
         public bool IsConnectedToWlan() {
             Logger.Info($"[IsConnectedToWlan]Checking wifi connection.");
 
-            throw new NotImplementedException();
+            // command : hostname -I | awk '{print $1}'
+            try {
+                // get all wlans
+                string command = "hostname -I | awk '{print $1}'";
+                ProcessStartInfo startInfo = new ProcessStartInfo() {
+                    FileName = "/bin/bash",
+                    Arguments = "/" + command,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+                Process proc = new Process() { StartInfo = startInfo };
+                proc.Start();
+                var streamReader = proc.StandardOutput;
+
+                string localIP = streamReader.ReadToEnd();
+
+                // check if there is a local ip
+                Logger.Info($"localIP: {localIP}");
+
+                return true;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, "[IsConnectedToWlan]Exception while getting local ip.");
+            }
+
+            return false;
         }
 
         private static bool pingHost(string nameOrAddress) {

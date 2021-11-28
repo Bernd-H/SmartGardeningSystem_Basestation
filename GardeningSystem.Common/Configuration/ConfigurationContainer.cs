@@ -22,17 +22,18 @@ namespace GardeningSystem.Common.Configuration {
         }
 
         public static string GetFullPath(string relativePath) {
-            return new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName + "\\" + relativePath;
+            return new FileInfo(Assembly.GetEntryAssembly().Location).DirectoryName + Path.DirectorySeparatorChar + relativePath;
         }
 
         private static IConfiguration GetConfigurationObject() {
             if (configuration == null) {
-                var GardeningSystemAssembly = Assembly.GetExecutingAssembly();
-                var appSettingsFileStream = GardeningSystemAssembly.GetManifestResourceStream("GardeningSystem.Common.Configuration.settings.json");
+                //var GardeningSystemAssembly = Assembly.GetExecutingAssembly();
+                //var appSettingsFileStream = GardeningSystemAssembly.GetManifestResourceStream("GardeningSystem.Common.Configuration.settings.json"); // for embedded resource
+                string appSettingsFilePath = GetFullPath($"Configuration{Path.DirectorySeparatorChar}settings.json"); // for file
 
                 // load configuration
-                var builder = new ConfigurationBuilder().AddJsonStream(appSettingsFileStream);
-                //.AddJsonFile(appSettingsFilePath, optional: true, reloadOnChange: true);
+                //var builder = new ConfigurationBuilder().AddJsonStream(appSettingsFileStream);
+                var builder = new ConfigurationBuilder().AddJsonFile(appSettingsFilePath, optional: false, reloadOnChange: true);
                 configuration = builder.Build();
 
                 // changes some configurations if test environment is set

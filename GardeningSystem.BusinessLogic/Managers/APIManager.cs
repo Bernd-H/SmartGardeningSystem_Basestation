@@ -178,7 +178,43 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return false;
         }
 
+
+
         #endregion
+
+        public async Task<bool> UpdateIPStatus(IPStatusDto dto) {
+            Logger.Info($"[UpdateIPStatus]Transmitting public ip to external server.");
+
+            if (!client.DefaultRequestHeaders.Contains("Authorization")) {
+                Logger.Fatal($"[UpdateIPStatus]Unable perfom this api request with no json web token.");
+                return false;
+            }
+
+            string url = "";
+
+            try {
+                // build url
+                var config = ConfigurationContainer.Configuration;
+                url = string.Format(config[ConfigurationVars.EXTERNALSERVER_IPLOOKUP_URL], config[ConfigurationVars.EXTERNALSERVER_DOMAIN], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
+
+                // prepare data to send
+                string json = JsonConvert.SerializeObject(dto);
+
+                // setup the body of the request
+                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(url, data);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.OK) {
+                    return true;
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, $"[UpdateIPStatus]Could not update public ip address. (url={url})");
+            }
+
+            return false;
+        }
 
         private bool CertificateValidationCallback(HttpRequestMessage httpReqMessage, X509Certificate2 cert, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
             if (ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT] == "true") {

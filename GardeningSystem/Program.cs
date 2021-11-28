@@ -42,6 +42,7 @@ namespace GardeningSystem {
 
         public static IHostBuilder CreateHostBuilder(string[] args, ICertificateHandler certificateHandler) =>
             Host.CreateDefaultBuilder(args)
+                .UseSystemd() // configures console logging to the systemd format
                 // configure logging
                 .ConfigureLogging(config => {
                     config.ClearProviders(); // remove default logging

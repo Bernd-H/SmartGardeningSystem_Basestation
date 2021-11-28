@@ -9,11 +9,14 @@ using NLog;
 namespace GardeningSystem.Jobs {
     public class WateringJob : TimedHostedService {
 
+        static readonly TimeSpan PERIOD = TimeSpan.FromHours(5);
+
+
         private IWateringManager WateringManager;
 
         private ILogger Logger;
 
-        public WateringJob(ILoggerService logger, IWateringManager wateringManager) : base(logger, nameof(WateringJob)) {
+        public WateringJob(ILoggerService logger, IWateringManager wateringManager) : base(logger, nameof(WateringJob), PERIOD, waitTillDoWorkHasFinished: false) {
             Logger = logger.GetLogger<WateringJob>();
             WateringManager = wateringManager;
 
