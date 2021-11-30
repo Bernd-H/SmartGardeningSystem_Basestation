@@ -42,6 +42,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 // build url
                 var config = ConfigurationContainer.Configuration;
                 url = string.Format(config[ConfigurationVars.EXTERNALSERVER_GETTOKEN_URL], config[ConfigurationVars.EXTERNALSERVER_LOCALIP], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
+                Console.WriteLine("Sending to url: " + url);
 
                 // setup the body of the request
                 string json = $"\"{SettingsManager.GetApplicationSettings().Id.ToString()}\"";

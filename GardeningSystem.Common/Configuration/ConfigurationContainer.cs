@@ -48,8 +48,14 @@ namespace GardeningSystem.Common.Configuration {
         /// </summary>
         private static void OverwriteSomeSettings(IConfiguration conf) {
             if (conf[ConfigurationVars.IS_TEST_ENVIRONMENT] == "true") {
-                conf[ConfigurationVars.EXTERNALSERVER_DOMAIN] = "192.168.1.48";
-                conf[ConfigurationVars.EXTERNALSERVER_LOCALIP] = "192.168.1.48";
+                //conf[ConfigurationVars.EXTERNALSERVER_DOMAIN] = "192.168.1.48";
+                //conf[ConfigurationVars.EXTERNALSERVER_LOCALIP] = "192.168.1.48";
+
+                // for local relay test
+                conf[ConfigurationVars.EXTERNALSERVER_DOMAIN] = "127.0.0.1";
+                conf[ConfigurationVars.EXTERNALSERVER_LOCALIP] = "127.0.0.1";
+                conf[ConfigurationVars.EXTERNALSERVER_APIPORT] = "5035";
+                conf[ConfigurationVars.EXTERNALSERVER_GETTOKEN_URL] = "http://{0}:{1}/api/Token/";
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
@@ -18,6 +19,24 @@ namespace GardeningSystem {
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
             try {
                 IoC.Init();
+
+                Console.WriteLine("Press enter to send api request...");
+                Console.ReadLine();
+
+                //var t = new Task(async () => {
+                //    await Task.Delay(5000);
+                //    Console.WriteLine("Sending...");
+                //    await IoC.Get<Common.Specifications.Managers.IAPIManager>().GetToken();
+                //});
+                //t.Start();
+
+                CreateHostBuilder(args, IoC.Get<ICertificateHandler>()).Build().Run();
+
+                //t.Wait();
+
+                Console.WriteLine("Send finished.");
+                Console.ReadLine();
+                return;
 
                 // development setup
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
@@ -61,7 +80,7 @@ namespace GardeningSystem {
                     webBuilder.UseKestrel(opts =>
                     {
                         // Bind directly to a socket handle or Unix socket
-                        opts.ListenAnyIP(5001, opts => opts.UseHttps(certificateHandler.GetCurrentServerCertificate()));
+                        //opts.ListenAnyIP(5001, opts => opts.UseHttps(certificateHandler.GetCurrentServerCertificate()));
                         opts.ListenAnyIP(5000);
                     });
                 })
