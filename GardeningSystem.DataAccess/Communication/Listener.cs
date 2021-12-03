@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -25,7 +26,7 @@ namespace GardeningSystem.DataAccess.Communication {
             //StatusChanged?.InvokeAsync(this, EventArgs.Empty);
         }
 
-        public void Start() {
+        public void Start(IPEndPoint listenerEndPoint) {
             if (Status == ListenerStatus.Listening)
                 return;
 
@@ -34,7 +35,7 @@ namespace GardeningSystem.DataAccess.Communication {
             Cancellation.Token.Register(() => RaiseStatusChanged(ListenerStatus.NotListening));
 
             //try {
-                Start(Cancellation.Token);
+                Start(Cancellation.Token, listenerEndPoint);
                 RaiseStatusChanged(ListenerStatus.Listening);
             //}
             //catch (SocketException soex) {
@@ -43,7 +44,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
         }
 
-        protected abstract void Start(CancellationToken token);
+        protected abstract void Start(CancellationToken token, IPEndPoint listenerEndPoint);
 
         public void Stop() {
             Cancellation?.Cancel();

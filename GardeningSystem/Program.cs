@@ -93,6 +93,9 @@ namespace GardeningSystem {
                     if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.COMMUNICATIONJOB_ENABLED])) {
                         services.AddHostedService<CommunicationJob>();
                     }
+                    if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.PUBLICIPJOB_ENABLED])) {
+                        services.AddHostedService<PublicIPJob>();
+                    }
                 });
     }
 }

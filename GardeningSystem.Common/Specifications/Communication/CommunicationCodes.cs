@@ -6,5 +6,7 @@
         public static byte[] Hello = new byte[] { 100 };
 
         public static byte[] WlanCommand = new byte[] { 150 };
+
+        public static byte[] SendPeerToPeerEndPoint = new byte[1] { 86 };
     }
 }

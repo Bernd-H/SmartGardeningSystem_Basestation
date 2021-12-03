@@ -29,6 +29,9 @@
         // Command listener
         public static string COMMANDLISTENER_LISTENPORT = "commandListener_listenPort";
 
+        // WanManager
+        public static string WANMANAGER_CONNECTIONSERVICEPORT = "wanManager_connectionServicePort";
+
         // External Server API
         public static string EXTERNALSERVER_DOMAIN = "externalServer_domain";
         public static string EXTERNALSERVER_LOCALIP = "externalServer_localIp";
@@ -46,6 +49,7 @@
         // Services
         public static string WATERINGJOB_ENABLED = "wateringJob_enabled";
         public static string COMMUNICATIONJOB_ENABLED = "communicationJob_enabled";
+        public static string PUBLICIPJOB_ENABLED = "publicIpJob_enabled";
 
         // Test Environment
         public static string IS_TEST_ENVIRONMENT = "isTestEnvironment";

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace GardeningSystem.Common.Specifications.Communication {
     public enum ListenerStatus {
@@ -12,7 +13,8 @@ namespace GardeningSystem.Common.Specifications.Communication {
 
         ListenerStatus Status { get; }
 
-        void Start();
+        void Start(IPEndPoint listenerEndPoint);
+
         void Stop();
     }
 }

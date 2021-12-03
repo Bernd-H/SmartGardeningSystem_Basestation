@@ -12,7 +12,7 @@ using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.DataAccess.Communication;
 using NLog;
 
-namespace MobileApp.DataAccess.Communication {
+namespace GardeningSystem.DataAccess.Communication {
     public class AesTcpListener : SocketListener, IAesTcpListener {
 
         public event EventHandler<TcpMessageReceivedEventArgs> CommandReceivedEventHandler;
@@ -24,8 +24,7 @@ namespace MobileApp.DataAccess.Communication {
 
         private IAesEncrypterDecrypter AesEncrypterDecrypter;
 
-        public AesTcpListener(IPEndPoint listenerEndPoint, ILoggerService loggerService, IAesEncrypterDecrypter aesEncrypterDecrypter)
-            : base(listenerEndPoint) {
+        public AesTcpListener(ILoggerService loggerService, IAesEncrypterDecrypter aesEncrypterDecrypter) {
             Logger = loggerService.GetLogger<AesTcpListener>();
             AesEncrypterDecrypter = aesEncrypterDecrypter;
         }
@@ -79,8 +78,8 @@ namespace MobileApp.DataAccess.Communication {
             await networkStream.WriteAsync(packet.ToArray(), 0, packet.Count);
         }
 
-        protected override void Start(CancellationToken token) {
-            tcpListener = new TcpListener(OriginalEndPoint);
+        protected override void Start(CancellationToken token, IPEndPoint listenerEndPoint) {
+            tcpListener = new TcpListener(listenerEndPoint);
             tcpListener.Server.ReceiveTimeout = 1000; // 1s
             tcpListener.Server.SendTimeout = 1000; // 1s
             EndPoint = (IPEndPoint)tcpListener.Server.LocalEndPoint;

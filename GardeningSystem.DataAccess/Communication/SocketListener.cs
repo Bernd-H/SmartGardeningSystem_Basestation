@@ -11,10 +11,7 @@ namespace GardeningSystem.DataAccess.Communication {
     public abstract class SocketListener : Listener, ISocketListener {
         public IPEndPoint EndPoint { get; protected set; }
 
-        public IPEndPoint OriginalEndPoint { get; protected set; }
-
-        protected SocketListener(IPEndPoint endPoint) {
-            EndPoint = OriginalEndPoint = endPoint;
+        protected SocketListener() {
         }
     }
 }

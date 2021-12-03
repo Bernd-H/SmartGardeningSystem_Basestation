@@ -31,6 +31,9 @@
   // Command listener
   "commandListener_listenPort": "52240",
 
+  // Wan manager
+  "wanManager_connectionServicePort": "5039",
+
   // External Server API
   "externalServer_domain": "nas.djcodex.com",
   "externalServer_localIp": "192.168.1.32",
@@ -42,6 +45,7 @@
   ///////////////////////// Service options
   "wateringJob_enabled": "false",
   "communicationJob_enabled": "true",
+  "publicIpJob_enabled": "false",
 
   ///////////////////////// Test Environment options
   "isTestEnvironment": "true"
