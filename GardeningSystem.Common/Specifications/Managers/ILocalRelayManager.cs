@@ -1,5 +1,5 @@
-﻿namespace GardeningSystem.Common.Specifications.Communication {
-    public interface ILocalServicesClient {
+﻿namespace GardeningSystem.Common.Specifications.Managers {
+    public interface ILocalRelayManager {
 
         /// <summary>
         /// Sends <paramref name="data"/> to the local API.
@@ -7,10 +7,9 @@
         /// </summary>
         /// <param name="data"></param>
         /// <param name="url"></param>
-        /// <param name="port">Port of the service.</param>
+        /// <param name="port">Port of the local API.</param>
         /// <returns>Answer of the API call.</returns>
-        //byte[] MakeAPIRequest(byte[] data, string url, int port);
-        byte[] MakeAPIRequest(byte[] data);
+        byte[] MakeAPIRequest(byte[] data, int port);
 
         /// <summary>
         /// Sends <paramref name="data"/> to the local service.

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
@@ -33,7 +34,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         public void Start() {
             Logger.Info($"[Start]Starting local mobile app discovery.");
-            LocalMobileAppDiscovery.Start();
+            LocalMobileAppDiscovery.Start(new IPEndPoint(IPAddress.Any, DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.MulticastAddressV4.Port));
         }
 
         public void Stop() {

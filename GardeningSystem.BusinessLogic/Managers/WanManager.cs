@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Security;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Models.Entities;
@@ -29,35 +30,30 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private IAesTcpListener AesTcpListener_PeerToPeer;
 
-        private ILocalServicesClient LocalServicesClient;
+        private ILocalRelayManager LocalRelayManager;
 
         private INatController NatController;
 
         private ILogger Logger;
 
         public WanManager(ILoggerService loggerService, ISslTcpClient sslTcpClient, IConfiguration configuration, ISettingsManager settingsManager,
-            ILocalServicesClient localServicesClient, INatController natController, IAesTcpListener aesTcpListener) {
+            ILocalRelayManager localRelayManager, INatController natController, IAesTcpListener aesTcpListener) {
             Logger = loggerService.GetLogger<WanManager>();
             SslTcpClient = sslTcpClient;
             Configuration = configuration;
             SettingsManager = settingsManager;
-            LocalServicesClient = localServicesClient;
+            LocalRelayManager = localRelayManager;
             NatController = natController;
             AesTcpListener_PeerToPeer = aesTcpListener;
+
+            SslTcpClient.ConnectionCollapsedEvent += OnExternalServerConnectionCollapsedEvent;
         }
 
         public void Start(CancellationToken cancellationToken) {
             _cancellationToken = cancellationToken;
             Logger.Info($"[Start]Starting a connection to the external server.");
 
-            var ip = Dns.GetHostAddresses(Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]).FirstOrDefault();
-            if (ip != null) {
-                int port = Convert.ToInt32(Configuration[ConfigurationVars.WANMANAGER_CONNECTIONSERVICEPORT]);
-                SslTcpClient.Start(new IPEndPoint(ip, port), OnConnectedToExternalServer, Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]);
-            }
-            else {
-                Logger.Warn($"[Start]WanManager not started. Could not resolve {Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]}.");
-            }
+            ConnectToExternalServerLoop(cancellationToken);
         }
 
         public void StartRelayOnly(CancellationToken cancellationToken, IPEndPoint localEndPoint) {
@@ -67,7 +63,31 @@ namespace GardeningSystem.BusinessLogic.Managers {
             AesTcpListener_PeerToPeer.Start(localEndPoint);
         }
 
-        private async void OnPeerToPeer_newClientAccepted(object sender, TcpMessageReceivedEventArgs e) {
+        private void OnExternalServerConnectionCollapsedEvent(object sender, EventArgs e) {
+            // reconnect to the server
+            // connection collapse could be due to a internet outage or a public ip change
+            ConnectToExternalServerLoop(_cancellationToken);
+        }
+
+        private void ConnectToExternalServerLoop(CancellationToken cancellationToken) {
+            bool success = false;
+            do {
+                var ip = Dns.GetHostAddresses(Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]).FirstOrDefault();
+                if (ip != null) {
+                    int port = Convert.ToInt32(Configuration[ConfigurationVars.WANMANAGER_CONNECTIONSERVICEPORT]);
+                    int keepAliveInterval = 60000; // 1min
+                    success = SslTcpClient.Start(new IPEndPoint(ip, port), OnConnectedToExternalServer, Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN], keepAliveInterval);
+                }
+
+                if (!success) {
+                    // wait till the next attempt
+                    Logger.Trace($"[ConnectToExternalServerLoop]WanManager not started. Could not resolve {Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]}. Retrying.");
+                    Task.Delay(60 * 1000, cancellationToken).Wait();
+                }
+            } while (!success && !cancellationToken.IsCancellationRequested);
+        }
+
+        private async void OnPeerToPeer_newClientAccepted(object sender, TcpEventArgs e) {
             var networkStream = e.TcpClient.GetStream();
 
             try {
@@ -135,9 +155,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     byte[] serviceAnswer = null;
 
                     if (packetO.ServiceDetails.Type == ServiceType.API) {
-                        serviceAnswer = LocalServicesClient.MakeAPIRequest(packetO.Package);
+                        serviceAnswer = LocalRelayManager.MakeAPIRequest(packetO.Package, packetO.ServiceDetails.Port);
                     } else if (packetO.ServiceDetails.Type == ServiceType.AesTcp) {
-                        serviceAnswer = LocalServicesClient.MakeAesTcpRequest(packetO.Package, packetO.ServiceDetails.Port);
+                        serviceAnswer = LocalRelayManager.MakeAesTcpRequest(packetO.Package, packetO.ServiceDetails.Port);
                     } else {
                         Logger.Error($"[HandleIncomingPackages]Unknown ServiceType ({packetO.ServiceDetails.Type}).");
                         return null;

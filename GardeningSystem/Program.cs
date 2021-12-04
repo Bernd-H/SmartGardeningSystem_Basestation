@@ -20,23 +20,12 @@ namespace GardeningSystem {
             try {
                 IoC.Init();
 
-                Console.WriteLine("Press enter to send api request...");
-                Console.ReadLine();
-
-                //var t = new Task(async () => {
-                //    await Task.Delay(5000);
-                //    Console.WriteLine("Sending...");
-                //    await IoC.Get<Common.Specifications.Managers.IAPIManager>().GetToken();
-                //});
-                //t.Start();
-
-                CreateHostBuilder(args, IoC.Get<ICertificateHandler>()).Build().Run();
-
-                //t.Wait();
-
-                Console.WriteLine("Send finished.");
-                Console.ReadLine();
-                return;
+                //Console.WriteLine("Press enter to send api request...");
+                //Console.ReadLine();
+                //CreateHostBuilder(args, IoC.Get<ICertificateHandler>()).Build().Run();
+                //Console.WriteLine("Send finished.");
+                //Console.ReadLine();
+                //return;
 
                 // development setup
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {

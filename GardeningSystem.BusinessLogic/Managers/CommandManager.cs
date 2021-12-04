@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
     public class CommandManager : ICommandManager {
-
-        private ILogger Logger;
 
         private IAesTcpListener AesTcpListener;
 
@@ -22,11 +23,17 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private IAesEncrypterDecrypter AesEncrypterDecrypter;
 
-        public CommandManager(ILoggerService loggerService, IAesTcpListener aesTcpListener, IWifiConfigurator wifiConfigurator, IAesEncrypterDecrypter aesEncrypterDecrypter) {
+        private IConfiguration Configuration;
+
+        private ILogger Logger;
+
+        public CommandManager(ILoggerService loggerService, IAesTcpListener aesTcpListener, IWifiConfigurator wifiConfigurator, IAesEncrypterDecrypter aesEncrypterDecrypter,
+            IConfiguration configuration) {
             Logger = loggerService.GetLogger<CommandManager>();
             AesTcpListener = aesTcpListener;
             WifiConfigurator = wifiConfigurator;
             AesEncrypterDecrypter = aesEncrypterDecrypter;
+            Configuration = configuration;
         }
 
         ~CommandManager() {
@@ -35,10 +42,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         public void Start() {
             AesTcpListener.CommandReceivedEventHandler += OnCommandReceivedEvent;
-            AesTcpListener.Start();
+            var commandListenerPort = Convert.ToInt32(Configuration[ConfigurationVars.COMMANDLISTENER_LISTENPORT]);
+            AesTcpListener.Start(new IPEndPoint(IPAddress.Any, commandListenerPort));
         }
 
-        private async void OnCommandReceivedEvent(object sender, TcpMessageReceivedEventArgs e) {
+        private async void OnCommandReceivedEvent(object sender, TcpEventArgs e) {
             NetworkStream networkStream = null;
             try {
                 networkStream = e.TcpClient.GetStream();

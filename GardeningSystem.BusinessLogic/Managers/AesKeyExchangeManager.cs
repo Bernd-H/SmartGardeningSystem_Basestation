@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Net.Security;
+using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Utilities;
+using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
@@ -17,13 +20,17 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private IAesEncrypterDecrypter AesEncrypterDecrypter;
 
+        private IConfiguration Configuration;
+
         private ILogger Logger;
 
-        public AesKeyExchangeManager(ILoggerService loggerService, ISslListener sslListener, ICertificateHandler certificateHandler, IAesEncrypterDecrypter aesEncrypterDecrypter) {
+        public AesKeyExchangeManager(ILoggerService loggerService, ISslListener sslListener, ICertificateHandler certificateHandler, IAesEncrypterDecrypter aesEncrypterDecrypter,
+            IConfiguration configuration) {
             Logger = loggerService.GetLogger<AesKeyExchangeManager>();
             SslListener = sslListener;
             CertificateHandler = certificateHandler;
             AesEncrypterDecrypter = aesEncrypterDecrypter;
+            Configuration = configuration;
         }
 
         public void StartListener() {
@@ -36,9 +43,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
             // start listener
             Logger.Info($"[StartListener]Starting listening.");
-            SslListener.Start();
+            var port = Convert.ToInt32(Configuration[ConfigurationVars.AESKEYEXCHANGE_LISTENPORT]);
+            SslListener.Start(new IPEndPoint(IPAddress.Any, port));
             if (SslListener.Status == ListenerStatus.PortNotFree) {
-                Logger.Error($"[StartListener]Could not start litsener. Endpoint {SslListener.OriginalEndPoint} is not free.");
+                Logger.Error($"[StartListener]Could not start litsener. Endpoint {SslListener.EndPoint} is not free.");
             }
         }
 

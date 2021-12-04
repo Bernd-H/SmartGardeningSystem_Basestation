@@ -9,6 +9,9 @@ using NLog;
 namespace GardeningSystem.Jobs {
     public class CommunicationJob : IHostedService {
 
+        private CancellationTokenSource _cancellationTokenSource;
+
+
         private ILocalMobileAppDiscoveryManager LocalMobileAppDiscoveryManager;
 
         private IAesKeyExchangeManager AesKeyExchangeManager;
@@ -19,16 +22,21 @@ namespace GardeningSystem.Jobs {
 
         private IAPIManager APIManager;
 
+        private IWanManager WanManager;
+
         private ILogger Logger;
 
         public CommunicationJob(ILoggerService logger, ISettingsManager settingsManager, ILocalMobileAppDiscoveryManager localMobileAppDiscoveryManager,
-            IAesKeyExchangeManager aesKeyExchangeManager, ICommandManager commandManager, IAPIManager _APIManager) {
+            IAesKeyExchangeManager aesKeyExchangeManager, ICommandManager commandManager, IAPIManager _APIManager, IWanManager wanManager) {
             Logger = logger.GetLogger<CommunicationJob>();
             SettingsManager = settingsManager;
             LocalMobileAppDiscoveryManager = localMobileAppDiscoveryManager;
             AesKeyExchangeManager = aesKeyExchangeManager;
             CommandManager = commandManager;
             APIManager = _APIManager;
+            WanManager = wanManager;
+
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         public Task StartAsync(CancellationToken cancellationToken) {
@@ -48,6 +56,8 @@ namespace GardeningSystem.Jobs {
                     }
 
                     CommandManager.Start();
+
+                    WanManager.Start(_cancellationTokenSource.Token);
                 } catch (Exception ex) {
                     Logger.Fatal(ex, "[StartAsync]An exception occured.");
                 }
@@ -62,6 +72,8 @@ namespace GardeningSystem.Jobs {
                     LocalMobileAppDiscoveryManager.Stop();
                     AesKeyExchangeManager.Stop();
                     CommandManager.Stop();
+
+                    _cancellationTokenSource.Cancel();
 
                     Logger.Trace($"[StopAsync]All communication connections closed.");
                 } catch (Exception ex) {

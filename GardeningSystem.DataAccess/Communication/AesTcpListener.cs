@@ -15,7 +15,7 @@ using NLog;
 namespace GardeningSystem.DataAccess.Communication {
     public class AesTcpListener : SocketListener, IAesTcpListener {
 
-        public event EventHandler<TcpMessageReceivedEventArgs> CommandReceivedEventHandler;
+        public event EventHandler<TcpEventArgs> CommandReceivedEventHandler;
 
         private TcpListener tcpListener;
 
@@ -97,7 +97,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
                 TcpClient client = listener.EndAcceptTcpClient(ar);
 
-                CommandReceivedEventHandler?.Invoke(this, new TcpMessageReceivedEventArgs(client));
+                CommandReceivedEventHandler?.Invoke(this, new TcpEventArgs(client));
             }
             catch (ObjectDisposedException) {
                 // when stoppoing tcpListerner

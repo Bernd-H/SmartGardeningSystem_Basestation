@@ -31,7 +31,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         /// <summary>
         /// The IPAddress and port of the IPV4 multicast group.
         /// </summary>
-        static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("224.20.21.18"), 6771);
+        public static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("224.20.21.18"), 6771);
         //static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("239.192.152.143"), 6771);
 
         /// <summary>
@@ -52,9 +52,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
 
         private ILogger Logger;
 
-        public LocalMobileAppDiscovery(ILoggerService loggerService)
-            : base(new IPEndPoint(IPAddress.Any, MulticastAddressV4.Port)) {
-
+        public LocalMobileAppDiscovery(ILoggerService loggerService) {
             Logger = loggerService.GetLogger<LocalMobileAppDiscovery>();
 
             //Cookie = $"1.0.0.0-{Random.Next(1, int.MaxValue)}";
@@ -102,9 +100,9 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             }
         }
 
-        protected override void Start(CancellationToken token) {
+        protected override void Start(CancellationToken token, IPEndPoint listenerEndPoint) {
             UdpListener = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            UdpListener.Bind(OriginalEndPoint);
+            UdpListener.Bind(listenerEndPoint);
             EndPoint = (IPEndPoint)UdpListener.LocalEndPoint;
 
             //token.Register(() => UdpClient.SafeDispose());

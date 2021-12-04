@@ -29,8 +29,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private Thread acceptingClientsThread;
 
-        public SslListener(IPEndPoint listenerEndPoint, ILoggerService loggerService, IConfiguration configuration)
-            : base(listenerEndPoint) {
+        public SslListener(ILoggerService loggerService, IConfiguration configuration) {
             Logger = loggerService.GetLogger<SslListener>();
         }
 
@@ -83,7 +82,7 @@ namespace GardeningSystem.DataAccess.Communication {
             this.serverCertificate = serverCertificate;
         }
 
-        protected override void Start(CancellationToken token) {
+        protected override void Start(CancellationToken token, IPEndPoint localEndPoint) {
             if (sslStreamOpenCallback == null || serverCertificate == null) {
                 throw new Exception("SslListener.Init() must be called first.");
             }
@@ -91,9 +90,9 @@ namespace GardeningSystem.DataAccess.Communication {
                 throw new Exception("SslListener has already been started.");
             }
 
-            listener = new TcpListener(OriginalEndPoint);
+            listener = new TcpListener(localEndPoint);
             listener.Start(backlog: 10);
-            Logger.Info($"[Start]Listening on {OriginalEndPoint.ToString()}.");
+            Logger.Info($"[Start]Listening on {listener.LocalEndpoint}.");
 
             token.Register(() => listener.Stop());
 

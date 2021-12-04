@@ -1,8 +1,8 @@
 ﻿namespace GardeningSystem.Common.Specifications.DataObjects {
 
     public enum PackageType {
-        Init,
-        Relay
+        Init = 0,
+        Relay = 1
     }
 
     public interface IWanPackage {

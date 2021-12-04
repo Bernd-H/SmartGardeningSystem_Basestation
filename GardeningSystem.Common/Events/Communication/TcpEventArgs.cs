@@ -2,11 +2,11 @@
 using System.Net.Sockets;
 
 namespace GardeningSystem.Common.Events.Communication {
-    public class TcpMessageReceivedEventArgs : EventArgs {
+    public class TcpEventArgs : EventArgs {
 
         public TcpClient TcpClient { get; }
 
-        public TcpMessageReceivedEventArgs(TcpClient tcpClient) {
+        public TcpEventArgs(TcpClient tcpClient) {
             TcpClient = tcpClient;
         }
     }

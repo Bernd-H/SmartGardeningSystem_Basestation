@@ -52,10 +52,10 @@ namespace GardeningSystem.Common.Configuration {
                 //conf[ConfigurationVars.EXTERNALSERVER_LOCALIP] = "192.168.1.48";
 
                 // for local relay test
-                conf[ConfigurationVars.EXTERNALSERVER_DOMAIN] = "127.0.0.1";
-                conf[ConfigurationVars.EXTERNALSERVER_LOCALIP] = "127.0.0.1";
-                conf[ConfigurationVars.EXTERNALSERVER_APIPORT] = "5035";
-                conf[ConfigurationVars.EXTERNALSERVER_GETTOKEN_URL] = "http://{0}:{1}/api/Token/";
+                //conf[ConfigurationVars.EXTERNALSERVER_DOMAIN] = "127.0.0.1";
+                //conf[ConfigurationVars.EXTERNALSERVER_LOCALIP] = "127.0.0.1";
+                //conf[ConfigurationVars.EXTERNALSERVER_APIPORT] = "5035";
+                //conf[ConfigurationVars.EXTERNALSERVER_GETTOKEN_URL] = "http://{0}:{1}/api/Token/";
             }
         }
     }

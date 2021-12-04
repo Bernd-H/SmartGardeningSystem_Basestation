@@ -68,28 +68,13 @@ namespace LocalRelayReceiveTest
 
             lock(locker) {
                 var networkStream = client.GetStream();
-                //var streamReader = new StreamReader(networkStream);
-                //var streamWriter = new StreamWriter(networkStream);
 
 
                 // send to external server
                 using (var sendToAPIClient = new TcpClient()) {
                     sendToAPIClient.Connect(IPAddress.Parse("127.0.0.1"), 5000);
                     var sendToAPIClient_NS = sendToAPIClient.GetStream();
-                    //var streamReaderAPI = new StreamReader(sendToAPIClient_NS);
-                    //var streamWriterAPI = new StreamWriter(sendToAPIClient_NS);
 
-                    //string req;
-                    //while ((req = Readline(networkStream)) != null) {
-                    //    if (req == "") {
-                    //        break;
-                    //    }
-
-                    //    Console.WriteLine("Sending: " + req);
-                    //    //streamWriterAPI.WriteLine(req);
-                    //    //streamWriterAPI.WriteLine("");
-                    //    Write(sendToAPIClient_NS, req);
-                    //}
                     string reqAndHeader, content;
                     Console.WriteLine("Get request");
                     (reqAndHeader, content) = GetRequestOrAnswer(networkStream);
@@ -101,15 +86,6 @@ namespace LocalRelayReceiveTest
 
 
                     // get answer and send it back to request maker
-                    //string answ;
-                    //while ((answ = Readline(sendToAPIClient_NS)) != null) {
-                    //    if (req == "") {
-                    //        break;
-                    //    }
-
-                    //    Console.WriteLine("Answer: " + answ);
-                    //    Write(networkStream, answ);
-                    //}
                     Console.WriteLine("Receiving answer");
                     (reqAndHeader, content) = GetRequestOrAnswer(sendToAPIClient_NS);
                     Console.WriteLine(reqAndHeader);
