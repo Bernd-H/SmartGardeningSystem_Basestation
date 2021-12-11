@@ -19,9 +19,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using NLog;
 
 namespace GardeningSystem.RestAPI.Controllers {
+
     [Route("api/[controller]")]
     [ApiController]
     public class LoginController : ControllerBase {

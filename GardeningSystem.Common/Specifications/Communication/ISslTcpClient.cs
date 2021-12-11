@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace GardeningSystem.Common.Specifications.Communication {
     public interface ISslTcpClient {
@@ -18,6 +19,6 @@ namespace GardeningSystem.Common.Specifications.Communication {
         /// <param name="targetHost">The name of the server that shares the System.Net.Security.SslStream.</param>
         /// <param name="keepAliveInterval">0 or less, to deactivate keep alive. Value in ms.</param>
         /// <returns>True, when the connection establishment was successful.</returns>
-        bool Start(IPEndPoint endPoint, SslStreamOpenCallback sslStreamOpenCallback, string targetHost, int keepAliveInterval);
+        Task<bool> Start(IPEndPoint endPoint, SslStreamOpenCallback sslStreamOpenCallback, string targetHost, int keepAliveInterval);
     }
 }

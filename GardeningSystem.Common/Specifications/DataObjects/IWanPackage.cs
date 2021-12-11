@@ -1,4 +1,6 @@
-﻿namespace GardeningSystem.Common.Specifications.DataObjects {
+﻿using GardeningSystem.Common.Models.Entities;
+
+namespace GardeningSystem.Common.Specifications.DataObjects {
 
     public enum PackageType {
         Init = 0,
@@ -11,6 +13,6 @@
 
         byte[] Package { get; set; }
 
-        IServiceDetails ServiceDetails { get; set; }
+        ServiceDetails ServiceDetails { get; set; }
     }
 }

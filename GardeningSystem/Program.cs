@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -15,17 +16,24 @@ using NLog.Web;
 
 namespace GardeningSystem {
     public class Program {
+
+        private static IHost _host;
+
+        private static ManualResetEvent stopEvent = new ManualResetEvent(false);
+
         public static void Main(string[] args) {
+            //Console.CancelKeyPress += (sender, eventArgs) => {
+            //    // Cancel the cancellation to allow the program to shutdown cleanly.
+            //    eventArgs.Cancel = true;
+
+            //    _host?.StopAsync().Wait();
+
+            //    stopEvent.Set();
+            //};
+            
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
             try {
                 IoC.Init();
-
-                //Console.WriteLine("Press enter to send api request...");
-                //Console.ReadLine();
-                //CreateHostBuilder(args, IoC.Get<ICertificateHandler>()).Build().Run();
-                //Console.WriteLine("Send finished.");
-                //Console.ReadLine();
-                //return;
 
                 // development setup
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
@@ -34,7 +42,11 @@ namespace GardeningSystem {
                 }
 
                 logger.Debug("init main");
-                CreateHostBuilder(args, IoC.Get<ICertificateHandler>()).Build().Run();
+                _host = CreateHostBuilder(args, IoC.Get<ICertificateHandler>()).Build();
+                _host.Run();
+
+                //stopEvent.WaitOne();
+
                 //var r = IoC.Get<Common.Specifications.Repositories.IWeatherRepository>().GetCurrentWeatherPredictions("Unterstinkenbrunn").Result;
             }
             catch (Exception exception) {
@@ -51,7 +63,7 @@ namespace GardeningSystem {
         public static IHostBuilder CreateHostBuilder(string[] args, ICertificateHandler certificateHandler) =>
             Host.CreateDefaultBuilder(args)
                 .UseSystemd() // configures console logging to the systemd format
-                // configure logging
+                              // configure logging
                 .ConfigureLogging(config => {
                     config.ClearProviders(); // remove default logging
                     config.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
@@ -66,11 +78,10 @@ namespace GardeningSystem {
                 // configure services
                 .ConfigureWebHostDefaults(webBuilder => { // rest api
                     webBuilder.UseStartup<StartupRestAPI>();
-                    webBuilder.UseKestrel(opts =>
-                    {
+                    webBuilder.UseKestrel(opts => {
                         // Bind directly to a socket handle or Unix socket
-                        //opts.ListenAnyIP(5001, opts => opts.UseHttps(certificateHandler.GetCurrentServerCertificate()));
-                        opts.ListenAnyIP(5000);
+                        opts.ListenAnyIP(5001, opts => opts.UseHttps(certificateHandler.GetCurrentServerCertificate()));
+                        opts.ListenLocalhost(5000);
                     });
                 })
                 .ConfigureServices((hostContext, services) => {
@@ -85,6 +96,6 @@ namespace GardeningSystem {
                     if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.PUBLICIPJOB_ENABLED])) {
                         services.AddHostedService<PublicIPJob>();
                     }
-                });
+                }).UseConsoleLifetime();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using NLog;
@@ -47,6 +48,14 @@ namespace GardeningSystem.DataAccess.Communication {
                 else {
                     packet.AddRange(buffer);
                 }
+            }
+
+            var answer = Encoding.UTF8.GetString(packet.ToArray());
+            if (answer.Contains($"Transfer-Encoding: chunked")) {
+                // add terminating chunk
+                answer += "0\r\n\r\n";
+
+                return Encoding.UTF8.GetBytes(answer);
             }
 
             return packet.ToArray();

@@ -32,28 +32,28 @@ namespace GardeningSystem.DataAccess.Communication {
         public SslTcpClient(ILoggerService loggerService) {
             Logger = loggerService.GetLogger<SslTcpClient>();
 
-            _checkConnectionForCollapseTS = new CancellationTokenSource();
             _connectionCollapsedTS = new CancellationTokenSource();
         }
 
-        public bool Start(IPEndPoint endPoint, SslStreamOpenCallback sslStreamOpenCallback, string targetHost, int keepAliveInterval) {
+        public async Task<bool> Start(IPEndPoint endPoint, SslStreamOpenCallback sslStreamOpenCallback, string targetHost, int keepAliveInterval) {
             bool result = false;
-            _client = null;
             SslStream sslStream = null;
+            _client = null;
             _keepAliveInterval = keepAliveInterval;
 
             try {
                 // connect
                 _client = new TcpClient();
-                _client.ReceiveTimeout = 1000; // 1s
-                _client.SendTimeout = 1000;
+                _client.SendTimeout = 5000;
                 _client.Client.Blocking = true;
 
                 ConfigureKeepAlive();
 
-                _client.Connect(endPoint);
+                //_client.Connect(endPoint);
+                await _client.ConnectAsync(endPoint.Address, endPoint.Port);
                 Logger.Info($"[RunClient]Connected to server {endPoint.ToString()}.");
 
+                _checkConnectionForCollapseTS = new CancellationTokenSource();
                 StartConnectionCollapseDetectionProcess();
 
                 // create ssl stream
@@ -73,12 +73,17 @@ namespace GardeningSystem.DataAccess.Communication {
                     sslStream?.Close();
                 });
             } catch (Exception ex) {
-                Logger.Fatal(ex, $"[Start]Error while connecting to {endPoint}. targetHost={targetHost}");
-                sslStream?.Close();
+                if (ex.HResult != 10060) {
+                    Logger.Error(ex, $"[Start]Error while connecting to {endPoint}. targetHost={targetHost}");
+                    sslStream?.Close();
+                }
+                else {
+                    Logger.Info($"[Start]Connecting to {endPoint} failed.");
+                }
             }
 
             // stop check the connection state
-            _checkConnectionForCollapseTS.Cancel();
+            _checkConnectionForCollapseTS?.Cancel();
 
             return result;
         }

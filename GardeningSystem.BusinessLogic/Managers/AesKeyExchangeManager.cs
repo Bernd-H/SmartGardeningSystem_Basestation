@@ -22,15 +22,18 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private IConfiguration Configuration;
 
+        private ISettingsManager SettingsManager;
+
         private ILogger Logger;
 
         public AesKeyExchangeManager(ILoggerService loggerService, ISslListener sslListener, ICertificateHandler certificateHandler, IAesEncrypterDecrypter aesEncrypterDecrypter,
-            IConfiguration configuration) {
+            IConfiguration configuration, ISettingsManager settingsManager) {
             Logger = loggerService.GetLogger<AesKeyExchangeManager>();
             SslListener = sslListener;
             CertificateHandler = certificateHandler;
             AesEncrypterDecrypter = aesEncrypterDecrypter;
             Configuration = configuration;
+            SettingsManager = settingsManager;
         }
 
         public void StartListener() {
@@ -60,7 +63,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             byte[] key = new byte[Cryptography.AesEncrypterDecrypter.KEY_SIZE], iv = new byte[Cryptography.AesEncrypterDecrypter.IV_SIZE];
             CryptoUtils.GetByteArrayFromUM(key, keyPtr, key.Length);
             CryptoUtils.GetByteArrayFromUM(iv, ivPtr, iv.Length);
-
+            //Console.WriteLine("BasestationIP: " + SettingsManager.GetApplicationSettings().Id); // only for debugging
             Logger.Info("[SslStreamOpenCallback]Sending aes key to client.");
             try {
                 // send key

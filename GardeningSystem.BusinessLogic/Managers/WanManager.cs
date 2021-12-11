@@ -10,6 +10,7 @@ using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
+using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.DataObjects;
 using GardeningSystem.Common.Specifications.Managers;
 using Microsoft.Extensions.Configuration;
@@ -34,10 +35,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private INatController NatController;
 
+        private IAesEncrypterDecrypter AesEncrypterDecrypter;
+
         private ILogger Logger;
 
         public WanManager(ILoggerService loggerService, ISslTcpClient sslTcpClient, IConfiguration configuration, ISettingsManager settingsManager,
-            ILocalRelayManager localRelayManager, INatController natController, IAesTcpListener aesTcpListener) {
+            ILocalRelayManager localRelayManager, INatController natController, IAesTcpListener aesTcpListener, IAesEncrypterDecrypter aesEncrypterDecrypter) {
             Logger = loggerService.GetLogger<WanManager>();
             SslTcpClient = sslTcpClient;
             Configuration = configuration;
@@ -45,6 +48,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             LocalRelayManager = localRelayManager;
             NatController = natController;
             AesTcpListener_PeerToPeer = aesTcpListener;
+            AesEncrypterDecrypter = aesEncrypterDecrypter;
 
             SslTcpClient.ConnectionCollapsedEvent += OnExternalServerConnectionCollapsedEvent;
         }
@@ -53,7 +57,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             _cancellationToken = cancellationToken;
             Logger.Info($"[Start]Starting a connection to the external server.");
 
-            ConnectToExternalServerLoop(cancellationToken);
+            _ = ConnectToExternalServerLoop(cancellationToken);
         }
 
         public void StartRelayOnly(CancellationToken cancellationToken, IPEndPoint localEndPoint) {
@@ -66,17 +70,17 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private void OnExternalServerConnectionCollapsedEvent(object sender, EventArgs e) {
             // reconnect to the server
             // connection collapse could be due to a internet outage or a public ip change
-            ConnectToExternalServerLoop(_cancellationToken);
+            _ = ConnectToExternalServerLoop(_cancellationToken);
         }
 
-        private void ConnectToExternalServerLoop(CancellationToken cancellationToken) {
+        private async Task ConnectToExternalServerLoop(CancellationToken cancellationToken) {
             bool success = false;
             do {
                 var ip = Dns.GetHostAddresses(Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]).FirstOrDefault();
                 if (ip != null) {
                     int port = Convert.ToInt32(Configuration[ConfigurationVars.WANMANAGER_CONNECTIONSERVICEPORT]);
                     int keepAliveInterval = 60000; // 1min
-                    success = SslTcpClient.Start(new IPEndPoint(ip, port), OnConnectedToExternalServer, Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN], keepAliveInterval);
+                    success = await SslTcpClient.Start(new IPEndPoint(ip, port), OnConnectedToExternalServer, Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN], keepAliveInterval);
                 }
 
                 if (!success) {
@@ -117,12 +121,35 @@ namespace GardeningSystem.BusinessLogic.Managers {
             try {
                 while (true) {
                     var packet = DataAccess.Communication.SslTcpClient.ReadMessage(openStream);
+
+                    // decrypt relay packages
+                    bool relayPackage = false;
+                    try {
+                        // try parsing package 
+                        var p = JsonConvert.DeserializeObject<WanPackage>(Encoding.UTF8.GetString(packet));
+
+                        // success, that means that the package is of type Init and is not encrypted
+                    } catch(Exception) {
+                        // package is encrypted
+                        packet = AesEncrypterDecrypter.DecryptToByteArray(packet);
+                        relayPackage = true;
+                    }
+
                     var answer = HandleIncomingPackages(packet, false);
+
+                    // encrypt relay packages
+                    if (relayPackage) {
+                        answer = AesEncrypterDecrypter.EncryptByteArray(answer);
+                    }
+
                     DataAccess.Communication.SslTcpClient.SendMessage(openStream, answer);
                 }
             }
             catch (ObjectDisposedException) {
                 // conneciton got closed
+            }
+            catch (Exception ex) {
+                Logger.Fatal(ex, $"[OnConnectedToExternalServer]Package decryption has failed!");
             }
         }
 
@@ -135,16 +162,25 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                 // relay initialization
                 if (packetO.PackageType == PackageType.Init && !relayOnlyMode) {
+                    Logger.Info($"[HandleIncomingPackages]Remote connection initialization package received.");
                     if (packetO.Package.SequenceEqual(CommunicationCodes.SendPeerToPeerEndPoint)) {
 
                         // try to open a public port
                         var endpoint = GetPublicEndpoint();
 
                         // build result
-                        answer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new WanPackage() {
-                            PackageType = PackageType.Init,
-                            Package = Encoding.UTF8.GetBytes(endpoint.ToString())
-                        }));
+                        if (endpoint != null) {
+                            answer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new WanPackage() {
+                                PackageType = PackageType.Init,
+                                Package = Encoding.UTF8.GetBytes(endpoint.ToString())
+                            }));
+                        }
+                        else {
+                            answer = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new WanPackage() {
+                                PackageType = PackageType.Init,
+                                Package = new byte[0]
+                            }));
+                        }
                     }
                     else {
                         Logger.Error($"[HandleIncomingPackages]Invalid package bytes with packagetype=Init.");
@@ -172,6 +208,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 }
             }
             catch (Exception ex) {
+                
                 Logger.Error(ex, $"[HandleIncomingPackages]An error occured.");
             }
 
@@ -179,7 +216,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         private IPEndPoint GetPublicEndpoint() {
-
+            return null;
             // TODO: build cache... and don't use a new local endpoint every time...
             // check if hole is still active
 

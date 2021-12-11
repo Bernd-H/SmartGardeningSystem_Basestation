@@ -7,6 +7,6 @@ namespace GardeningSystem.Common.Models.Entities {
 
         public byte[] Package { get; set; }
 
-        public IServiceDetails ServiceDetails { get; set; }
+        public ServiceDetails ServiceDetails { get; set; }
     }
 }

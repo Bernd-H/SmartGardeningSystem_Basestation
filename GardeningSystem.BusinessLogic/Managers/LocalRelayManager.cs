@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Managers;
@@ -22,7 +23,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         public byte[] MakeAesTcpRequest(byte[] data, int port) {
             lock (AesTcpClient) {
                 Logger.Info($"[MakeAesTcpRequest]Forwarding data to local service with port {port}.");
-                AesTcpClient.Connect(new IPEndPoint(IPAddress.Any, port));
+                AesTcpClient.Connect(new IPEndPoint(IPAddress.Loopback, port));
 
                 AesTcpClient.SendData(data);
                 var answer = AesTcpClient.ReceiveData();
@@ -35,11 +36,13 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         public byte[] MakeAPIRequest(byte[] data, int port) {
             lock (HttpForwarder) {
-                Logger.Info($"[MakeAesTcpRequest]Forwarding data to local service with port {port}.");
-                HttpForwarder.Connect(new IPEndPoint(IPAddress.Any, port));
+                Logger.Info($"[MakeAPIRequest]Forwarding data to local service with port {port}.");
+                HttpForwarder.Connect(new IPEndPoint(IPAddress.Loopback, port));
 
                 HttpForwarder.Send(data);
                 var answer = HttpForwarder.Receive();
+
+                //System.Console.WriteLine($"API-Answer: {Encoding.UTF8.GetString(answer)}\n----END----");
 
                 HttpForwarder.Close();
 
