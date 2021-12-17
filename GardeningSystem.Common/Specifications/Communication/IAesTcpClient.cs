@@ -9,6 +9,8 @@ namespace GardeningSystem.Common.Specifications.Communication {
 
         void SendData(byte[] msg);
 
+        void SendAlreadyEncryptedData(byte[] encryptedData);
+
         /// <param name="endPoint">Endpoint to connect to.</param>
         /// <exception cref="ObjectDisposedException"></exception>
         /// <exception cref="SocketException"></exception>

@@ -1,4 +1,6 @@
-﻿namespace GardeningSystem.Common.Specifications.DataObjects {
+﻿using System;
+
+namespace GardeningSystem.Common.Specifications.DataObjects {
 
     public enum ServiceType {
         API = 0,
@@ -13,5 +15,10 @@
         int Port { get; set; }
 
         ServiceType Type { get; set; }
+
+        /// <summary>
+        /// True, to hold the connection from the LocalRelayManager to the local Service (ServiceType) open
+        /// </summary>
+        bool HoldConnectionOpen { get; set; }
     }
 }

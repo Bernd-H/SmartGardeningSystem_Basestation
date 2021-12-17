@@ -17,7 +17,8 @@
         /// </summary>
         /// <param name="data"></param>
         /// <param name="port">Port of the service.</param>
+        /// <param name="closeConnection">True, when the connection should get closed and no data sent.</param>
         /// <returns>Answer, which that service returned.</returns>
-        byte[] MakeAesTcpRequest(byte[] data, int port);
+        byte[] MakeAesTcpRequest(byte[] data, int port, bool closeConnection);
     }
 }

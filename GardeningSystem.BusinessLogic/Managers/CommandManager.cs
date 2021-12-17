@@ -52,7 +52,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 networkStream = e.TcpClient.GetStream();
 
                 // receive command
-                var command = await AesTcpListener.ReceiveData(networkStream);
+                 var command = await AesTcpListener.ReceiveData(networkStream);
 
                 // send ack
                 await AesTcpListener.SendData(CommunicationCodes.ACK, networkStream);
@@ -68,7 +68,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     }
                     // process other commands here
                 }
-                catch (Exception) { }
+                catch (Exception ex) {
+                    Logger.Error(ex, $"[OnCommandReceivedEvent]An error occured while processing command {Convert.ToInt32(command[0])}.");
+                }
 
                 // send return code
                 await AesTcpListener.SendData(BitConverter.GetBytes(success), networkStream);

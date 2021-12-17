@@ -193,7 +193,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     if (packetO.ServiceDetails.Type == ServiceType.API) {
                         serviceAnswer = LocalRelayManager.MakeAPIRequest(packetO.Package, packetO.ServiceDetails.Port);
                     } else if (packetO.ServiceDetails.Type == ServiceType.AesTcp) {
-                        serviceAnswer = LocalRelayManager.MakeAesTcpRequest(packetO.Package, packetO.ServiceDetails.Port);
+                        serviceAnswer = LocalRelayManager.MakeAesTcpRequest(packetO.Package, packetO.ServiceDetails.Port, !packetO.ServiceDetails.HoldConnectionOpen);
                     } else {
                         Logger.Error($"[HandleIncomingPackages]Unknown ServiceType ({packetO.ServiceDetails.Type}).");
                         return null;
@@ -208,8 +208,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 }
             }
             catch (Exception ex) {
-                
                 Logger.Error(ex, $"[HandleIncomingPackages]An error occured.");
+                answer = new byte[0];
             }
 
             return answer;

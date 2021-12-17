@@ -54,6 +54,7 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<LoggerService>().As<ILoggerService>();
             containerBuilder.Register(c => ConfigurationContainer.Configuration).As<IConfiguration>();
             containerBuilder.RegisterType<DevelopmentSetuper>().As<IDevelopmentSetuper>();
+            containerBuilder.RegisterType<DependencyResolver>().As<IDependencyResolver>();
 
             /// jobs
             containerBuilder.RegisterType<WateringJob>().AsSelf();

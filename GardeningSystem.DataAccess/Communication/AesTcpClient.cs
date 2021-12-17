@@ -73,6 +73,19 @@ namespace GardeningSystem.DataAccess.Communication {
             _networkStream.Write(packet.ToArray(), 0, packet.Count);
         }
 
+        public void SendAlreadyEncryptedData(byte[] encryptedData) {
+            Logger.Trace($"[SendAlreadyEncryptedData] Sending data with length {encryptedData.Length}.");
+            List<byte> packet = new List<byte>();
+
+            // add length of packet - 4B
+            packet.AddRange(BitConverter.GetBytes(encryptedData.Length + 4));
+
+            // add content
+            packet.AddRange(encryptedData);
+
+            _networkStream.Write(packet.ToArray(), 0, packet.Count);
+        }
+
         public void Connect(IPEndPoint remoteEP) {
             Logger.Trace($"[Connect]Connecting to {remoteEP}.");
 
