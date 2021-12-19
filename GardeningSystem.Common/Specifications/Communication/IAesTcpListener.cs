@@ -10,6 +10,6 @@ namespace GardeningSystem.Common.Specifications.Communication {
 
         Task<byte[]> ReceiveData(NetworkStream networkStream);
 
-        Task SendData(byte[] msg, NetworkStream networkStream);
+        Task SendData(byte[] data, NetworkStream networkStream);
     }
 }

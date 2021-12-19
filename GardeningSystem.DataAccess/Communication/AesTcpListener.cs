@@ -9,6 +9,7 @@ using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.Common.Utilities;
 using GardeningSystem.DataAccess.Communication;
 using NLog;
 
@@ -31,51 +32,22 @@ namespace GardeningSystem.DataAccess.Communication {
 
         public async Task<byte[]> ReceiveData(NetworkStream networkStream) {
             Logger.Trace($"[ReceiveData]Waiting to receive data on local endpoint {EndPoint}.");
-            int bytes = -1;
-            int packetLength = -1;
-            int readBytes = 0;
-            List<byte> packet = new List<byte>();
 
-            do {
-                byte[] buffer = new byte[2048];
-                bytes = await networkStream.ReadAsync(buffer, 0, buffer.Length);
-
-                // get length
-                if (packetLength == -1) {
-                    byte[] length = new byte[4];
-                    Array.Copy(buffer, 0, length, 0, 4);
-                    packetLength = BitConverter.ToInt32(length, 0);
-                }
-
-                readBytes += bytes;
-                packet.AddRange(buffer);
-
-            } while (bytes != 0 && packetLength - readBytes > 0);
-
-            // remove length information and attached bytes
-            packet.RemoveRange(packetLength, packet.Count - packetLength);
-            packet.RemoveRange(0, 4);
+            var packet = await CommunicationUtils.ReceiveAsync(Logger, networkStream);
 
             // decrypt message
-            byte[] decryptedPacket = AesEncrypterDecrypter.DecryptToByteArray(packet.ToArray());
+            byte[] decryptedPacket = AesEncrypterDecrypter.DecryptToByteArray(packet);
 
             return decryptedPacket;
         }
 
-        public async Task SendData(byte[] msg, NetworkStream networkStream) {
-            Logger.Trace($"[SendData] Sending data with length {msg.Length}.");
-            List<byte> packet = new List<byte>();
+        public async Task SendData(byte[] data, NetworkStream networkStream) {
+            Logger.Trace($"[SendData] Sending data with length {data.Length}.");
 
             // encrypt message
-            var encryptedMsg = AesEncrypterDecrypter.EncryptByteArray(msg);
+            var encryptedData = AesEncrypterDecrypter.EncryptByteArray(data);
 
-            // add length of packet - 4B
-            packet.AddRange(BitConverter.GetBytes(encryptedMsg.Length + 4));
-
-            // add content
-            packet.AddRange(encryptedMsg);
-
-            await networkStream.WriteAsync(packet.ToArray(), 0, packet.Count);
+            await CommunicationUtils.SendAsync(Logger, encryptedData, networkStream);
         }
 
         protected override void Start(CancellationToken token, IPEndPoint listenerEndPoint) {

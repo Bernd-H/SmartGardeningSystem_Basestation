@@ -12,7 +12,7 @@ namespace GardeningSystem.Common.Specifications.Communication {
         /// <exception cref="SocketException"></exception>
         void Connect(IPEndPoint endPoint);
 
-        void Send(byte[] msg);
+        void Send(byte[] data);
 
         byte[] Receive();
     }

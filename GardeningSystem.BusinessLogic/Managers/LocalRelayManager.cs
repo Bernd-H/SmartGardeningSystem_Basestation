@@ -30,10 +30,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             AesTcpClients = new Dictionary<Guid, IAesTcpClient>();
         }
 
-        public byte[] MakeAesTcpRequest(byte[] data, int port, bool closeConnection) {
-            Console.WriteLine("--------------Data: -----------------");
-            Console.WriteLine(Encoding.UTF8.GetString(data));
-            Console.WriteLine("--------------End   -----------------");
+        public byte[] MakeTcpRequest(byte[] data, int port, bool closeConnection) {
             IServicePackage servicePackage = JsonConvert.DeserializeObject<ServicePackage>(Encoding.UTF8.GetString(data));
             IAesTcpClient aesTcpClient = null;
             IServicePackage answerPackage = null;
@@ -62,10 +59,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                         // forward data and receive answer
                         aesTcpClient.SendAlreadyEncryptedData(servicePackage.Data);
-                        var answer = aesTcpClient.ReceiveData();
+                        var encryptedAnswer = aesTcpClient.ReceiveEncryptedData();
 
                         answerPackage = new ServicePackage() {
-                            Data = answer,
+                            Data = encryptedAnswer,
                             SessionId = sessionId
                         };
                     }
@@ -85,8 +82,6 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                 HttpForwarder.Send(data);
                 var answer = HttpForwarder.Receive();
-
-                //System.Console.WriteLine($"API-Answer: {Encoding.UTF8.GetString(answer)}\n----END----");
 
                 HttpForwarder.Close();
 

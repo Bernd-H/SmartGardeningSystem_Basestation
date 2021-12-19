@@ -7,7 +7,13 @@ namespace GardeningSystem.Common.Specifications.Communication {
 
         byte[] ReceiveData();
 
-        void SendData(byte[] msg);
+        /// <summary>
+        /// Does not decrypt the received data.
+        /// </summary>
+        /// <returns>Encrypted data.</returns>
+        byte[] ReceiveEncryptedData();
+
+        void SendData(byte[] data);
 
         void SendAlreadyEncryptedData(byte[] encryptedData);
 

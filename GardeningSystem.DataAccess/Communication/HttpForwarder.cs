@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
+using GardeningSystem.Common.Utilities;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
@@ -34,23 +35,10 @@ namespace GardeningSystem.DataAccess.Communication {
 
         public byte[] Receive() {
             Logger.Trace($"[Receive]Receiveing from {_tcpClient.Client.RemoteEndPoint}.");
-            List<byte> packet = new List<byte>();
-            byte[] buffer = new byte[1024];
-            int readBytes = 0;
-            while (true) {
-                readBytes = _networkStream.Read(buffer, 0, buffer.Length);
 
-                if (readBytes < buffer.Length) {
-                    var tmp = new List<byte>(buffer);
-                    packet.AddRange(tmp.GetRange(0, readBytes));
-                    break;
-                }
-                else {
-                    packet.AddRange(buffer);
-                }
-            }
+            var packet = CommunicationUtils.Receive(Logger, _networkStream);
 
-            var answer = Encoding.UTF8.GetString(packet.ToArray());
+            var answer = Encoding.UTF8.GetString(packet);
             if (answer.Contains($"Transfer-Encoding: chunked")) {
                 // add terminating chunk
                 answer += "0\r\n\r\n";
@@ -58,13 +46,13 @@ namespace GardeningSystem.DataAccess.Communication {
                 return Encoding.UTF8.GetBytes(answer);
             }
 
-            return packet.ToArray();
+            return packet;
         }
 
-        public void Send(byte[] msg) {
-            Logger.Trace($"[Send]Sending {msg.Length} bytes to {_tcpClient.Client.RemoteEndPoint}.");
-            _networkStream.Write(msg, 0, msg.Length);
-            _networkStream.Flush();
+        public void Send(byte[] data) {
+            Logger.Trace($"[Send]Sending {data.Length} bytes to {_tcpClient.Client.RemoteEndPoint}.");
+
+            CommunicationUtils.Send(Logger, data, _networkStream);
         }
     }
 }

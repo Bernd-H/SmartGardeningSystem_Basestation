@@ -4,7 +4,7 @@ namespace GardeningSystem.Common.Specifications.DataObjects {
 
     public enum ServiceType {
         API = 0,
-        AesTcp = 1
+        TCP = 1
     }
 
     /// <summary>

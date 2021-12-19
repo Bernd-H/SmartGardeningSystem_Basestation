@@ -67,20 +67,20 @@ namespace GardeningSystem.BusinessLogic.Managers {
             Logger.Info("[SslStreamOpenCallback]Sending aes key to client.");
             try {
                 // send key
-                DataAccess.Communication.SslListener.SendConfidentialInformation(openStream, key);
+                SslListener.SendConfidentialInformation(openStream, key);
 
                 // get ack
-                var msg = DataAccess.Communication.SslListener.ReadMessage(openStream);
+                var msg = SslListener.ReceiveData(openStream);
                 if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
                     Logger.Info($"[SslStreamOpenCallback]Received ACK was incorrect.");
                     return; // abort
                 }
 
                 // send iv
-                DataAccess.Communication.SslListener.SendConfidentialInformation(openStream, iv);
+                SslListener.SendConfidentialInformation(openStream, iv);
 
                 // get ack
-                msg = DataAccess.Communication.SslListener.ReadMessage(openStream);
+                msg = SslListener.ReceiveData(openStream);
                 if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
                     Logger.Info($"[SslStreamOpenCallback]2. received ACK was incorrect.");
                     return; // abort

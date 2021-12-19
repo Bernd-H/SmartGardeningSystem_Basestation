@@ -14,5 +14,11 @@ namespace GardeningSystem.Common.Specifications.Communication {
         //event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
         void Init(SslStreamOpenCallback sslStreamOpenCallback, X509Certificate serverCertificate);
+
+        byte[] ReceiveData(SslStream sslStream);
+
+        void SendData(SslStream sslStream, byte[] data);
+
+        void SendConfidentialInformation(SslStream sslStream, byte[] data);
     }
 }

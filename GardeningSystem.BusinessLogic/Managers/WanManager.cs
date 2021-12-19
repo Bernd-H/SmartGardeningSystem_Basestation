@@ -109,10 +109,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private void OnConnectedToExternalServer(SslStream openStream) {
             // send id
             var id = SettingsManager.GetApplicationSettings().Id.ToByteArray();
-            DataAccess.Communication.SslTcpClient.SendMessage(openStream, id);
+            SslTcpClient.SendData(openStream, id);
 
             // receive ack
-            var ack = DataAccess.Communication.SslTcpClient.ReadMessage(openStream);
+            var ack = SslTcpClient.ReceiveData(openStream);
             if (!ack.SequenceEqual(CommunicationCodes.ACK)) {
                 return;
             }
@@ -120,7 +120,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             // listen
             try {
                 while (true) {
-                    var packet = DataAccess.Communication.SslTcpClient.ReadMessage(openStream);
+                    var packet = SslTcpClient.ReceiveData(openStream);
 
                     // decrypt relay packages
                     bool relayPackage = false;
@@ -142,7 +142,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         answer = AesEncrypterDecrypter.EncryptByteArray(answer);
                     }
 
-                    DataAccess.Communication.SslTcpClient.SendMessage(openStream, answer);
+                    SslTcpClient.SendData(openStream, answer);
                 }
             }
             catch (ObjectDisposedException) {
@@ -192,8 +192,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                     if (packetO.ServiceDetails.Type == ServiceType.API) {
                         serviceAnswer = LocalRelayManager.MakeAPIRequest(packetO.Package, packetO.ServiceDetails.Port);
-                    } else if (packetO.ServiceDetails.Type == ServiceType.AesTcp) {
-                        serviceAnswer = LocalRelayManager.MakeAesTcpRequest(packetO.Package, packetO.ServiceDetails.Port, !packetO.ServiceDetails.HoldConnectionOpen);
+                    } else if (packetO.ServiceDetails.Type == ServiceType.TCP) {
+                        serviceAnswer = LocalRelayManager.MakeTcpRequest(packetO.Package, packetO.ServiceDetails.Port, !packetO.ServiceDetails.HoldConnectionOpen);
                     } else {
                         Logger.Error($"[HandleIncomingPackages]Unknown ServiceType ({packetO.ServiceDetails.Type}).");
                         return null;
