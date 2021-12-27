@@ -12,6 +12,10 @@
 
         public static string WLANINTERFACE_NAME = "wlanInterface_name";
 
+        public static string AP_SSID = "ap_ssid";
+
+        public static string AP_PASSPHRASE = "ap_passPhrase";
+
         // Cryptography
         // Server certificate
         public static string CERT_PRIVATEKEY_FILENAME = "cert_privateKey_fileName";

@@ -9,6 +9,10 @@
 
   "wlanInterface_name": "wlan0", // standard interface name
 
+  "ap_ssid": "SmartGardeningSystem",
+
+  "ap_passPhrase": "Garden!ng",
+
   ///////////////////////// cryptography
   // rest api token
   "rest_api_jwt": {

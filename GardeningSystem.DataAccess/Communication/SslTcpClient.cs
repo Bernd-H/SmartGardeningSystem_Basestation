@@ -74,12 +74,16 @@ namespace GardeningSystem.DataAccess.Communication {
                     sslStream?.Close();
                 });
             } catch (Exception ex) {
-                if (ex.HResult != 10060) {
-                    Logger.Error(ex, $"[Start]Error while connecting to {endPoint}. targetHost={targetHost}");
-                    sslStream?.Close();
+                //if (ex.HResult == 10060) {
+                //    Logger.Info($"[Start]Connecting to {endPoint} failed.");
+                //}
+                //else if (ex.HResult == 10061) {
+                if (ex.HResult == -2147467259) { 
+                    Logger.Warn($"[Start]Target host ({endPoint}) refused connection.");
                 }
                 else {
-                    Logger.Info($"[Start]Connecting to {endPoint} failed.");
+                    Logger.Error(ex, $"[Start]Error while connecting to {endPoint}. targetHost={targetHost}");
+                    sslStream?.Close();
                 }
             }
 

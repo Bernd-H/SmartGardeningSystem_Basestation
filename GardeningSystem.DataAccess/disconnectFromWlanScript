@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#shutdown dhc
+dhclient -r
+#shutdown wpa_supplicant
+killall wpa_supplicant
+#down interface
+ifdown --force wlan0
+sleep 1

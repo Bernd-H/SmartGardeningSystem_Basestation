@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
+using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Jobs;

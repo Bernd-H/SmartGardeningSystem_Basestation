@@ -99,7 +99,7 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<AesTcpClient>().As<IAesTcpClient>();
             containerBuilder.RegisterType<SslTcpClient>().As<ISslTcpClient>();
             containerBuilder.RegisterType<HttpForwarder>().As<IHttpForwarder>();
-            containerBuilder.RegisterType<NatController>().As<INatController>();
+            containerBuilder.RegisterType<NatController>().As<INatController>().SingleInstance();
         }
 
         /// <summary>

@@ -75,8 +75,18 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private async Task ConnectToExternalServerLoop(CancellationToken cancellationToken) {
             bool success = false;
+            bool resolveExceptionMessageLogged = false;
             do {
-                var ip = Dns.GetHostAddresses(Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]).FirstOrDefault();
+                IPAddress ip = null;
+                try {
+                    ip = Dns.GetHostAddresses(Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]).FirstOrDefault();
+                }catch (Exception) {
+                    if (!resolveExceptionMessageLogged) {
+                        Logger.Info($"[ConnectToExternalServerLoop]Could not resolve {Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]}. Retrying ever 60 minutes.");
+                        resolveExceptionMessageLogged = true;
+                    }
+                }
+
                 if (ip != null) {
                     int port = Convert.ToInt32(Configuration[ConfigurationVars.WANMANAGER_CONNECTIONSERVICEPORT]);
                     int keepAliveInterval = 60000; // 1min
@@ -85,8 +95,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                 if (!success) {
                     // wait till the next attempt
-                    Logger.Trace($"[ConnectToExternalServerLoop]WanManager not started. Could not resolve {Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]}. Retrying.");
-                    Task.Delay(60 * 1000, cancellationToken).Wait();
+                    Logger.Trace($"WanManager not started. Retrying.");
+                    await Task.Delay(60 * 1000, cancellationToken);
                 }
             } while (!success && !cancellationToken.IsCancellationRequested);
         }
@@ -166,7 +176,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     if (packetO.Package.SequenceEqual(CommunicationCodes.SendPeerToPeerEndPoint)) {
 
                         // try to open a public port
-                        var endpoint = GetPublicEndpoint();
+                        var endpoint = getPublicEndpoint(0).Result;
 
                         // build result
                         if (endpoint != null) {
@@ -215,19 +225,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return answer;
         }
 
-        private IPEndPoint GetPublicEndpoint() {
-            return null;
-            // TODO: build cache... and don't use a new local endpoint every time...
-            // check if hole is still active
+        private async Task<IPEndPoint> getPublicEndpoint(int privatePort) {
+            //var publicPort = 0;
+            //var success = await NatController.OpenPublicPort(privatePort, publicPort, tcp: true);
 
-            IStunResult result = NatController.PunchHole();
-            if (result.PublicEndPoint != null && result.LocalEndPoint != null) {
-                StartRelayOnly(_cancellationToken, result.LocalEndPoint);
-
-                return result.PublicEndPoint;
-            }
-
-            return null;
+            //if (success) {
+            //    return new IPEndPoint(, publicPort);
+            //}
+            //else {
+                return null;
+            //}
         }
     }
 }
