@@ -23,5 +23,7 @@ namespace GardeningSystem.Common.Specifications {
         bool CreateAP();
 
         bool ShutdownAP();
+
+        bool IsAccessPointUp();
     }
 }

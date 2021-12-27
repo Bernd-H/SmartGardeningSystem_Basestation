@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 using System.Threading;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
@@ -36,21 +37,7 @@ namespace GardeningSystem.DataAccess {
             executeCommand($"sudo ./{changeWlanScriptName} \"{essid}\" \"{secret}\"");
 
             // check if connected
-            bool success = false;
-            int attempts = 5;
-            do {
-                if (attempts != 5) {
-                    Thread.Sleep(2000);
-                }
-                success = IsConnectedToWlan();
-                attempts--;
-            } while (!success && attempts >= 0);
-
-            if (!success) {
-                // TODO: establish connection 
-            }
-
-            return success;
+            return loopFunction(IsConnectedToWlan, 2000, 30);
         }
 
         public bool DisconnectFromWlan() {
@@ -61,9 +48,7 @@ namespace GardeningSystem.DataAccess {
             executeCommand($"sudo ./{disconnectFromWlanScriptName}");
 
             // check if connected
-            var isConnected = IsConnectedToWlan();
-
-            return !isConnected;
+            return loopFunction(() => !IsConnectedToWlan(), 2000, 30);
         }
 
         public IEnumerable<string> GetAllWlans() {
@@ -111,12 +96,12 @@ namespace GardeningSystem.DataAccess {
                     localIP = streamReader.ReadToEnd();
                 });
 
-                localIP = localIP.Replace("\\r", "").Replace("\\n", "");
+                //localIP = localIP.Replace("\\r", "").Replace("\\n", "");
+                localIP = extractIpFromString(localIP);
 
                 // check if there is a local ip
-                Logger.Trace($"[IsConnectedToWlan]localIP: {localIP}");
                 IPAddress address;
-                if (IPAddress.TryParse(localIP, out address)) {
+                if (localIP != string.Empty && IPAddress.TryParse(localIP, out address)) {
                     return true;
                 }
             }
@@ -132,19 +117,10 @@ namespace GardeningSystem.DataAccess {
 
             try {
                 // create an access point without internet sharing and client isolation (clients can't talk to each other)
-                string command = $"sudo create_ap --isolate-clients -n wlan0 {Configuration[ConfigurationVars.AP_SSID]} {Configuration[ConfigurationVars.AP_PASSPHRASE]}";
+                string command = $"sudo create_ap --isolate-clients -n {Configuration[ConfigurationVars.WLANINTERFACE_NAME]} " +
+                    $"{Configuration[ConfigurationVars.AP_SSID]} {Configuration[ConfigurationVars.AP_PASSPHRASE]}";
                 bool error = false;
                 executeCommand(command);
-                //console(command, (streamWriter, streamReader) => {
-                //    string outputText = streamReader.ReadToEnd();
-                //    if (outputText.Contains("ERROR")) {
-                //        error = true;
-                //        Logger.Error($"[CreateAP]Error while creating ap: {outputText}");
-                //    }
-                //    else {
-                //        Logger.Trace($"[CreateAP]create_ap output:\n" + outputText);
-                //    }
-                //});
 
                 if (error) {
                     return false;
@@ -155,9 +131,7 @@ namespace GardeningSystem.DataAccess {
                 executeCommand(startServiceCommand);
 
                 // verfiy that ap is active
-
-
-                return true;
+                return loopFunction(IsAccessPointUp, 6000, 10);
             } catch (Exception ex) {
                 Logger.Error(ex, "[CreateAP]Exception while creating access point.");
             }
@@ -172,20 +146,72 @@ namespace GardeningSystem.DataAccess {
                 // stop service
                 string stopServiceCommand = "sudo systemctl stop create_ap";
                 executeCommand(stopServiceCommand);
-                //console(stopServiceCommand, (streamWriter, streamReader) => {
-                //    string outputText = streamReader.ReadToEnd();
-                //});
 
                 // verfiy that ap is deactivated
-
-
-                return true;
+                return loopFunction(() => !IsAccessPointUp(), 2000, 30);
             }
             catch (Exception ex) {
                 Logger.Error(ex, "[ShutdownAP]Exception while closing access point.");
             }
 
             return false;
+        }
+
+        public bool IsAccessPointUp() {
+            Logger.Info($"[IsAccessPointUp]Checking mode of interface {Configuration[ConfigurationVars.WLANINTERFACE_NAME]}.");
+
+            try {
+                // stop service
+                string command = "iwconfig wlan0";
+                string outputText = string.Empty;
+                console(command, (streamWriter, streamReader) => {
+                    outputText = streamReader.ReadToEnd();
+                });
+
+                if (outputText.Contains("Mode:")) {
+                    string textStartingWithMode = outputText.Substring(outputText.IndexOf("Mode:")+5);
+                    if (textStartingWithMode.Substring(0, textStartingWithMode.IndexOf(" ")) == "Master") {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, "[IsAccessPointUp]Exception while getting/processing interface state.");
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Calls every <paramref name="millisecondsInterval"/> ms a function (<paramref name="func"/>).
+        /// Stops when the function returns true, or <paramref name="maxLoopCount"/> is reached.
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="millisecondsInterval"></param>
+        /// <param name="maxLoopCount"></param>
+        /// <returns></returns>
+        private bool loopFunction(Func<bool> func, int millisecondsInterval, int maxLoopCount) {
+            bool success = false;
+            int attempt = 0;
+            do {
+                if (attempt > 0) {
+                    Thread.Sleep(millisecondsInterval);
+                }
+
+                success = func();
+                attempt++;
+            } while (!success && attempt <= maxLoopCount);
+
+            return success;
+        }
+
+        private string extractIpFromString(string s) {
+            var regex = new Regex(@"([0-9]{1,3}\.){3}[0-9]{1,3}", RegexOptions.Compiled);
+
+            var match = regex.Match(s);
+            if (!match.Success) return null;
+
+            return match.Value;
         }
 
         private static bool pingHost(string nameOrAddress) {
@@ -223,7 +249,7 @@ namespace GardeningSystem.DataAccess {
             proc.Close();
         }
 
-        private static void executeCommand(string command) {
+        public static void executeCommand(string command) {
             console(command, null);
         }
 

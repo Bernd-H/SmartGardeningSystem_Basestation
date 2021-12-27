@@ -53,7 +53,7 @@
         // Services
         public static string WATERINGJOB_ENABLED = "wateringJob_enabled";
         public static string COMMUNICATIONJOB_ENABLED = "communicationJob_enabled";
-        public static string PUBLICIPJOB_ENABLED = "publicIpJob_enabled";
+        public static string ACCESSPOINTJOB_ENABLED = "accessPointJob_enabled";
 
         // Test Environment
         public static string IS_TEST_ENVIRONMENT = "isTestEnvironment";

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading;
 using GardeningSystem;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.DataAccess;
 using NLog;
 
 namespace LinuxCommandsTests
@@ -23,8 +25,8 @@ namespace LinuxCommandsTests
             logger.Info($"Is connected to wlan = {wifiConfigurator.IsConnectedToWlan()}");
 
             #region change wifi
-            Console.WriteLine("Connect to a new wlan test:");
-            logger.Info($"Connect to a wlan test.");
+            //logger.Info($"Connect to a wlan test.");
+            logger.Info($"Enter wlan ssid and passphrase for later.");
             Console.Write("SSID: ");
             string ssid = Console.ReadLine();
             logger.Info($"Entered ssid={ssid}");
@@ -36,29 +38,18 @@ namespace LinuxCommandsTests
             #endregion
 
             #region test access point methods
-            //logger.Info($"Disconnecting form wifi: {wifiConfigurator.DisconnectFromWlan()}");
-            //logger.Info($"Creating access point..: {wifiConfigurator.CreateAP()}");
-            //logger.Info($"----------------------------------------------");
-            //GetAllWifis(wifiConfigurator, logger);
-            //logger.Info($"----------------------------------------------");
-            //logger.Info($"Waiting 2*60 seconds.");
-            //Thread.Sleep(60 * 2 * 1000);
+            logger.Info($"Disconnecting form wifi: {wifiConfigurator.DisconnectFromWlan()}");
+            logger.Info($"Creating access point..: {wifiConfigurator.CreateAP()}");
+            logger.Info($"Waiting 30 seconds.");
+            Thread.Sleep(30 * 1000);
             logger.Info($"Closing access point: {wifiConfigurator.ShutdownAP()}");
-
-            bool wentGood = wifiConfigurator.ConnectToWlan(ssid, pwd);
-            logger.Info($"Connecting to wifi again: {wentGood}");
+            logger.Info($"Connecting to wifi again: {wifiConfigurator.ConnectToWlan(ssid, pwd)}");
             #endregion
 
+            logger.Info($"Shutting down system.");
+            WifiConfigurator.executeCommand("sudo shutdown -h now");
+
             Console.WriteLine("Finished!");
-            //Console.ReadLine();
-        }
-
-
-        private static void GetAllWifis(IWifiConfigurator wifiConfigurator, ILogger logger) {
-            var wlans = wifiConfigurator.GetAllWlans();
-            foreach (var wlan in wlans) {
-                logger.Info($"Wlan found: {wlan}");
-            }
         }
     }
 }
