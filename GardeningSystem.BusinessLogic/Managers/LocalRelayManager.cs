@@ -8,6 +8,7 @@ using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.DataObjects;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.Common.Utilities;
 using Newtonsoft.Json;
 using NLog;
 
@@ -31,7 +32,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         public byte[] MakeTcpRequest(byte[] data, int port, bool closeConnection) {
-            IServicePackage servicePackage = JsonConvert.DeserializeObject<ServicePackage>(Encoding.UTF8.GetString(data));
+            IServicePackage servicePackage = CommunicationUtils.DeserializeObject<ServicePackage>(data);
             IAesTcpClient aesTcpClient = null;
             IServicePackage answerPackage = null;
             Guid sessionId = Guid.Empty;
@@ -71,7 +72,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     return new byte[0];
                 }
 
-                return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(answerPackage));
+                return CommunicationUtils.SerializeObject<ServicePackage>(answerPackage as ServicePackage);
             }
         }
 

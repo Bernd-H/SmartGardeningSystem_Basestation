@@ -111,7 +111,7 @@ namespace GardeningSystem.DataAccess {
                     localIP = streamReader.ReadToEnd();
                 });
 
-                localIP = localIP.Replace("\r", "").Replace("\n", "");
+                localIP = localIP.Replace("\\r", "").Replace("\\n", "");
 
                 // check if there is a local ip
                 Logger.Trace($"[IsConnectedToWlan]localIP: {localIP}");

@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using NLog;
 
 namespace GardeningSystem.Common.Utilities {
     public static class CommunicationUtils {
+
+        #region Send/Receive Methods
 
         #region Async-Methods
 
@@ -135,5 +139,17 @@ namespace GardeningSystem.Common.Utilities {
         }
 
         #endregion
+
+        #endregion
+
+        public static byte[] SerializeObject<T>(T o) where T : class {
+            var json = JsonConvert.SerializeObject(o);
+            return Encoding.UTF8.GetBytes(json);
+        }
+
+        public static T DeserializeObject<T>(byte[] o) where T : class {
+            var json = Encoding.UTF8.GetString(o);
+            return JsonConvert.DeserializeObject<T>(json);
+        }
     }
 }

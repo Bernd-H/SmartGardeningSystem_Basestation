@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Managers;
 using Microsoft.Extensions.Hosting;
 using NLog;
@@ -24,10 +25,13 @@ namespace GardeningSystem.Jobs {
 
         private IWanManager WanManager;
 
+        private INatController NatController;
+
         private ILogger Logger;
 
         public CommunicationJob(ILoggerService logger, ISettingsManager settingsManager, ILocalMobileAppDiscoveryManager localMobileAppDiscoveryManager,
-            IAesKeyExchangeManager aesKeyExchangeManager, ICommandManager commandManager, IAPIManager _APIManager, IWanManager wanManager) {
+            IAesKeyExchangeManager aesKeyExchangeManager, ICommandManager commandManager, IAPIManager _APIManager, IWanManager wanManager,
+            INatController natController) {
             Logger = logger.GetLogger<CommunicationJob>();
             SettingsManager = settingsManager;
             LocalMobileAppDiscoveryManager = localMobileAppDiscoveryManager;
@@ -35,6 +39,7 @@ namespace GardeningSystem.Jobs {
             CommandManager = commandManager;
             APIManager = _APIManager;
             WanManager = wanManager;
+            NatController = natController;
 
             _cancellationTokenSource = new CancellationTokenSource();
         }
@@ -43,6 +48,8 @@ namespace GardeningSystem.Jobs {
             return Task.Run(async () => {
                 try {
                     Logger.Info($"[StartAsync]Starting Communication-Setup routine.");
+
+                    NatController.StartSearchingForNatDevices();
 
                     if (string.IsNullOrEmpty(SettingsManager.GetApplicationSettings().APIToken)) {
                         // get api token from local server if system got started in the production network, from where the token server is reachable

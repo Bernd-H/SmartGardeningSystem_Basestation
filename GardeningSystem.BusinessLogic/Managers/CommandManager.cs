@@ -10,6 +10,7 @@ using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.Common.Utilities;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using NLog;
@@ -61,8 +62,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 try {
                     if (command.SequenceEqual(CommunicationCodes.WlanCommand)) {
                         // get login information
-                        var connectInfo_json = Encoding.UTF8.GetString(await AesTcpListener.ReceiveData(networkStream));
-                        var connectInfo = JsonConvert.DeserializeObject<WlanInfoDto>(connectInfo_json);
+                        var connectInfo_bytes = await AesTcpListener.ReceiveData(networkStream);
+                        var connectInfo = CommunicationUtils.DeserializeObject<WlanInfoDto>(connectInfo_bytes);
 
                         success = processCommand_ConnectToWlan(connectInfo);
                     }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,26 +22,45 @@ namespace GardeningSystem.DataAccess.Communication {
 
         public NatController(ILoggerService loggerService) {
             Logger = loggerService.GetLogger<NatController>();
+        }
 
+        public void StartSearchingForNatDevices() {
+            Logger.Info($"[StartSearchingForNatDevices]Searching for nats.");
             NatUtility.DeviceFound += deviceFound;
             NatUtility.StartDiscovery();
         }
 
         public async Task CloseAllOpendPorts() {
-            foreach (var mapping in performedMappings) {
-                await closeMapping(mapping);
+            await locker.WaitAsync();
+            try {
+                Logger.Info($"[CloseAllOpendPorts]Closing {performedMappings.Count} open ports.");
+                foreach (var mapping in performedMappings) {
+                    await closeMapping(mapping);
+                }
+
+                performedMappings.Clear();
+            }
+            finally {
+                locker.Release();
             }
         }
 
         public async Task ClosePublicPort(int publicPort, bool tcp = true) {
             await locker.WaitAsync();
-            Protocol protocol = tcp ? Protocol.Tcp : Protocol.Udp;
+            try {
+                Protocol protocol = tcp ? Protocol.Tcp : Protocol.Udp;
 
-            var mapping = performedMappings.Find((m) => {
-                return (m.Protocol == protocol) && (m.PublicPort == publicPort);
-            });
+                var mapping = performedMappings.Find((m) => {
+                    return (m.Protocol == protocol) && (m.PublicPort == publicPort);
+                });
 
-            await closeMapping(mapping);
+                await closeMapping(mapping);
+
+                performedMappings.Remove(mapping);
+            }
+            finally {
+                locker.Release();
+            }
         }
 
         public async Task<int> OpenPublicPort(int privatePort, int publicPort, bool tcp = true) {
@@ -125,28 +143,23 @@ namespace GardeningSystem.DataAccess.Communication {
         private async Task closeMapping(Mapping mapping) {
             List<IPAddress> devicesWithRemovedMapping = new List<IPAddress>();
 
-            try { 
-                if (mapping != null) {
-                    // delete mapping on all nat devices
-                    foreach (var device in natDevices) {
-                        var externalDeviceIp = await device.GetExternalIPAsync();
-                        if (!devicesWithRemovedMapping.Contains(externalDeviceIp)) {
-                            try {
-                                await device.DeletePortMapAsync(mapping);
-                                Logger.Info("[ClosePublicPort]Deleting Mapping: protocol={0}, public={1}, private={2}", mapping.Protocol, mapping.PublicPort, mapping.PrivatePort);
-                                devicesWithRemovedMapping.Add(externalDeviceIp);
-                            }
-                            catch {
-                                Logger.Info("[ClosePublicPort]Couldn't delete specific mapping");
-                            }
+            if (mapping != null) {
+                // delete mapping on all nat devices
+                foreach (var device in natDevices) {
+                    var externalDeviceIp = await device.GetExternalIPAsync();
+                    if (!devicesWithRemovedMapping.Contains(externalDeviceIp)) {
+                        try {
+                            await device.DeletePortMapAsync(mapping);
+                            Logger.Info("[ClosePublicPort]Deleting Mapping: protocol={0}, public={1}, private={2}", mapping.Protocol, mapping.PublicPort, mapping.PrivatePort);
+                            devicesWithRemovedMapping.Add(externalDeviceIp);
+                        }
+                        catch {
+                            Logger.Info("[ClosePublicPort]Couldn't delete specific mapping");
                         }
                     }
-
-                    performedMappings.Remove(mapping);
                 }
-            }
-            finally {
-                locker.Release();
+
+                //performedMappings.Remove(mapping);
             }
         }
 
@@ -159,7 +172,9 @@ namespace GardeningSystem.DataAccess.Communication {
                 // upnp and nat-pmp.
 
                 Logger.Info($"[DeviceFound]{device.NatProtocol} supporting nat with ip={await device.GetExternalIPAsync()} found.");
-                natDevices.Add(device);
+                if (!natDevices.Contains(device)) {
+                    natDevices.Add(device);
+                }
             }
             finally {
                 locker.Release();

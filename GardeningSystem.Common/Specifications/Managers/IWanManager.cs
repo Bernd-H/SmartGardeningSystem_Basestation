@@ -19,8 +19,8 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// Listens on a specific port and does not initiate connections. (Only relays packages)
         /// Used when a public port was opened successfully.
         /// </summary>
-        /// <param name="cancellationToken"></param>
+        /// <param name="cancellationToken">Cancellation token to cancle only this relay service.</param>
         /// <param name="localEndPoint">Local end point where the public port relays all its received packages to.</param>
-        void StartRelayOnly(CancellationToken cancellationToken, IPEndPoint localEndPoint);
+        void StartNewRelayOnlyService(CancellationToken cancellationToken, IPEndPoint localEndPoint);
     }
 }

@@ -3,6 +3,8 @@
 namespace GardeningSystem.Common.Specifications.Communication {
     public interface INatController {
 
+        void StartSearchingForNatDevices();
+
         /// <summary>
         /// Maps a specific private and public port via the Upnp or Pmp protocol on all reachable nat devices.
         /// </summary>
