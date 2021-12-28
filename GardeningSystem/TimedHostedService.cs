@@ -12,6 +12,7 @@ namespace GardeningSystem {
         private ILogger _logger;
         private Timer _timer;
         private EventHandler _doWorkHandler;
+        private EventHandler _stopHandler;
         private string _serviceName;
         private TimeSpan _period;
 
@@ -27,8 +28,12 @@ namespace GardeningSystem {
             _waitTillDoWorkHasFinished = waitTillDoWorkHasFinished;
         }
 
-        protected void SetEventHandler(EventHandler doWorkHandler) {
+        protected void SetStartEventHandler(EventHandler doWorkHandler) {
             _doWorkHandler = doWorkHandler;
+        }
+
+        protected void SetStopEventHandler(EventHandler stopHandler) {
+            _stopHandler = stopHandler;
         }
 
         public Task StartAsync(CancellationToken stoppingToken) {
@@ -63,6 +68,8 @@ namespace GardeningSystem {
             _logger.Warn($"[StopAsync]{_serviceName} is stopping.");
 
             _timer?.Change(Timeout.Infinite, 0);
+
+            _stopHandler?.Invoke(null, null);
 
             return Task.CompletedTask;
         }

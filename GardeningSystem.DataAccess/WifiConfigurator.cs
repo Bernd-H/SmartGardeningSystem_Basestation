@@ -8,7 +8,9 @@ using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading;
 using GardeningSystem.Common.Configuration;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Utilities;
 using Microsoft.Extensions.Configuration;
 using NLog;
 
@@ -29,7 +31,15 @@ namespace GardeningSystem.DataAccess {
             Configuration = configuration;
         }
 
-        public bool ConnectToWlan(string essid, string secret) {
+        public bool ManagedConnectToWlan(string ssid, string secret) {
+            if (IsAccessPointUp()) {
+                Logger.Info($"[ManagedConnectToWlan]Shutting down the access point: {ShutdownAP()}.");
+            }
+
+            return ChangeWlan(ssid, secret);
+        }
+
+        public bool ChangeWlan(string essid, string secret) {
             Logger.Info($"[ConnectToWlan]Trying to connect to wlan wiht essid={essid}.");
             setScriptExecutionRights(changeWlanScriptName);
 
@@ -51,9 +61,9 @@ namespace GardeningSystem.DataAccess {
             return loopFunction(() => !IsConnectedToWlan(), 2000, 30);
         }
 
-        public IEnumerable<string> GetAllWlans() {
+        public IEnumerable<WlanInfo> GetAllWlans() {
             Logger.Info($"[GetAllWlans]Searching for reachable wifis.");
-            var finalIds = new List<string>();
+            var finalIds = new List<WlanInfo>();
 
             try { 
                 // get all wlans
@@ -68,7 +78,9 @@ namespace GardeningSystem.DataAccess {
                     var essids = allWlans.Split("ESSID:\"").ToList();
                     essids.RemoveAt(0);
                     foreach (var id in essids) {
-                        finalIds.Add(id.Substring(0, id.IndexOf("\"")));
+                        finalIds.Add(new WlanInfo {
+                            Ssid = id.Substring(0, id.IndexOf("\""))
+                        });
                     }
                 }
             }
@@ -85,28 +97,30 @@ namespace GardeningSystem.DataAccess {
         }
 
         public bool IsConnectedToWlan() {
-            Logger.Info($"[IsConnectedToWlan]Checking wifi connection.");
+            Logger.Trace($"[IsConnectedToWlan]Checking wifi connection.");
 
-            // command : hostname -I | awk '{print $1}'
             try {
-                // get all wlans
-                string command = "hostname -I | awk '{print $1}'";
-                string localIP = string.Empty;
-                console(command, (streamWriter, streamReader) => {
-                    localIP = streamReader.ReadToEnd();
-                });
+                var myIp = getLocalIpThroughTerminal();
+                Logger.Info($"myIP: " + myIp?.ToString());
+                if (myIp == null || !myIp.IsPrivateAddress()) {
+                    return false;
+                }
 
-                //localIP = localIP.Replace("\\r", "").Replace("\\n", "");
-                localIP = extractIpFromString(localIP);
+                var networkIpAddress = myIp.GetNetworkAddress(IpUtils.GetSubnetMask(myIp));
+                var firstAddressInTheNetwork = networkIpAddress.GetNextIPAddress();
+                Logger.Info($"FirstIP: " + firstAddressInTheNetwork.ToString());
 
-                // check if there is a local ip
-                IPAddress address;
-                if (localIP != string.Empty && IPAddress.TryParse(localIP, out address)) {
+                // check if first address in the network is our ip address
+                // if so -> we are probably the router (access point is up)
+                if (firstAddressInTheNetwork.Equals(myIp)) {
+                    return false;
+                }
+                else {
                     return true;
                 }
             }
             catch (Exception ex) {
-                Logger.Error(ex, "[IsConnectedToWlan]Exception while getting local ip.");
+                Logger.Error(ex, "[IsConnectedToWlan]Exception while getting/processing local ip.");
             }
 
             return false;
@@ -158,7 +172,7 @@ namespace GardeningSystem.DataAccess {
         }
 
         public bool IsAccessPointUp() {
-            Logger.Info($"[IsAccessPointUp]Checking mode of interface {Configuration[ConfigurationVars.WLANINTERFACE_NAME]}.");
+            Logger.Trace($"[IsAccessPointUp]Checking mode of interface {Configuration[ConfigurationVars.WLANINTERFACE_NAME]}.");
 
             try {
                 // stop service
@@ -212,6 +226,30 @@ namespace GardeningSystem.DataAccess {
             if (!match.Success) return null;
 
             return match.Value;
+        }
+
+        private IPAddress getLocalIpThroughTerminal() {
+            Logger.Trace($"[getLocalIpThroughTerminal]Getting local ip address.");
+
+            try {
+                // get all wlans
+                string command = "hostname -I | awk '{print $1}'";
+                string localIP = string.Empty;
+                console(command, (streamWriter, streamReader) => {
+                    localIP = streamReader.ReadToEnd();
+                });
+
+                localIP = extractIpFromString(localIP);
+
+                IPAddress address = null;
+                IPAddress.TryParse(localIP, out address);
+                return address;
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, "[getLocalIpThroughTerminal]Exception while getting local ip.");
+            }
+
+            return null;
         }
 
         private static bool pingHost(string nameOrAddress) {

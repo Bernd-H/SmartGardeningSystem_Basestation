@@ -105,6 +105,17 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private void ConfigureKeepAlive() {
             if (_keepAliveInterval > 0) {
+                _client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                _client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.TcpKeepAliveTime, _keepAliveInterval);
+            }
+        }
+
+        /// <summary>
+        /// Works only on windows: "Socket.IOControl handles Windows-specific control codes and is not supported on this platform"
+        /// </summary>
+        [Obsolete]
+        private void ConfigureKeepAlive_Windows() {
+            if (_keepAliveInterval > 0) {
                 // Get the size of the uint to use to back the byte array
                 int size = Marshal.SizeOf((uint)0);
 

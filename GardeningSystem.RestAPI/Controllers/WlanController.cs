@@ -17,9 +17,9 @@ namespace GardeningSystem.RestAPI.Controllers {
 
         private IWifiConfigurator WifiConfigurator;
 
-        public WlanController(ILoggerService logger) {
+        public WlanController(ILoggerService logger, IWifiConfigurator wifiConfigurator) {
             Logger = logger.GetLogger<WlanController>();
-            //WifiConfigurator = wifiConfigurator;
+            WifiConfigurator = wifiConfigurator;
         }
 
         // GET: api/Wlan
@@ -27,11 +27,7 @@ namespace GardeningSystem.RestAPI.Controllers {
         public IEnumerable<WlanInfo> Get() {
             Logger.Info($"[Get]User {ControllerHelperClass.GetUserId(HttpContext)} requested all registered modules.");
             try {
-                //return ModuleManager.GetAllModules().Result;
-                Logger.Warn("[Get]Not implemented!");
-
-                //return WifiConfigurator.GetAllWlans();
-                return new List<WlanInfo>() { new WlanInfo() { Ssid = "Wlan1" }, new WlanInfo() { Ssid = "Wlan2" }, new WlanInfo() { Ssid = "Wlan3" } };
+                return WifiConfigurator.GetAllWlans();
             }
             catch (Exception ex) {
                 Logger.Error(ex, "[Get]Could not load all registered modules.");
@@ -48,8 +44,7 @@ namespace GardeningSystem.RestAPI.Controllers {
 
             bool _isConnected = false;
             try {
-                Logger.Warn("[GetIsConnected]Not implemented!");
-                _isConnected = false;
+                _isConnected = WifiConfigurator.IsConnectedToWlan();
             }
             catch (Exception ex) {
                 Logger.Error(ex, "[GetIsConnected]Could not load requested module information.");

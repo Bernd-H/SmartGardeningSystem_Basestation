@@ -20,7 +20,8 @@ namespace GardeningSystem.Jobs {
             Logger = logger.GetLogger<WateringJob>();
             WateringManager = wateringManager;
 
-            base.SetEventHandler(new EventHandler(Start));
+            base.SetStartEventHandler(new EventHandler(Start));
+            base.SetStopEventHandler(new EventHandler(Stop));
         }
 
         private async void Start(object s, EventArgs e) {
@@ -46,6 +47,9 @@ namespace GardeningSystem.Jobs {
             // wait for all the end of all watering tasks
             await Task.WhenAll(wateringTasks);
             Logger.Trace($"[Start]Watering job finished.");
+        }
+
+        private async void Stop(object s, EventArgs e) {
         }
     }
 }

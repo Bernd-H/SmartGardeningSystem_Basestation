@@ -103,7 +103,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                 if (ip != null) {
                     int port = Convert.ToInt32(Configuration[ConfigurationVars.WANMANAGER_CONNECTIONSERVICEPORT]);
-                    int keepAliveInterval = 60000; // 1min
+                    int keepAliveInterval = 60; // 1min
                     success = await SslTcpClient.Start(new IPEndPoint(ip, port), OnConnectedToExternalServer, Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN], keepAliveInterval);
                 }
 

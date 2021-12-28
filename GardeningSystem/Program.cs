@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
+using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
@@ -41,6 +42,8 @@ namespace GardeningSystem {
                     logger.Info("Setting up test development/test enviroment.");
                     IoC.Get<IDevelopmentSetuper>().SetupTestEnvironment();
                 }
+
+                //IoC.Get<IWifiConfigurator>().DisconnectFromWlan();
 
                 logger.Debug("init main");
                 _host = CreateHostBuilder(args, IoC.Get<ICertificateHandler>()).Build();

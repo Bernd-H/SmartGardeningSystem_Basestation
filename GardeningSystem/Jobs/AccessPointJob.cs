@@ -17,7 +17,7 @@ namespace GardeningSystem.Jobs {
             Logger = logger.GetLogger<AccessPointJob>();
             WifiConfigurator = wifiConfigurator;
 
-            base.SetEventHandler(new EventHandler(Start));
+            base.SetStartEventHandler(new EventHandler(Start));
             Logger.Info($"[AccessPointJob]Checking network connection every {PERIOD.TotalMinutes} minutes.");
         }
 
@@ -26,10 +26,16 @@ namespace GardeningSystem.Jobs {
                 if (!WifiConfigurator.IsAccessPointUp()) {
                     Logger.Info($"[Start]Starting access point: {WifiConfigurator.CreateAP()}.");
                 }
+                else {
+                    Logger.Info($"[Start]Access point is already up.");
+                }
             }
             else {
                 if (WifiConfigurator.IsAccessPointUp()) {
                     Logger.Info($"[Start]Shutting down access point: {WifiConfigurator.ShutdownAP()}.");
+                }
+                else {
+                    Logger.Info($"[Start]Connected to wlan. Access point is down.");
                 }
             }
         }

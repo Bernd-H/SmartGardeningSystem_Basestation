@@ -12,7 +12,6 @@ using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Utilities;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
@@ -45,6 +44,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             AesTcpListener.CommandReceivedEventHandler += OnCommandReceivedEvent;
             var commandListenerPort = Convert.ToInt32(Configuration[ConfigurationVars.COMMANDLISTENER_LISTENPORT]);
             AesTcpListener.Start(new IPEndPoint(IPAddress.Any, commandListenerPort));
+            Logger.Info($"[Start]Listening on {AesTcpListener.EndPoint}...");
         }
 
         private async void OnCommandReceivedEvent(object sender, TcpEventArgs e) {
@@ -93,8 +93,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private bool processCommand_ConnectToWlan(WlanInfoDto connectInfo) {
             string decryptedSecret = Encoding.UTF8.GetString(AesEncrypterDecrypter.DecryptToByteArray(connectInfo.EncryptedPassword));
             Logger.Info($"[processCommand_ConnectToWlan]Password for wlan {connectInfo.Ssid} = {decryptedSecret}.");
-            //return WifiConfigurator.ConnectToWlan(connectInfo.Ssid, decryptedSecret);
-            return true;
+            return WifiConfigurator.ManagedConnectToWlan(connectInfo.Ssid, decryptedSecret);
         }
     }
 }
