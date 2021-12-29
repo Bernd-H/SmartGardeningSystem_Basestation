@@ -28,6 +28,7 @@ namespace GardeningSystem.RestAPI.Controllers {
             Logger.Info($"[Get]User {ControllerHelperClass.GetUserId(HttpContext)} requested all registered modules.");
             try {
                 return WifiConfigurator.GetAllWlans();
+                //return new WlanInfo[] { new WlanInfo { Ssid = "Wlan1" } };
             }
             catch (Exception ex) {
                 Logger.Error(ex, "[Get]Could not load all registered modules.");

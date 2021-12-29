@@ -10,9 +10,6 @@ using NLog;
 namespace GardeningSystem.Jobs {
     public class CommunicationJob : IHostedService {
 
-        private CancellationTokenSource _cancellationTokenSource;
-
-
         private ILocalMobileAppDiscoveryManager LocalMobileAppDiscoveryManager;
 
         private IAesKeyExchangeManager AesKeyExchangeManager;
@@ -40,8 +37,6 @@ namespace GardeningSystem.Jobs {
             APIManager = _APIManager;
             WanManager = wanManager;
             NatController = natController;
-
-            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         public Task StartAsync(CancellationToken cancellationToken) {
@@ -64,29 +59,27 @@ namespace GardeningSystem.Jobs {
 
                     CommandManager.Start();
 
-                    WanManager.Start(_cancellationTokenSource.Token);
+                    WanManager.Start();
                 } catch (Exception ex) {
                     Logger.Fatal(ex, "[StartAsync]An exception occured.");
                 }
             });
         }
 
-        public Task StopAsync(CancellationToken cancellationToken) {
-            return Task.Run(() => {
-                try {
-                    Logger.Info($"[StopAsync]Stop requested.");
+        public async Task StopAsync(CancellationToken cancellationToken) {
+            try {
+                Logger.Info($"[StopAsync]Stop requested.");
 
-                    LocalMobileAppDiscoveryManager.Stop();
-                    AesKeyExchangeManager.Stop();
-                    CommandManager.Stop();
+                await WanManager.Stop();
+                LocalMobileAppDiscoveryManager.Stop();
+                AesKeyExchangeManager.Stop();
+                CommandManager.Stop();
 
-                    _cancellationTokenSource.Cancel();
-
-                    Logger.Trace($"[StopAsync]All communication connections closed.");
-                } catch (Exception ex) {
-                    Logger.Fatal(ex, "[StopAsync]Exception while stopping communication services.");
-                }
-            });
+                Logger.Trace($"[StopAsync]All communication connections closed.");
+            }
+            catch (Exception ex) {
+                Logger.Fatal(ex, "[StopAsync]Exception while stopping communication services.");
+            }
         }
     }
 }

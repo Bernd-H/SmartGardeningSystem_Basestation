@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace GardeningSystem.Common.Specifications.Managers {
 
@@ -12,8 +13,7 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <summary>
         /// Starts a connection to the external server and starts handling incoming connection requests.
         /// </summary>
-        /// <param name="cancellationToken">Stops handling connection requests from the wan if cancellation is requested.</param>
-        void Start(CancellationToken cancellationToken);
+        void Start();
 
         /// <summary>
         /// Listens on a specific port and does not initiate connections. (Only relays packages)
@@ -22,5 +22,10 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <param name="cancellationToken">Cancellation token to cancle only this relay service.</param>
         /// <param name="localEndPoint">Local end point where the public port relays all its received packages to.</param>
         void StartNewRelayOnlyService(CancellationToken cancellationToken, IPEndPoint localEndPoint);
+
+        /// <summary>
+        /// To stop handling connection requests from the wan.
+        /// </summary>
+        Task Stop();
     }
 }

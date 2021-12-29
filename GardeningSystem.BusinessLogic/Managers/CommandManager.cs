@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Models.DTOs;
@@ -25,19 +26,18 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private IConfiguration Configuration;
 
+        private IWateringManager WateringManager;
+
         private ILogger Logger;
 
         public CommandManager(ILoggerService loggerService, IAesTcpListener aesTcpListener, IWifiConfigurator wifiConfigurator, IAesEncrypterDecrypter aesEncrypterDecrypter,
-            IConfiguration configuration) {
+            IConfiguration configuration, IWateringManager wateringManager) {
             Logger = loggerService.GetLogger<CommandManager>();
             AesTcpListener = aesTcpListener;
             WifiConfigurator = wifiConfigurator;
             AesEncrypterDecrypter = aesEncrypterDecrypter;
             Configuration = configuration;
-        }
-
-        ~CommandManager() {
-            Stop();
+            WateringManager = wateringManager;
         }
 
         public void Start() {
@@ -67,6 +67,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                         success = processCommand_ConnectToWlan(connectInfo);
                     }
+                    else if (command.SequenceEqual(CommunicationCodes.StartManualWateringCommand)) {
+                        success = await processCommand_StartManualWateringCommand();
+                    }
+                    else if (command.SequenceEqual(CommunicationCodes.StopManualWateringCommand)) {
+                        success = await processCommand_StopManualWateringCommand();
+                    }
                     // process other commands here
                 }
                 catch (Exception ex) {
@@ -81,8 +87,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
             finally {
                 // let client close the connection
-                networkStream?.Close();
-                e.TcpClient?.Close();
+                //networkStream?.Close();
+                //e.TcpClient?.Close();
+                
+                // don't close connection, client will close it
+                // there seems to be a problem on the receiver/client side when the connection get's closed right after the last message got sent...
             }
         }
 
@@ -91,9 +100,19 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         private bool processCommand_ConnectToWlan(WlanInfoDto connectInfo) {
+            Logger.Info($"[processCommand_ConnectToWlan]Connecting to wlan with ssid={connectInfo.Ssid}.");
             string decryptedSecret = Encoding.UTF8.GetString(AesEncrypterDecrypter.DecryptToByteArray(connectInfo.EncryptedPassword));
-            Logger.Info($"[processCommand_ConnectToWlan]Password for wlan {connectInfo.Ssid} = {decryptedSecret}.");
             return WifiConfigurator.ManagedConnectToWlan(connectInfo.Ssid, decryptedSecret);
+        }
+
+        private async Task<bool> processCommand_StartManualWateringCommand() {
+            Logger.Info($"[processCommand_StartManualWateringCommand]Starting watering.");
+            return await WateringManager.ManualOverwrite(true);
+        }
+
+        private async Task<bool> processCommand_StopManualWateringCommand() {
+            Logger.Info($"[processCommand_StopManualWateringCommand]Stopping watering.");
+            return await WateringManager.ManualOverwrite(false);
         }
     }
 }

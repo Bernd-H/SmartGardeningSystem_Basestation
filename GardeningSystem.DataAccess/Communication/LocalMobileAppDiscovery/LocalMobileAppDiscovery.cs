@@ -5,6 +5,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
@@ -31,8 +32,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         /// <summary>
         /// The IPAddress and port of the IPV4 multicast group.
         /// </summary>
-        public static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("224.20.21.18"), 6771);
-        //static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("239.192.152.143"), 6771);
+        public static readonly IPEndPoint MulticastAddressV4 = new IPEndPoint(IPAddress.Parse("239.192.20.21"), 6777);
 
         /// <summary>
         /// String to search for in a message received from the multicast group, indicating that this message is for a
@@ -55,12 +55,11 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         public LocalMobileAppDiscovery(ILoggerService loggerService) {
             Logger = loggerService.GetLogger<LocalMobileAppDiscovery>();
 
-            //Cookie = $"1.0.0.0-{Random.Next(1, int.MaxValue)}";
-            //BaseSearchString = $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString}\r\nHost: {MulticastAddressV4.Address}:{MulticastAddressV4.Port}\r\nIP: {{0}}\r\nPort: {{1}}\r\ncookie: {Cookie}\r\n\r\n\r\n";
+            // BaseSearchString that we receive from an client:
+            // BaseSearchString = $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString}\r\nHost: {MulticastAddressV4.Address}:{MulticastAddressV4.Port}\r\nIP: {{0}}\r\nPort: {{1}}\r\n\r\n\r\n";
         }
 
         private void ProcessReceivedMulticastMessage(byte[] buffer) {
-
             try {
                 Logger.Trace($"[ProcessReceivedMulticastMessage]Received multicast traffic of length {buffer.Length}.");
                 string[] receiveString = Encoding.ASCII.GetString(buffer)
@@ -69,15 +68,10 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
                 string systemString = receiveString.FirstOrDefault();
                 string portString = receiveString.FirstOrDefault(t => t.StartsWith("Port: ", StringComparison.Ordinal));
                 string ipString = receiveString.FirstOrDefault(t => t.StartsWith("IP: ", StringComparison.Ordinal));
-                string cookieString = receiveString.FirstOrDefault(t => t.StartsWith("cookie", StringComparison.Ordinal));
 
                 // An invalid response was received if these are missing.
                 if (portString == null || ipString == null || systemString != $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString}")
                     return;
-
-                // If we received our own cookie we can ignore the message.
-                //if (cookieString != null && cookieString.Contains(Cookie))
-                //return;
 
                 // If the port is invalid, ignore it!
                 int portcheck = int.Parse(portString.Split(' ').Last());
@@ -105,14 +99,12 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             UdpListener.Bind(listenerEndPoint);
             EndPoint = (IPEndPoint)UdpListener.LocalEndPoint;
 
-            //token.Register(() => UdpClient.SafeDispose());
             token.Register(() => UdpListener.Close());
 
             UdpListener.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
             joinTheMulticastGroupOnAllInterfaces();
             Logger.Info($"[Start]Starting listening for mobile apps on {MulticastAddressV4.ToString()}.");
-            Thread t = new Thread(() => StartListening(token));
-            t.Start();
+            Task.Run(() => StartListening(token), token);
         }
 
         private void joinTheMulticastGroupOnAllInterfaces() {
@@ -131,10 +123,8 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
                         continue; // IPv4 is not configured on this adapter
 
                     Logger.Info($"[joinTheMulticastGroupOnAllInterfaces]Joining multicast group on interface {adapter.GetPhysicalAddress().ToString()}.");
-                    //var mcastOption = new MulticastOption(MulticastAddressV4.Address, (int)IPAddress.HostToNetworkOrder(p.Index));
                     var mcastOption = new MulticastOption(MulticastAddressV4.Address, p.Index);
                     UdpListener.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, mcastOption);
-                    //UdpClient.JoinMulticastGroup((int)IPAddress.HostToNetworkOrder(p.Index), MulticastAddressV4.Address);
                 }
             } catch (Exception ex) {
                 Logger.Fatal(ex, $"[joinTheMulticastGroupOnAllInterfaces]An error occured.");
@@ -149,12 +139,10 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
                 allDone.Reset();
 
                 // Start an asynchronous socket to listen for connections.  
-                Logger.Trace("[StartListening]Waiting for a connection."); ;
+                Logger.Trace("[StartListening]Waiting for a connection.");
                 var state = new StateObject();
                 state.workSocket = UdpListener;
-                //state.remoteEndpoint = new IPEndPoint(IPAddress.Any, 0);
                 UdpListener.BeginReceive(state.buffer, 0, StateObject.BufferSize, SocketFlags.None, new AsyncCallback(ReceiveCallback), state);
-                //UdpListener.BeginReceiveFrom(state.buffer, 0, StateObject.BufferSize, SocketFlags.None, ref state.remoteEndpoint, new AsyncCallback(ReceiveCallback), state);
 
                 // Wait until a connection is made before continuing.  
                 allDone.WaitOne();
@@ -162,17 +150,18 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         }
 
         private void ReceiveCallback(IAsyncResult ar) {
+            bool allDoneSet = false;
             try {
                 // Retrieve the state object and the handler socket  
                 // from the asynchronous state object.  
                 StateObject state = (StateObject)ar.AsyncState;
-                Socket handler = state.workSocket;
-                //var remoteEndpoint = (IPEndPoint)state.remoteEndpoint;
+                var handler = state.workSocket;
 
                 // Read data from the client socket.
                 int bytesRead = handler.EndReceive(ar);
                 // Signal the main thread to continue.  
                 allDone.Set();
+                allDoneSet = true;
 
                 if (bytesRead > 0) {
                     // buffer is big enough for the hole multicast message, no need to receive more...
@@ -180,8 +169,12 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
                     ProcessReceivedMulticastMessage(state.buffer);
                 }
             }
-            catch (ObjectDisposedException) {
-
+            catch (ObjectDisposedException) { }
+            finally {
+                if (!allDoneSet) {
+                    // when EndReceive() threw an exception
+                    allDone.Set();
+                }
             }
         }
 

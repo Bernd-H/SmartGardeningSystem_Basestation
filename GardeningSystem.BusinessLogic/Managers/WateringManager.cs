@@ -58,17 +58,6 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return wateringInfo;
         }
 
-        private TimeSpan wateringAlgo(double soilHumidity, DateTime? lastWateringTime, WeatherDataDto weatherData) {
-            Logger.Trace($"[wateringAlgo]Checking if watering is neccessary.");
-            if (soilHumidity < 0.5) {
-                if (lastWateringTime == null || (DateTime.Now - lastWateringTime.Value).TotalHours > 11) {
-                    return TimeSpan.FromHours(4);
-                }
-            }
-
-            return TimeSpan.Zero;
-        }
-
         public Task StartWatering(WateringNeccessaryDto wateringInfo) {
             Logger.Info($"[StartWatering]Starting watering for sensor with id={wateringInfo.Id.ToString()} for {wateringInfo.ValveOpenTime.TotalHours} hours.");
 
@@ -108,6 +97,38 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     }
                 }
             });
+        }
+
+        public Task<bool> ManualOverwrite(bool activateWatering) {
+            throw new NotImplementedException();
+        }
+
+        private TimeSpan wateringAlgo(double soilHumidity, DateTime? lastWateringTime, WeatherDataDto weatherData) {
+            Logger.Trace($"[wateringAlgo]Checking if watering is neccessary.");
+            //if (soilHumidity < 0.5) {
+            //    if (lastWateringTime == null || (DateTime.Now - lastWateringTime.Value).TotalHours > 11) {
+            //        return TimeSpan.FromHours(4);
+            //    }
+            //}
+
+            float c1 = 0.9f, c2 = -0.5f, c3 = 0.5f;
+
+            double spanBetweenLastWatering = 0;
+            if (lastWateringTime != null) {
+                spanBetweenLastWatering = (DateTime.Now - lastWateringTime.Value).TotalHours;
+            }
+
+            double rainInMilimeterOnTheSameDay = double.NaN;
+
+            var w = soilHumidity * c1 + spanBetweenLastWatering * c2 + rainInMilimeterOnTheSameDay * c3;
+
+            double treshhold = double.NaN;
+
+            if (w < treshhold) {
+                return TimeSpan.FromHours(4);
+            }
+
+            return TimeSpan.Zero;
         }
     }
 }

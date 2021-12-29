@@ -26,10 +26,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
             LocalMobileAppDiscovery.MobileAppFound += LocalMobileAppDiscovery_MobileAppFound;
         }
 
-        private void LocalMobileAppDiscovery_MobileAppFound(object sender, Common.Events.Communication.LocalMobileAppFoundEventArgs e) {
-            Logger.Info($"[LocalMobileAppDiscovery_MobileAppFound]Mobile app with ip={e.EndPoint.Address.ToString()} found.");
+        private async void LocalMobileAppDiscovery_MobileAppFound(object sender, Common.Events.Communication.LocalMobileAppFoundEventArgs e) {
+            Logger.Info($"[LocalMobileAppDiscovery_MobileAppFound]Mobile app with ep={e.EndPoint.ToString()} found.");
             var settings = SettingsManager.GetApplicationSettings();
-            SocketSender.SendToAllInterfacesAsync(settings.Id.ToByteArray(), e.EndPoint).Wait(); // send 16 byte id
+            await SocketSender.SendToAllInterfacesAsync(settings.Id.ToByteArray(), e.EndPoint); // send 16 byte id
         }
 
         public void Start() {

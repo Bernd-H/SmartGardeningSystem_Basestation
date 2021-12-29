@@ -24,18 +24,18 @@ namespace GardeningSystem.Jobs {
         private void Start(object s, EventArgs e) {
             if (!WifiConfigurator.IsConnectedToWlan()) {
                 if (!WifiConfigurator.IsAccessPointUp()) {
-                    Logger.Info($"[Start]Starting access point: {WifiConfigurator.CreateAP()}.");
+                    Logger.Trace($"[Start]Starting access point: {WifiConfigurator.CreateAP()}.");
                 }
                 else {
-                    Logger.Info($"[Start]Access point is already up.");
+                    Logger.Trace($"[Start]Access point is already up.");
                 }
             }
             else {
                 if (WifiConfigurator.IsAccessPointUp()) {
-                    Logger.Info($"[Start]Shutting down access point: {WifiConfigurator.ShutdownAP()}.");
+                    Logger.Trace($"[Start]Shutting down access point: {WifiConfigurator.ShutdownAP()}.");
                 }
                 else {
-                    Logger.Info($"[Start]Connected to wlan. Access point is down.");
+                    Logger.Trace($"[Start]Connected to wlan. Access point is down.");
                 }
             }
         }

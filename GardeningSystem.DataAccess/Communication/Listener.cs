@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using GardeningSystem.Common.Specifications.Communication;
-using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
 
 namespace GardeningSystem.DataAccess.Communication {
     public abstract class Listener : IListener {
@@ -23,7 +17,6 @@ namespace GardeningSystem.DataAccess.Communication {
         void RaiseStatusChanged(ListenerStatus status) {
             Status = status;
             StatusChanged?.Invoke(this, EventArgs.Empty);
-            //StatusChanged?.InvokeAsync(this, EventArgs.Empty);
         }
 
         public void Start(IPEndPoint listenerEndPoint) {
@@ -34,14 +27,8 @@ namespace GardeningSystem.DataAccess.Communication {
             Cancellation = new CancellationTokenSource();
             Cancellation.Token.Register(() => RaiseStatusChanged(ListenerStatus.NotListening));
 
-            //try {
-                Start(Cancellation.Token, listenerEndPoint);
-                RaiseStatusChanged(ListenerStatus.Listening);
-            //}
-            //catch (SocketException soex) {
-            //    RaiseStatusChanged(ListenerStatus.PortNotFree);
-            //}
-
+            Start(Cancellation.Token, listenerEndPoint);
+            RaiseStatusChanged(ListenerStatus.Listening);
         }
 
         protected abstract void Start(CancellationToken token, IPEndPoint listenerEndPoint);

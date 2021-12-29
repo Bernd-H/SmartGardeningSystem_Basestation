@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
-using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Jobs;
 using GardeningSystem.RestAPI;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -18,53 +16,41 @@ using NLog.Web;
 
 namespace GardeningSystem {
     public class Program {
-
-        private static IHost _host;
-
-        private static ManualResetEvent stopEvent = new ManualResetEvent(false);
-
         public static void Main(string[] args) {
-            //Console.CancelKeyPress += (sender, eventArgs) => {
-            //    // Cancel the cancellation to allow the program to shutdown cleanly.
-            //    eventArgs.Cancel = true;
-
-            //    _host?.StopAsync().Wait();
-
-            //    stopEvent.Set();
-            //};
-            
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
             try {
                 IoC.Init();
 
                 // development setup
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
-                    logger.Info("Setting up test development/test enviroment.");
+                    logger.Info("[Main]Setting up test development/test enviroment.");
                     IoC.Get<IDevelopmentSetuper>().SetupTestEnvironment();
                 }
 
-                //IoC.Get<IWifiConfigurator>().DisconnectFromWlan();
+                IoC.Get<IWifiConfigurator>().DisconnectFromWlan();
 
-                logger.Debug("init main");
-                _host = CreateHostBuilder(args, IoC.Get<ICertificateHandler>()).Build();
-                _host.Run();
-
-                //stopEvent.WaitOne();
+                logger.Debug("[Main]init main");
+                var host = CreateHostBuilder(args, IoC.Get<ICertificateHandler>(), IoC.Get<IConfiguration>()).Build();
+                host.Run();
 
                 //var r = IoC.Get<Common.Specifications.Repositories.IWeatherRepository>().GetCurrentWeatherPredictions("Unterstinkenbrunn").Result;
             }
             catch (Exception exception) {
                 //NLog: catch setup errors
-                logger.Fatal(exception, "Stopped program because of exception");
+                logger.Fatal(exception, "[Main]Stopped program because of exception");
                 throw;
             }
             finally {
                 // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
                 NLog.LogManager.Shutdown();
             }
+
+            // An unknown thread blocks the application when it's finished.
+            // All own processes should shut down cleanly after the cancel key (Strg + C) gets pressed.
+            Environment.Exit(0);
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args, ICertificateHandler certificateHandler) =>
+        public static IHostBuilder CreateHostBuilder(string[] args, ICertificateHandler certificateHandler, IConfiguration configuration) =>
             Host.CreateDefaultBuilder(args)
                 .UseSystemd() // configures console logging to the systemd format
                               // configure logging
@@ -90,14 +76,14 @@ namespace GardeningSystem {
                 })
                 .ConfigureServices((hostContext, services) => {
                     // timed jobs
-                    if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.WATERINGJOB_ENABLED])) {
+                    if (Convert.ToBoolean(configuration[ConfigurationVars.WATERINGJOB_ENABLED])) {
                         services.AddHostedService<WateringJob>();
                     }
                     // other services
-                    if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.COMMUNICATIONJOB_ENABLED])) {
+                    if (Convert.ToBoolean(configuration[ConfigurationVars.COMMUNICATIONJOB_ENABLED])) {
                         services.AddHostedService<CommunicationJob>();
                     }
-                    if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.ACCESSPOINTJOB_ENABLED])) {
+                    if (Convert.ToBoolean(configuration[ConfigurationVars.ACCESSPOINTJOB_ENABLED])) {
                         services.AddHostedService<AccessPointJob>();
                     }
                 }).UseConsoleLifetime();

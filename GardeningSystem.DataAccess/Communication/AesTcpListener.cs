@@ -54,27 +54,55 @@ namespace GardeningSystem.DataAccess.Communication {
             tcpListener = new TcpListener(listenerEndPoint);
             tcpListener.Server.ReceiveTimeout = 1000; // 1s
             tcpListener.Server.SendTimeout = 1000; // 1s
-            EndPoint = (IPEndPoint)tcpListener.Server.LocalEndPoint;
 
             tcpListener.Start();
+
+            EndPoint = (IPEndPoint)tcpListener.Server.LocalEndPoint;
             token.Register(() => tcpListener.Stop());
 
-            tcpListener.BeginAcceptTcpClient(BeginAcceptClient, tcpListener);
+            Task.Run(() => StartListening(token), token);
+        }
+
+        private ManualResetEvent allDone = new ManualResetEvent(false);
+
+        private void StartListening(CancellationToken token) {
+            while (!token.IsCancellationRequested) {
+                // Set the event to nonsignaled state.  
+                allDone.Reset();
+
+                // Start an asynchronous socket to listen for connections.  
+                Logger.Trace("[StartListening]Waiting to accept tcp client.");
+                tcpListener.BeginAcceptTcpClient(BeginAcceptClient, tcpListener);
+
+                // Wait until a connection is made before continuing.  
+                allDone.WaitOne();
+            }
         }
 
         private void BeginAcceptClient(IAsyncResult ar) {
+            TcpClient client = null;
+            bool allDoneSet = false;
+
             try {
                 // Get the listener that handles the client request.
                 TcpListener listener = (TcpListener)ar.AsyncState;
 
-                TcpClient client = listener.EndAcceptTcpClient(ar);
+                client = listener.EndAcceptTcpClient(ar);
+
+                allDone.Set();
+                allDoneSet = true;
 
                 CommandReceivedEventHandler?.Invoke(this, new TcpEventArgs(client));
             }
             catch (ObjectDisposedException) {
-                // when stoppoing tcpListerner
+                // when tcpListerner got stopped
             }
-
+            finally {
+                //client?.Close();
+                if (!allDoneSet) {
+                    allDone.Set();
+                }
+            }
         }
     }
 }

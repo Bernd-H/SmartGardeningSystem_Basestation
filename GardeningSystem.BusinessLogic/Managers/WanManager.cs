@@ -24,7 +24,7 @@ using NLog;
 namespace GardeningSystem.BusinessLogic.Managers {
     public class WanManager : IWanManager {
 
-        private CancellationToken _cancellationToken;
+        private CancellationTokenSource _cancellationTokenSource;
 
 
         private ISettingsManager SettingsManager;
@@ -56,16 +56,15 @@ namespace GardeningSystem.BusinessLogic.Managers {
             AesEncrypterDecrypter = aesEncrypterDecrypter;
             AutofacContainer = autofacContainer;
 
+            _cancellationTokenSource = new CancellationTokenSource();
             AesTcpListeners_PeerToPeer = new List<IAesTcpListener>();
             SslTcpClient.ConnectionCollapsedEvent += OnExternalServerConnectionCollapsedEvent;
         }
 
-        public void Start(CancellationToken cancellationToken) {
-            _cancellationToken = cancellationToken;
-            cancellationToken.Register(async () => await Stop());
+        public void Start() {
             Logger.Info($"[Start]Starting a connection to the external server.");
 
-            _ = ConnectToExternalServerLoop(cancellationToken);
+            _ = ConnectToExternalServerLoop(_cancellationTokenSource.Token);
         }
 
         public void StartNewRelayOnlyService(CancellationToken cancellationToken, IPEndPoint localEndPoint) {
@@ -79,12 +78,23 @@ namespace GardeningSystem.BusinessLogic.Managers {
             AesTcpListeners_PeerToPeer.Add(listener);
         }
 
+        public async Task Stop() {
+            Logger.Info($"[Stop]Shutting down WanManager. Closing all open connections.");
+            _cancellationTokenSource.Cancel();
+
+            foreach (var listener in AesTcpListeners_PeerToPeer) {
+                listener.Stop();
+            }
+
+            await NatController.CloseAllOpendPorts();
+        }
+
         #region External server connection methods
 
         private void OnExternalServerConnectionCollapsedEvent(object sender, EventArgs e) {
             // reconnect to the server
             // connection collapse could be due to a internet outage or a public ip change
-            _ = ConnectToExternalServerLoop(_cancellationToken);
+            _ = ConnectToExternalServerLoop(_cancellationTokenSource.Token);
         }
 
         private async Task ConnectToExternalServerLoop(CancellationToken cancellationToken) {
@@ -188,7 +198,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             var publicEndPoint = await tryGetPublicEndPoint(localPort);
             if (publicEndPoint != null) {
                 // create a listener for a direct connection to a mobile app
-                StartNewRelayOnlyService(_cancellationToken, new IPEndPoint(IPAddress.Any, localPort));
+                StartNewRelayOnlyService(_cancellationTokenSource.Token, new IPEndPoint(IPAddress.Any, localPort));
             }
 
             return publicEndPoint;
@@ -269,18 +279,6 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
 
             return answer;
-        }
-
-        /// <summary>
-        /// Gets called if cancellation is requested from the cancellationToken form Start()
-        /// </summary>
-        private async Task Stop() {
-            Logger.Info($"[Stop]Closing open peer to peer connections.");
-            foreach (var listener in AesTcpListeners_PeerToPeer) {
-                listener.Stop();
-            }
-
-            await NatController.CloseAllOpendPorts();
         }
     }
 }
