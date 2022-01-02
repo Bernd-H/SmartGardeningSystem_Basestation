@@ -25,7 +25,9 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private int _keepAliveInterval;
 
-        private TcpClient _client;
+        private Socket _client;
+
+        private NetworkStream networkStream;
 
 
         private ILogger Logger;
@@ -36,7 +38,8 @@ namespace GardeningSystem.DataAccess.Communication {
             _connectionCollapsedTS = new CancellationTokenSource();
         }
 
-        public async Task<bool> Start(IPEndPoint endPoint, SslStreamOpenCallback sslStreamOpenCallback, string targetHost, int keepAliveInterval) {
+        public async Task<bool> Start(IPEndPoint endPoint, SslStreamOpenCallback sslStreamOpenCallback, string targetHost, int keepAliveInterval,
+            CancellationToken cancellationToken = default) {
             bool result = false;
             SslStream sslStream = null;
             _client = null;
@@ -44,27 +47,30 @@ namespace GardeningSystem.DataAccess.Communication {
 
             try {
                 // connect
-                _client = new TcpClient();
-                _client.SendTimeout = 5000;
-                _client.Client.Blocking = true;
+                //_client = new TcpClient();
+                //_client.SendTimeout = 5000;
+                //_client.Client.Blocking = true;
+                _client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                _client.Blocking = true;
+                _client.Bind(new IPEndPoint(IPAddress.Any, 0));
+                //_client.SendTimeout = 5000;
+                _client.SendTimeout = System.Threading.Timeout.Infinite;
+                _client.ReceiveTimeout = System.Threading.Timeout.Infinite;
 
                 ConfigureKeepAlive();
 
-                //_client.Connect(endPoint);
                 await _client.ConnectAsync(endPoint.Address, endPoint.Port);
                 Logger.Info($"[RunClient]Connected to server {endPoint.ToString()}.");
 
-                _checkConnectionForCollapseTS = new CancellationTokenSource();
-                StartConnectionCollapseDetectionProcess();
-
                 // create ssl stream
-                sslStream = new SslStream(_client.GetStream(), false, new RemoteCertificateValidationCallback(ValidateServerCertificate), null);
+                networkStream = new NetworkStream(_client);
+                sslStream = new SslStream(networkStream, false, new RemoteCertificateValidationCallback(ValidateServerCertificate), null);
                 sslStream.AuthenticateAsClient(targetHost);
                 result = true;
 
-                _callbackTask = Task.Run(() => {
+                _callbackTask = Task.Run(async () => {
                     try {
-                        sslStreamOpenCallback.Invoke(sslStream);
+                        await sslStreamOpenCallback.Invoke(sslStream);
                     }
                     catch (Exception ex) {
                         Logger.Error(ex, $"[Start]An exception occured in sslStreamOpenCallback.");
@@ -73,22 +79,28 @@ namespace GardeningSystem.DataAccess.Communication {
                     // also closes sslStream if task got cancelled
                     sslStream?.Close();
                 });
+
+                // start checking the connection
+                _checkConnectionForCollapseTS = new CancellationTokenSource();
+                StartConnectionCollapseDetectionProcess();
+
+                cancellationToken.Register(() => {
+                    _checkConnectionForCollapseTS.Cancel(); // cancle collapse detection task
+                    _connectionCollapsedTS.Cancel(); // cancle callback
+                });
             } catch (Exception ex) {
-                //if (ex.HResult == 10060) {
-                //    Logger.Info($"[Start]Connecting to {endPoint} failed.");
-                //}
-                //else if (ex.HResult == 10061) {
                 if (ex.HResult == -2147467259) { 
                     Logger.Warn($"[Start]Target host ({endPoint}) refused connection.");
                 }
                 else {
                     Logger.Error(ex, $"[Start]Error while connecting to {endPoint}. targetHost={targetHost}");
-                    sslStream?.Close();
                 }
-            }
 
-            // stop check the connection state
-            _checkConnectionForCollapseTS?.Cancel();
+                sslStream?.Close();
+
+                // stop check the connection state
+                _checkConnectionForCollapseTS?.Cancel();
+            }
 
             return result;
         }
@@ -105,8 +117,10 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private void ConfigureKeepAlive() {
             if (_keepAliveInterval > 0) {
-                _client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-                _client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.TcpKeepAliveTime, _keepAliveInterval);
+                _client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, _keepAliveInterval);
+                _client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 5);
+                _client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 2);
+                _client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             }
         }
 
@@ -131,7 +145,7 @@ namespace GardeningSystem.DataAccess.Communication {
                 Buffer.BlockCopy(BitConverter.GetBytes((uint)5000), 0, keepAlive, size * 2, size);
 
                 // Set the keep-alive settings on the underlying Socket
-                _client.Client.IOControl(IOControlCode.KeepAliveValues, keepAlive, null);
+                _client.IOControl(IOControlCode.KeepAliveValues, keepAlive, null);
             }
         }
 

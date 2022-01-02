@@ -50,6 +50,11 @@ namespace GardeningSystem.DataAccess.Communication {
             await CommunicationUtils.SendAsync(Logger, encryptedData, networkStream);
         }
 
+        /// <summary>
+        /// temporary solution...
+        /// </summary>
+        public bool AcceptMultipleClients { get; set; } = true;
+
         protected override void Start(CancellationToken token, IPEndPoint listenerEndPoint) {
             tcpListener = new TcpListener(listenerEndPoint);
             tcpListener.Server.ReceiveTimeout = 1000; // 1s
@@ -60,7 +65,12 @@ namespace GardeningSystem.DataAccess.Communication {
             EndPoint = (IPEndPoint)tcpListener.Server.LocalEndPoint;
             token.Register(() => tcpListener.Stop());
 
-            Task.Run(() => StartListening(token), token);
+            if (AcceptMultipleClients) {
+                Task.Run(() => StartListening(token), token);
+            }
+            else {
+                tcpListener.BeginAcceptTcpClient(BeginAcceptClient, tcpListener);
+            }
         }
 
         private ManualResetEvent allDone = new ManualResetEvent(false);

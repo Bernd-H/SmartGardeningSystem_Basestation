@@ -70,7 +70,8 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<CommandManager>().As<ICommandManager>();
             containerBuilder.RegisterType<APIManager>().As<IAPIManager>();
             containerBuilder.RegisterType<WanManager>().As<IWanManager>();
-            containerBuilder.RegisterType<LocalRelayManager>().As<ILocalRelayManager> ();
+            containerBuilder.RegisterType<LocalRelayManager>().As<ILocalRelayManager>();
+            containerBuilder.RegisterType<TunnelManager>().As<ITunnelManager>();
 
             // cryptography
             containerBuilder.RegisterType<PasswordHasher>().As<IPasswordHasher>();

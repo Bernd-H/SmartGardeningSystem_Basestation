@@ -27,7 +27,7 @@ namespace GardeningSystem {
                     IoC.Get<IDevelopmentSetuper>().SetupTestEnvironment();
                 }
 
-                IoC.Get<IWifiConfigurator>().DisconnectFromWlan();
+                //IoC.Get<IWifiConfigurator>().DisconnectFromWlan();
 
                 logger.Debug("[Main]init main");
                 var host = CreateHostBuilder(args, IoC.Get<ICertificateHandler>(), IoC.Get<IConfiguration>()).Build();

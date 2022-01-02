@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Security;
+using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
@@ -58,7 +59,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             SslListener.Stop();
         }
 
-        private void SslStreamOpenCallback(SslStream openStream) {
+        private Task SslStreamOpenCallback(SslStream openStream) {
             (IntPtr keyPtr, IntPtr ivPtr) = AesEncrypterDecrypter.GetServerAesKey();
             byte[] key = new byte[Cryptography.AesEncrypterDecrypter.KEY_SIZE], iv = new byte[Cryptography.AesEncrypterDecrypter.IV_SIZE];
             CryptoUtils.GetByteArrayFromUM(key, keyPtr, key.Length);
@@ -73,7 +74,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 var msg = SslListener.ReceiveData(openStream);
                 if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
                     Logger.Info($"[SslStreamOpenCallback]Received ACK was incorrect.");
-                    return; // abort
+                    return Task.CompletedTask; // abort
                 }
 
                 // send iv
@@ -83,7 +84,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 msg = SslListener.ReceiveData(openStream);
                 if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
                     Logger.Info($"[SslStreamOpenCallback]2. received ACK was incorrect.");
-                    return; // abort
+                    return Task.CompletedTask; // abort
                 }
             }
             catch (Exception ex) {
@@ -93,6 +94,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 CryptoUtils.ObfuscateByteArray(key);
                 CryptoUtils.ObfuscateByteArray(iv);
             }
+
+            return Task.CompletedTask;
         }
     }
 }

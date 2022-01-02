@@ -6,6 +6,8 @@ using GardeningSystem.Common.Events.Communication;
 namespace GardeningSystem.Common.Specifications.Communication {
     public interface IAesTcpListener : ISocketListener {
 
+        bool AcceptMultipleClients { get; set; }
+
         event EventHandler<TcpEventArgs> CommandReceivedEventHandler;
 
         Task<byte[]> ReceiveData(NetworkStream networkStream);

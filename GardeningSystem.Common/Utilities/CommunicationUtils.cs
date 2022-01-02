@@ -15,6 +15,7 @@ namespace GardeningSystem.Common.Utilities {
         #region Async-Methods
 
         public static async Task<byte[]> ReceiveAsync(ILogger logger, Stream networkStream, CancellationToken cancellationToken = default) {
+            //return await Task.FromResult<byte[]>(ReceiveDataWithHeader(networkStream));
             try {
                 List<byte> packet = new List<byte>();
                 byte[] buffer = new byte[1024];
@@ -46,6 +47,7 @@ namespace GardeningSystem.Common.Utilities {
         }
 
         public static async Task SendAsync(ILogger logger, byte[] msg, Stream networkStream, CancellationToken cancellationToken = default) {
+            //await Task.Run(() => SendDataWithHeader(msg, networkStream));
             await networkStream.WriteAsync(msg, 0, msg.Length, cancellationToken);
             await networkStream.FlushAsync();
         }
@@ -55,6 +57,7 @@ namespace GardeningSystem.Common.Utilities {
         #region Sync-Methods
 
         public static byte[] Receive(ILogger logger, Stream networkStream) {
+            //return ReceiveDataWithHeader(networkStream);
             try {
                 List<byte> packet = new List<byte>();
                 byte[] buffer = new byte[1024];
@@ -64,7 +67,7 @@ namespace GardeningSystem.Common.Utilities {
 
                     if (readBytes == 0) {
                         //throw new ConnectionClosedException(networkStreamId);
-                        throw new Exception();
+                        throw new Exception($"readBytes == 0");
                     }
                     if (readBytes < buffer.Length) {
                         var tmp = new List<byte>(buffer);
@@ -80,12 +83,14 @@ namespace GardeningSystem.Common.Utilities {
             }
             catch (ObjectDisposedException) {
                 //throw new ConnectionClosedException(networkStreamId);
+                throw;
             }
 
             return new byte[0];
         }
 
         public static void Send(ILogger logger, byte[] msg, Stream networkStream) {
+            //SendDataWithHeader(msg, networkStream);
             networkStream.Write(msg, 0, msg.Length);
             networkStream.Flush();
         }

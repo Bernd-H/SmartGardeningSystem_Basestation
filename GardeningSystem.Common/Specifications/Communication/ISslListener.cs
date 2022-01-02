@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using GardeningSystem.Common.Events.Communication;
 
 namespace GardeningSystem.Common.Specifications.Communication {
 
-    public delegate void SslStreamOpenCallback(SslStream openStream);
+    public delegate Task SslStreamOpenCallback(SslStream openStream);
 
     public interface ISslListener : ISocketListener {
         /// <summary>

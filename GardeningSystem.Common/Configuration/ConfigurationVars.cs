@@ -36,6 +36,9 @@
         // WanManager
         public static string WANMANAGER_CONNECTIONSERVICEPORT = "wanManager_connectionServicePort";
 
+        // TunnelManager
+        public static string TUNNELMANAGER_RELAYCONNECTIONSPORT = "tunnelManager_relayConnectionsPort";
+
         // External Server API
         public static string EXTERNALSERVER_DOMAIN = "externalServer_domain";
         public static string EXTERNALSERVER_LOCALIP = "externalServer_localIp";

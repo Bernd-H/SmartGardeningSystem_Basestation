@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -8,17 +7,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
-using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
-using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.DataObjects;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Utilities;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
@@ -33,31 +29,23 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ISslTcpClient SslTcpClient;
 
-        private List<IAesTcpListener> AesTcpListeners_PeerToPeer;
-
-        private IDependencyResolver AutofacContainer;
-
-        private ILocalRelayManager LocalRelayManager;
-
         private INatController NatController;
 
-        private IAesEncrypterDecrypter AesEncrypterDecrypter;
+        private ITunnelManager TunnelManager;
 
         private ILogger Logger;
 
         public WanManager(ILoggerService loggerService, ISslTcpClient sslTcpClient, IConfiguration configuration, ISettingsManager settingsManager,
-            ILocalRelayManager localRelayManager, INatController natController, IDependencyResolver autofacContainer, IAesEncrypterDecrypter aesEncrypterDecrypter) {
+             INatController natController, ITunnelManager tunnelManager) {
             Logger = loggerService.GetLogger<WanManager>();
             SslTcpClient = sslTcpClient;
             Configuration = configuration;
             SettingsManager = settingsManager;
-            LocalRelayManager = localRelayManager;
             NatController = natController;
-            AesEncrypterDecrypter = aesEncrypterDecrypter;
-            AutofacContainer = autofacContainer;
+            TunnelManager = tunnelManager;
 
             _cancellationTokenSource = new CancellationTokenSource();
-            AesTcpListeners_PeerToPeer = new List<IAesTcpListener>();
+
             SslTcpClient.ConnectionCollapsedEvent += OnExternalServerConnectionCollapsedEvent;
         }
 
@@ -67,24 +55,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
             _ = ConnectToExternalServerLoop(_cancellationTokenSource.Token);
         }
 
-        public void StartNewRelayOnlyService(CancellationToken cancellationToken, IPEndPoint localEndPoint) {
-            Logger.Info($"[StartRelayOnly]Starting to listen for peer to peer connections on {localEndPoint}.");
-
-            var listener = AutofacContainer.Resolve<IAesTcpListener>();
-            listener.CommandReceivedEventHandler += OnPeerToPeer_newClientAccepted;
-            listener.Start(localEndPoint);
-            cancellationToken.Register(() => listener.Stop());
-
-            AesTcpListeners_PeerToPeer.Add(listener);
-        }
-
         public async Task Stop() {
             Logger.Info($"[Stop]Shutting down WanManager. Closing all open connections.");
             _cancellationTokenSource.Cancel();
-
-            foreach (var listener in AesTcpListeners_PeerToPeer) {
-                listener.Stop();
-            }
 
             await NatController.CloseAllOpendPorts();
         }
@@ -104,7 +77,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 IPAddress ip = null;
                 try {
                     ip = Dns.GetHostAddresses(Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]).FirstOrDefault();
-                }catch (Exception) {
+                }
+                catch (Exception) {
                     if (!resolveExceptionMessageLogged) {
                         Logger.Info($"[ConnectToExternalServerLoop]Could not resolve {Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]}. Retrying ever 60 minutes.");
                         resolveExceptionMessageLogged = true;
@@ -125,7 +99,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             } while (!success && !cancellationToken.IsCancellationRequested);
         }
 
-        private void OnConnectedToExternalServer(SslStream openStream) {
+        private async Task OnConnectedToExternalServer(SslStream openStream) {
             // send id
             var id = SettingsManager.GetApplicationSettings().Id.ToByteArray();
             SslTcpClient.SendData(openStream, id);
@@ -141,31 +115,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 while (true) {
                     var packet = SslTcpClient.ReceiveData(openStream);
 
-                    // decrypt relay packages
-                    bool relayPackage = false;
-                    try {
-                        // try parsing package 
-                        var p = CommunicationUtils.DeserializeObject<WanPackage>(packet);
-
-                        // success, that means that the package is of type Init and is not encrypted
-                    }
-                    catch (Exception) {
-                        // package is encrypted
-                        packet = AesEncrypterDecrypter.DecryptToByteArray(packet);
-                        relayPackage = true;
-                    }
-
-                    var answer = HandleIncomingPackages(packet, false);
-
-                    // encrypt relay packages
-                    if (relayPackage) {
-                        answer = AesEncrypterDecrypter.EncryptByteArray(answer);
-                    }
+                    var answer = await handleInitPackage(packet);
 
                     SslTcpClient.SendData(openStream, answer);
                 }
             }
-            catch (ObjectDisposedException) {
+            catch (ObjectDisposedException ode) {
                 // conneciton got closed
             }
             catch (Exception ex) {
@@ -177,28 +132,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         #region Peer to peer connection methods
 
-        private async void OnPeerToPeer_newClientAccepted(object sender, TcpEventArgs e) {
-            var networkStream = e.TcpClient.GetStream();
-            var aesTcpListener = (IAesTcpListener)sender;
-
-            try {
-                while (true) {
-                    var packet = await aesTcpListener.ReceiveData(networkStream);
-                    var answer = HandleIncomingPackages(packet, relayOnlyMode: true);
-                    await aesTcpListener.SendData(answer, networkStream);
-                }
-            }
-            catch (ObjectDisposedException) {
-                // conneciton got closed
-            }
-        }
-
         private async Task<EndPoint> tryCreatePeerToPeerRelay() {
             var localPort = IpUtils.GetFreePort(ProtocolType.Tcp);
             var publicEndPoint = await tryGetPublicEndPoint(localPort);
             if (publicEndPoint != null) {
                 // create a listener for a direct connection to a mobile app
-                StartNewRelayOnlyService(_cancellationTokenSource.Token, new IPEndPoint(IPAddress.Any, localPort));
+                TunnelManager.OpenPeerToPeerListenerService(_cancellationTokenSource.Token, new IPEndPoint(IPAddress.Any, localPort));
             }
 
             return publicEndPoint;
@@ -218,7 +157,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         #endregion
 
-        private byte[] HandleIncomingPackages(byte[] packet, bool relayOnlyMode) {
+        private async Task<byte[]> handleInitPackage(byte[] packet) {
             byte[] answer = null;
 
             try {
@@ -226,8 +165,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 var packetO = CommunicationUtils.DeserializeObject<WanPackage>(packet);
 
                 // relay initialization
-                if (packetO.PackageType == PackageType.Init && !relayOnlyMode) {
-                    Logger.Info($"[HandleIncomingPackages]Remote connection initialization package received.");
+                if (packetO.PackageType == PackageType.Init) {
+                    Logger.Info($"[handleInitPackage]Remote connection initialization package received.");
                     var connectRequest = CommunicationUtils.DeserializeObject<ConnectRequestDto>(packetO.Package);
 
                     EndPoint endpoint = null;
@@ -239,43 +178,32 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     // build result
                     if (endpoint != null) {
                         answer = CommunicationUtils.SerializeObject<WanPackage>(new WanPackage() {
-                            PackageType = PackageType.Init,
+                            PackageType = PackageType.PeerToPeerInit,
                             Package = Encoding.UTF8.GetBytes(endpoint.ToString())
                         });
                     }
                     else {
+                        // open a new connection to the external server
+                        Guid tunnelId = Guid.NewGuid();
+                        bool success = await TunnelManager.OpenExternalServerRelayTunnel(_cancellationTokenSource.Token, tunnelId);
+                        if (!success) {
+                            throw new Exception($"Could not open a new connection to the server.");
+                        }
+                        //Thread.Sleep(1000);
+
                         answer = CommunicationUtils.SerializeObject<WanPackage>(new WanPackage() {
-                            PackageType = PackageType.Init,
-                            Package = new byte[0]
+                            PackageType = PackageType.ExternalServerRelayInit,
+                            Package = tunnelId.ToByteArray()
                         });
                     }
                 }
-                // relay mode
-                else if (packetO.PackageType == PackageType.Relay) {
-                    byte[] serviceAnswer = null;
-
-                    if (packetO.ServiceDetails.Type == ServiceType.API) {
-                        serviceAnswer = LocalRelayManager.MakeAPIRequest(packetO.Package, packetO.ServiceDetails.Port);
-                    }
-                    else if (packetO.ServiceDetails.Type == ServiceType.TCP) {
-                        serviceAnswer = LocalRelayManager.MakeTcpRequest(packetO.Package, packetO.ServiceDetails.Port, !packetO.ServiceDetails.HoldConnectionOpen);
-                    }
-                    else {
-                        Logger.Error($"[HandleIncomingPackages]Unknown ServiceType ({packetO.ServiceDetails.Type}).");
-                        return null;
-                    }
-
-                    // build answer
-                    answer = CommunicationUtils.SerializeObject<WanPackage>(new WanPackage() {
-                        PackageType = PackageType.Relay,
-                        Package = serviceAnswer,
-                        ServiceDetails = packetO.ServiceDetails
-                    });
-                }
             }
             catch (Exception ex) {
-                Logger.Error(ex, $"[HandleIncomingPackages]An error occured.");
-                answer = new byte[0];
+                Logger.Error(ex, $"[handleInitPackage]An error occured.");
+                answer = CommunicationUtils.SerializeObject<WanPackage>(new WanPackage() {
+                    PackageType = PackageType.Error,
+                    Package = new byte[0]
+                });
             }
 
             return answer;
