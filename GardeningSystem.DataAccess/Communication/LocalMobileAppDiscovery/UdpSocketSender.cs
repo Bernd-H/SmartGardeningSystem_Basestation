@@ -7,13 +7,13 @@ using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using NLog;
 
-namespace GardeningSystem.DataAccess.Communication {
-    public class SocketSender : ISocketSender {
+namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
+    public class UdpSocketSender : IUdpSocketSender {
 
         private ILogger Logger;
 
-        public SocketSender(ILoggerService loggerService) {
-            Logger = loggerService.GetLogger<SocketSender>();
+        public UdpSocketSender(ILoggerService loggerService) {
+            Logger = loggerService.GetLogger<UdpSocketSender>();
         }
 
         public async Task<bool> SendAsync(byte[] data, IPEndPoint endPoint) {

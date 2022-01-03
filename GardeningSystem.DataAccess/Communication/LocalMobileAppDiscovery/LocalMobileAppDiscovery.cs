@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
+using GardeningSystem.Common.Specifications.DataObjects;
+using GardeningSystem.DataAccess.Communication.Base;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
@@ -27,7 +29,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         public EndPoint remoteEndpoint = null;
     }
 
-    public class LocalMobileAppDiscovery : SocketListener, ILocalMobileAppDiscovery {
+    public class LocalMobileAppDiscovery : ILocalMobileAppDiscovery {
 
         /// <summary>
         /// The IPAddress and port of the IPV4 multicast group.
@@ -50,10 +52,16 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         /// </summary>
         Socket UdpListener { get; set; }
 
+        public EndPoint EndPoint { get; set; }
+
+        private CancellationTokenSource _cancellationTokenSource;
+
+
         private ILogger Logger;
 
         public LocalMobileAppDiscovery(ILoggerService loggerService) {
             Logger = loggerService.GetLogger<LocalMobileAppDiscovery>();
+            _cancellationTokenSource = new CancellationTokenSource();
 
             // BaseSearchString that we receive from an client:
             // BaseSearchString = $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString}\r\nHost: {MulticastAddressV4.Address}:{MulticastAddressV4.Port}\r\nIP: {{0}}\r\nPort: {{1}}\r\n\r\n\r\n";
@@ -94,17 +102,22 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             }
         }
 
-        protected override void Start(CancellationToken token, IPEndPoint listenerEndPoint) {
+        public void Start(IListenerSettings listenerSettings) {
             UdpListener = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            UdpListener.Bind(listenerEndPoint);
+            UdpListener.Bind(listenerSettings.EndPoint);
             EndPoint = (IPEndPoint)UdpListener.LocalEndPoint;
+            var ct = _cancellationTokenSource.Token;
 
-            token.Register(() => UdpListener.Close());
+            ct.Register(() => UdpListener.Close());
 
             UdpListener.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
             joinTheMulticastGroupOnAllInterfaces();
             Logger.Info($"[Start]Starting listening for mobile apps on {MulticastAddressV4.ToString()}.");
-            Task.Run(() => StartListening(token), token);
+            Task.Run(() => StartListening(ct), ct);
+        }
+
+        public void Stop() {
+            _cancellationTokenSource.Cancel();
         }
 
         private void joinTheMulticastGroupOnAllInterfaces() {

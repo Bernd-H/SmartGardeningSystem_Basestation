@@ -1,151 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using GardeningSystem.Common.Exceptions;
 using Newtonsoft.Json;
 using NLog;
 
 namespace GardeningSystem.Common.Utilities {
     public static class CommunicationUtils {
 
-        #region Send/Receive Methods
-
-        #region Async-Methods
-
-        public static async Task<byte[]> ReceiveAsync(ILogger logger, Stream networkStream, CancellationToken cancellationToken = default) {
-            //return await Task.FromResult<byte[]>(ReceiveDataWithHeader(networkStream));
-            try {
-                List<byte> packet = new List<byte>();
-                byte[] buffer = new byte[1024];
-                int readBytes = 0;
-                while (true) {
-                    readBytes = await networkStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
-
-                    if (readBytes == 0) {
-                        //throw new ConnectionClosedException(networkStreamId);
-                        throw new Exception();
-                    }
-                    if (readBytes < buffer.Length) {
-                        var tmp = new List<byte>(buffer);
-                        packet.AddRange(tmp.GetRange(0, readBytes));
-                        break;
-                    }
-                    else {
-                        packet.AddRange(buffer);
-                    }
-                }
-
-                return packet.ToArray();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="client">Socket</param>
+        /// <param name="remoteEndPoint">Endpoint to connect to.</param>
+        /// <param name="connectTimeout">Timeout in milliseconds. If 0 or less -> no timeout.</param>
+        /// <returns></returns>
+        public static async Task ConnectAsync(this Socket client, IPEndPoint remoteEndPoint, int connectTimeout) {
+            CancellationTokenSource cts;
+            if (connectTimeout > 0) {
+                cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(connectTimeout));
             }
-            catch (ObjectDisposedException) {
-                //throw new ConnectionClosedException(networkStreamId);
+            else {
+                cts = new CancellationTokenSource();
             }
 
-            return new byte[0];
+            await client.ConnectAsync(remoteEndPoint, cts.Token);
         }
 
-        public static async Task SendAsync(ILogger logger, byte[] msg, Stream networkStream, CancellationToken cancellationToken = default) {
-            //await Task.Run(() => SendDataWithHeader(msg, networkStream));
-            await networkStream.WriteAsync(msg, 0, msg.Length, cancellationToken);
-            await networkStream.FlushAsync();
-        }
+        public static void ConnectWithTimout(Socket client, IPEndPoint remoteEndPoint, int millisecondsTimeout) {
+            var result = client.BeginConnect(remoteEndPoint, null, null);
 
-        #endregion
+            var success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(millisecondsTimeout));
 
-        #region Sync-Methods
-
-        public static byte[] Receive(ILogger logger, Stream networkStream) {
-            //return ReceiveDataWithHeader(networkStream);
-            try {
-                List<byte> packet = new List<byte>();
-                byte[] buffer = new byte[1024];
-                int readBytes = 0;
-                while (true) {
-                    readBytes = networkStream.Read(buffer, 0, buffer.Length);
-
-                    if (readBytes == 0) {
-                        //throw new ConnectionClosedException(networkStreamId);
-                        throw new Exception($"readBytes == 0");
-                    }
-                    if (readBytes < buffer.Length) {
-                        var tmp = new List<byte>(buffer);
-                        packet.AddRange(tmp.GetRange(0, readBytes));
-                        break;
-                    }
-                    else {
-                        packet.AddRange(buffer);
-                    }
-                }
-
-                return packet.ToArray();
-            }
-            catch (ObjectDisposedException) {
-                //throw new ConnectionClosedException(networkStreamId);
-                throw;
+            if (!success) {
+                throw new SocketException();
             }
 
-            return new byte[0];
+            // we have connected
+            client.EndConnect(result);
         }
-
-        public static void Send(ILogger logger, byte[] msg, Stream networkStream) {
-            //SendDataWithHeader(msg, networkStream);
-            networkStream.Write(msg, 0, msg.Length);
-            networkStream.Flush();
-        }
-
-        #endregion
-
-        #region Obsolete methods
-
-        [Obsolete]
-        public static byte[] ReceiveDataWithHeader(Stream networkStream) {
-            int bytes = -1;
-            int packetLength = -1;
-            int readBytes = 0;
-            List<byte> packet = new List<byte>();
-
-            do {
-                byte[] buffer = new byte[2048];
-                bytes = networkStream.Read(buffer, 0, buffer.Length);
-
-                // get length
-                if (packetLength == -1) {
-                    byte[] length = new byte[4];
-                    Array.Copy(buffer, 0, length, 0, 4);
-                    packetLength = BitConverter.ToInt32(length, 0);
-                }
-
-                readBytes += bytes;
-                packet.AddRange(buffer);
-
-            } while (bytes != 0 && packetLength - readBytes > 0);
-
-            // remove length information and attached bytes
-            packet.RemoveRange(packetLength, packet.Count - packetLength);
-            packet.RemoveRange(0, 4);
-
-            return packet.ToArray();
-        }
-
-        [Obsolete]
-        public static void SendDataWithHeader(byte[] msg, Stream networkStream) {
-            List<byte> packet = new List<byte>();
-
-            // add length of packet - 4B
-            packet.AddRange(BitConverter.GetBytes(msg.Length + 4));
-
-            // add content
-            packet.AddRange(msg);
-
-            networkStream.Write(packet.ToArray(), 0, packet.Count);
-            networkStream.Flush();
-        }
-
-        #endregion
-
-        #endregion
 
         public static byte[] SerializeObject<T>(T o) where T : class {
             var json = JsonConvert.SerializeObject(o);

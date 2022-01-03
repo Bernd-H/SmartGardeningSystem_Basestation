@@ -13,11 +13,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ILocalMobileAppDiscovery LocalMobileAppDiscovery;
 
-        private ISocketSender SocketSender;
+        private IUdpSocketSender SocketSender;
 
         private ISettingsManager SettingsManager;
 
-        public LocalMobileAppDiscoveryManager(ILoggerService loggerService, ILocalMobileAppDiscovery localMobileAppDiscovery, ISocketSender socketSender,
+        public LocalMobileAppDiscoveryManager(ILoggerService loggerService, ILocalMobileAppDiscovery localMobileAppDiscovery, IUdpSocketSender socketSender,
             ISettingsManager settingsManager) {
             Logger = loggerService.GetLogger<LocalMobileAppDiscoveryManager>();
             LocalMobileAppDiscovery = localMobileAppDiscovery;

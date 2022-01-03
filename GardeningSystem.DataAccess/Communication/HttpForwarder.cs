@@ -1,42 +1,28 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Utilities;
+using GardeningSystem.DataAccess.Communication.Base;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
-    public class HttpForwarder : IHttpForwarder {
+    public class HttpForwarder : TcpClientBaseClass, IHttpForwarder {
 
-        private TcpClient _tcpClient;
+        public HttpForwarder(ILoggerService loggerService) : base(loggerService.GetLogger<HttpForwarder>()) {
 
-        private NetworkStream _networkStream;
-
-
-        private ILogger Logger;
-
-        public HttpForwarder(ILoggerService loggerService) {
-            Logger = loggerService.GetLogger<HttpForwarder>();
-        }
-        public void Close() {
-            _networkStream?.Close();
-            _tcpClient?.Close();
         }
 
-        public void Connect(IPEndPoint endPoint) {
-            Logger.Trace($"[Connect]Connecting to {endPoint}.");
+        public override async Task<byte[]> ReceiveAsync() {
+            Logger.Trace($"[Receive]Receiveing from {RemoteEndPoint}.");
 
-            _tcpClient = new TcpClient();
-            _tcpClient.Connect(endPoint);
-            _networkStream = _tcpClient.GetStream();
-        }
-
-        public byte[] Receive() {
-            Logger.Trace($"[Receive]Receiveing from {_tcpClient.Client.RemoteEndPoint}.");
-
-            var packet = CommunicationUtils.Receive(Logger, _networkStream);
+            var packet = await base.ReceiveAsync();
 
             var answer = Encoding.UTF8.GetString(packet);
             if (answer.Contains($"Transfer-Encoding: chunked")) {
@@ -49,10 +35,10 @@ namespace GardeningSystem.DataAccess.Communication {
             return packet;
         }
 
-        public void Send(byte[] data) {
-            Logger.Trace($"[Send]Sending {data.Length} bytes to {_tcpClient.Client.RemoteEndPoint}.");
+        public override async Task SendAsync(byte[] data) {
+            Logger.Trace($"[Send]Sending {data.Length} bytes to {RemoteEndPoint}.");
 
-            CommunicationUtils.Send(Logger, data, _networkStream);
+            await base.SendAsync(data);
         }
     }
 }

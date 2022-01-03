@@ -90,9 +90,9 @@ namespace GardeningSystem {
             // communication
             containerBuilder.RegisterType<WifiConfigurator>().As<IWifiConfigurator>();
             containerBuilder.RegisterType<LocalMobileAppDiscovery>().As<ILocalMobileAppDiscovery>();
-            containerBuilder.RegisterType<SocketSender>().As<ISocketSender>();
+            containerBuilder.RegisterType<UdpSocketSender>().As<IUdpSocketSender>();
             //var aesKeyExchangePort = Convert.ToInt32(ConfigurationContainer.Configuration[ConfigurationVars.AESKEYEXCHANGE_LISTENPORT]);
-            containerBuilder.RegisterType<SslListener>().As<ISslListener>();
+            containerBuilder.RegisterType<SslTcpListener>().As<ISslTcpListener>();
                 //.WithParameter("listenerEndPoint", new IPEndPoint(IPAddress.Any, aesKeyExchangePort));
             //var commandListenerPort = Convert.ToInt32(ConfigurationContainer.Configuration[ConfigurationVars.COMMANDLISTENER_LISTENPORT]);
             containerBuilder.RegisterType<AesTcpListener>().As<IAesTcpListener>();

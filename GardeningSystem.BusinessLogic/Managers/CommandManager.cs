@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Cryptography;
@@ -40,11 +41,20 @@ namespace GardeningSystem.BusinessLogic.Managers {
             WateringManager = wateringManager;
         }
 
-        public void Start() {
-            AesTcpListener.CommandReceivedEventHandler += OnCommandReceivedEvent;
+        public async Task Start() {
+            AesTcpListener.ClientConnectedEventHandler += OnCommandReceivedEvent;
             var commandListenerPort = Convert.ToInt32(Configuration[ConfigurationVars.COMMANDLISTENER_LISTENPORT]);
-            AesTcpListener.Start(new IPEndPoint(IPAddress.Any, commandListenerPort));
-            Logger.Info($"[Start]Listening on {AesTcpListener.EndPoint}...");
+            var listenerSettings = new ListenerSettings {
+                AcceptMultipleClients = true,
+                EndPoint = new IPEndPoint(IPAddress.Any, commandListenerPort)
+            };
+
+            if (await AesTcpListener.Start(listenerSettings)) {
+                Logger.Info($"[Start]Listening on {AesTcpListener.EndPoint}...");
+            }
+            else {
+                Logger.Fatal($"[Start]Could not start CommandManager on local endpoint {AesTcpListener.EndPoint}.");
+            }
         }
 
         private async void OnCommandReceivedEvent(object sender, TcpEventArgs e) {
@@ -53,16 +63,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 networkStream = e.TcpClient.GetStream();
 
                 // receive command
-                 var command = await AesTcpListener.ReceiveData(networkStream);
+                 var command = await AesTcpListener.ReceiveAsync(networkStream);
 
                 // send ack
-                await AesTcpListener.SendData(CommunicationCodes.ACK, networkStream);
+                await AesTcpListener.SendAsync(CommunicationCodes.ACK, networkStream);
 
                  bool success = false;
                 try {
                     if (command.SequenceEqual(CommunicationCodes.WlanCommand)) {
                         // get login information
-                        var connectInfo_bytes = await AesTcpListener.ReceiveData(networkStream);
+                        var connectInfo_bytes = await AesTcpListener.ReceiveAsync(networkStream);
                         var connectInfo = CommunicationUtils.DeserializeObject<WlanInfoDto>(connectInfo_bytes);
 
                         success = processCommand_ConnectToWlan(connectInfo);
@@ -80,7 +90,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 }
 
                 // send return code
-                await AesTcpListener.SendData(BitConverter.GetBytes(success), networkStream);
+                await AesTcpListener.SendAsync(BitConverter.GetBytes(success), networkStream);
             }
             catch (Exception ex) {
                 Logger.Error(ex, $"[OnCommandReceivedEvent]An error occured while processing a received command.");

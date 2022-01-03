@@ -57,7 +57,7 @@ namespace GardeningSystem.Jobs {
                         AesKeyExchangeManager.StartListener();
                     }
 
-                    CommandManager.Start();
+                    await CommandManager.Start();
 
                     WanManager.Start();
                 } catch (Exception ex) {

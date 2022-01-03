@@ -1,19 +1,11 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using GardeningSystem.Common.Specifications.Communication.Base;
 
 namespace GardeningSystem.Common.Specifications.Communication {
-    public interface IHttpForwarder {
+    public interface IHttpForwarder : ITcpClientBaseClass {
 
-        void Close();
-
-        /// <param name="endPoint">Endpoint to connect to.</param>
-        /// <exception cref="ObjectDisposedException"></exception>
-        /// <exception cref="SocketException"></exception>
-        void Connect(IPEndPoint endPoint);
-
-        void Send(byte[] data);
-
-        byte[] Receive();
     }
 }

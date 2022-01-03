@@ -1,27 +1,15 @@
-﻿using System;
-using System.Net;
-using System.Net.Sockets;
+﻿using System.Threading.Tasks;
+using GardeningSystem.Common.Specifications.Communication.Base;
 
 namespace GardeningSystem.Common.Specifications.Communication {
-    public interface IAesTcpClient {
-
-        byte[] ReceiveData();
+    public interface IAesTcpClient : ITcpClientBaseClass {
 
         /// <summary>
         /// Does not decrypt the received data.
         /// </summary>
         /// <returns>Encrypted data.</returns>
-        byte[] ReceiveEncryptedData();
+        Task<byte[]> ReceiveEncryptedData();
 
-        void SendData(byte[] data);
-
-        void SendAlreadyEncryptedData(byte[] encryptedData);
-
-        /// <param name="endPoint">Endpoint to connect to.</param>
-        /// <exception cref="ObjectDisposedException"></exception>
-        /// <exception cref="SocketException"></exception>
-        void Connect(IPEndPoint endPoint);
-
-        void Close();
+        Task SendAlreadyEncryptedData(byte[] encryptedData);
     }
 }

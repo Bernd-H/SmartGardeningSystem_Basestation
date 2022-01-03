@@ -73,6 +73,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private async Task ConnectToExternalServerLoop(CancellationToken cancellationToken) {
             bool success = false;
             bool resolveExceptionMessageLogged = false;
+
+            // connect
             do {
                 IPAddress ip = null;
                 try {
@@ -87,8 +89,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                 if (ip != null) {
                     int port = Convert.ToInt32(Configuration[ConfigurationVars.WANMANAGER_CONNECTIONSERVICEPORT]);
-                    int keepAliveInterval = 60; // 1min
-                    success = await SslTcpClient.Start(new IPEndPoint(ip, port), OnConnectedToExternalServer, Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN], keepAliveInterval);
+                    var clientSettings = new SslClientSettings {
+                        KeepAliveInterval = 60, // 1min
+                        RemoteEndPoint = new IPEndPoint(ip, port),
+                        TargetHost = Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN]
+                    };
+                    success = await SslTcpClient.Start(clientSettings);
                 }
 
                 if (!success) {
@@ -97,15 +103,18 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     await Task.Delay(60 * 1000, cancellationToken);
                 }
             } while (!success && !cancellationToken.IsCancellationRequested);
+
+            // start receiving
+            await OnConnectedToExternalServer();
         }
 
-        private async Task OnConnectedToExternalServer(SslStream openStream) {
+        private async Task OnConnectedToExternalServer() {
             // send id
             var id = SettingsManager.GetApplicationSettings().Id.ToByteArray();
-            SslTcpClient.SendData(openStream, id);
+            await SslTcpClient.SendAsync(id);
 
             // receive ack
-            var ack = SslTcpClient.ReceiveData(openStream);
+            var ack = await SslTcpClient.ReceiveAsync();
             if (!ack.SequenceEqual(CommunicationCodes.ACK)) {
                 return;
             }
@@ -113,11 +122,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
             // listen
             try {
                 while (true) {
-                    var packet = SslTcpClient.ReceiveData(openStream);
+                    var packet = await SslTcpClient.ReceiveAsync();
 
                     var answer = await handleInitPackage(packet);
 
-                    SslTcpClient.SendData(openStream, answer);
+                    await SslTcpClient.SendAsync(answer);
                 }
             }
             catch (ObjectDisposedException ode) {

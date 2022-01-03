@@ -1,4 +1,6 @@
-﻿namespace GardeningSystem.Common.Specifications.Managers {
+﻿using System.Threading.Tasks;
+
+namespace GardeningSystem.Common.Specifications.Managers {
     public interface ILocalRelayManager {
 
         /// <summary>
@@ -9,7 +11,7 @@
         /// <param name="url"></param>
         /// <param name="port">Port of the local API.</param>
         /// <returns>Answer of the API call.</returns>
-        byte[] MakeAPIRequest(byte[] data, int port);
+        Task<byte[]> MakeAPIRequest(byte[] data, int port);
 
         /// <summary>
         /// Sends <paramref name="data"/> to the local service.
@@ -19,6 +21,6 @@
         /// <param name="port">Port of the service.</param>
         /// <param name="closeConnection">True, when the connection should get closed and no data sent.</param>
         /// <returns>Answer, which that service returned.</returns>
-        byte[] MakeTcpRequest(byte[] data, int port, bool closeConnection);
+        Task<byte[]> MakeTcpRequest(byte[] data, int port, bool closeConnection);
     }
 }

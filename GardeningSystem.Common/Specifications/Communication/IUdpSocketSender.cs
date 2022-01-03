@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 
 namespace GardeningSystem.Common.Specifications.Communication {
-    public interface ISocketSender {
+    public interface IUdpSocketSender {
 
         Task<bool> SendAsync(byte[] data, IPEndPoint endPoint);
 

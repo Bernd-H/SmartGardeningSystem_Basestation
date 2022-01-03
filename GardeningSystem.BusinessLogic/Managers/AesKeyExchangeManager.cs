@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Security;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
+using GardeningSystem.Common.Events.Communication;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Cryptography;
@@ -15,7 +17,7 @@ using NLog;
 namespace GardeningSystem.BusinessLogic.Managers {
     public class AesKeyExchangeManager : IAesKeyExchangeManager {
 
-        private ISslListener SslListener;
+        private ISslTcpListener SslListener;
 
         private ICertificateHandler CertificateHandler;
 
@@ -27,7 +29,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ILogger Logger;
 
-        public AesKeyExchangeManager(ILoggerService loggerService, ISslListener sslListener, ICertificateHandler certificateHandler, IAesEncrypterDecrypter aesEncrypterDecrypter,
+        public AesKeyExchangeManager(ILoggerService loggerService, ISslTcpListener sslListener, ICertificateHandler certificateHandler, IAesEncrypterDecrypter aesEncrypterDecrypter,
             IConfiguration configuration, ISettingsManager settingsManager) {
             Logger = loggerService.GetLogger<AesKeyExchangeManager>();
             SslListener = sslListener;
@@ -41,50 +43,46 @@ namespace GardeningSystem.BusinessLogic.Managers {
             // initialize
             Logger.Info($"[StartListener]Initializing SslListener.");
             var serverCert = CertificateHandler.GetCurrentServerCertificate();
-            //X509Certificate serverCert = null;
-            SslStreamOpenCallback callbackHandler = SslStreamOpenCallback;
-            SslListener.Init(callbackHandler, serverCert);
+            SslListener.ClientConnectedEventHandler += SslListener_ClientConnectedEventHandler;
+            var port = Convert.ToInt32(Configuration[ConfigurationVars.AESKEYEXCHANGE_LISTENPORT]);
+            var listenerSettings = new SslListenerSettings {
+                EndPoint = new IPEndPoint(IPAddress.Any, port),
+                ServerCertificate = serverCert
+            };
 
             // start listener
             Logger.Info($"[StartListener]Starting listening.");
-            var port = Convert.ToInt32(Configuration[ConfigurationVars.AESKEYEXCHANGE_LISTENPORT]);
-            SslListener.Start(new IPEndPoint(IPAddress.Any, port));
-            if (SslListener.Status == ListenerStatus.PortNotFree) {
-                Logger.Error($"[StartListener]Could not start litsener. Endpoint {SslListener.EndPoint} is not free.");
-            }
+            SslListener.Start(listenerSettings);
         }
 
-        public void Stop() {
-            Logger.Info($"[Stop]Stopping SslListener.");
-            SslListener.Stop();
-        }
+        private async void SslListener_ClientConnectedEventHandler(object sender, ClientConnectedEventArgs e) {
+            var openStream = (SslStream)e.Stream;
 
-        private Task SslStreamOpenCallback(SslStream openStream) {
             (IntPtr keyPtr, IntPtr ivPtr) = AesEncrypterDecrypter.GetServerAesKey();
             byte[] key = new byte[Cryptography.AesEncrypterDecrypter.KEY_SIZE], iv = new byte[Cryptography.AesEncrypterDecrypter.IV_SIZE];
             CryptoUtils.GetByteArrayFromUM(key, keyPtr, key.Length);
             CryptoUtils.GetByteArrayFromUM(iv, ivPtr, iv.Length);
-            //Console.WriteLine("BasestationIP: " + SettingsManager.GetApplicationSettings().Id); // only for debugging
+            //Console.WriteLine("BasestationId: " + SettingsManager.GetApplicationSettings().Id); // only for debugging
             Logger.Info("[SslStreamOpenCallback]Sending aes key to client.");
             try {
                 // send key
-                SslListener.SendConfidentialInformation(openStream, key);
+                await SslListener.SendConfidentialInformation(openStream, key);
 
                 // get ack
-                var msg = SslListener.ReceiveData(openStream);
+                var msg = await SslListener.ReceiveAsync(openStream);
                 if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
                     Logger.Info($"[SslStreamOpenCallback]Received ACK was incorrect.");
-                    return Task.CompletedTask; // abort
+                    return; // abort
                 }
 
                 // send iv
-                SslListener.SendConfidentialInformation(openStream, iv);
+                await SslListener.SendConfidentialInformation(openStream, iv);
 
                 // get ack
-                msg = SslListener.ReceiveData(openStream);
+                msg = await SslListener.ReceiveAsync(openStream);
                 if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
                     Logger.Info($"[SslStreamOpenCallback]2. received ACK was incorrect.");
-                    return Task.CompletedTask; // abort
+                    return; // abort
                 }
             }
             catch (Exception ex) {
@@ -94,8 +92,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 CryptoUtils.ObfuscateByteArray(key);
                 CryptoUtils.ObfuscateByteArray(iv);
             }
+        }
 
-            return Task.CompletedTask;
+        public void Stop() {
+            Logger.Info($"[Stop]Stopping SslListener.");
+            SslListener.Stop();
         }
     }
 }

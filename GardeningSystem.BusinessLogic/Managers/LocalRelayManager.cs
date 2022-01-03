@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Autofac;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
@@ -14,6 +16,11 @@ using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
     public class LocalRelayManager : ILocalRelayManager {
+
+        private SemaphoreSlim _httpForwarderLock = new SemaphoreSlim(1, 1);
+
+        //private SemaphoreSlim _aesTcpClientsLock = new SemaphoreSlim(1, 1);
+
 
         private IDependencyResolver AutofacContainer;
 
@@ -31,7 +38,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             AesTcpClients = new Dictionary<Guid, IAesTcpClient>();
         }
 
-        public byte[] MakeTcpRequest(byte[] data, int port, bool closeConnection) {
+        public async Task<byte[]> MakeTcpRequest(byte[] data, int port, bool closeConnection) {
             IServicePackage servicePackage = CommunicationUtils.DeserializeObject<ServicePackage>(data);
             IAesTcpClient aesTcpClient = null;
             IServicePackage answerPackage = null;
@@ -47,7 +54,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 Logger.Info($"[MakeAesTcpRequest]Closeing connection from session with id={sessionId}.");
 
                 lock (AesTcpClients) {
-                    aesTcpClient?.Close();
+                    aesTcpClient?.Stop();
                     AesTcpClients.Remove(sessionId);
                 }
 
@@ -59,8 +66,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         Logger.Trace($"[MakeAesTcpRequest]Forwarding data to local service with port {port}.");
 
                         // forward data and receive answer
-                        aesTcpClient.SendAlreadyEncryptedData(servicePackage.Data);
-                        var encryptedAnswer = aesTcpClient.ReceiveEncryptedData();
+                        aesTcpClient.SendAlreadyEncryptedData(servicePackage.Data).Wait();
+                        var encryptedAnswer = aesTcpClient.ReceiveEncryptedData().Result;
 
                         answerPackage = new ServicePackage() {
                             Data = encryptedAnswer,
@@ -76,17 +83,22 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
-        public byte[] MakeAPIRequest(byte[] data, int port) {
-            lock (HttpForwarder) {
+        public async Task<byte[]> MakeAPIRequest(byte[] data, int port) {
+            await _httpForwarderLock.WaitAsync();
+            try {
                 Logger.Info($"[MakeAPIRequest]Forwarding data to local service with port {port}.");
-                HttpForwarder.Connect(new IPEndPoint(IPAddress.Loopback, port));
+                var connected = await HttpForwarder.Start(new ClientSettings() {
+                    RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, port)
+                });
 
-                HttpForwarder.Send(data);
-                var answer = HttpForwarder.Receive();
-
-                HttpForwarder.Close();
+                await HttpForwarder.SendAsync(data);
+                var answer = await HttpForwarder.ReceiveAsync();
 
                 return answer;
+            }
+            finally {
+                HttpForwarder.Stop();
+                _httpForwarderLock.Release();
             }
         }
 
@@ -110,7 +122,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 AesTcpClients.Add(currentSessionId, AutofacContainer.Resolve<IAesTcpClient>());
 
                 Logger.Trace($"[MakeAesTcpRequest]Connecting to local service with port {port}.");
-                AesTcpClients[currentSessionId].Connect(new IPEndPoint(IPAddress.Loopback, port));
+                AesTcpClients[currentSessionId].Start(new ClientSettings() {
+                    RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, port)
+                });
                 aesTcpClient = AesTcpClients[currentSessionId];
             }
 

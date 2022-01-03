@@ -23,7 +23,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ISerializedFileRepository<ApplicationSettings> SerializeFileRepository;
 
-        private static SemaphoreSlim LOCKER = new SemaphoreSlim(1);
+        private static SemaphoreSlim LOCKER = new SemaphoreSlim(1, 1);
 
         public SettingsManager(ILoggerService logger, IConfiguration configuration, ISerializedFileRepository<ApplicationSettings> serializeFileRepository) {
             Logger = logger.GetLogger<SettingsManager>();

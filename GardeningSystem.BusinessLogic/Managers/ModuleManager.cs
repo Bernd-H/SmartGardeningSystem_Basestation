@@ -28,7 +28,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private Guid basestationGuid;
 
         //private static readonly object LOCK_OBJEJCT = new object();
-        private static SemaphoreSlim LOCKER = new SemaphoreSlim(1);
+        private static SemaphoreSlim LOCKER = new SemaphoreSlim(1, 1);
 
         public ModuleManager(ILoggerService logger, IConfiguration configuration, IModulesRepository modulesRepository, IRfCommunicator rfCommunicator) {
             Logger = logger.GetLogger<ModuleManager>();

@@ -2,16 +2,11 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Events.Communication;
+using GardeningSystem.Common.Specifications.Communication.Base;
 
 namespace GardeningSystem.Common.Specifications.Communication {
-    public interface IAesTcpListener : ISocketListener {
+    public interface IAesTcpListener : ITcpListenerBaseClass {
 
-        bool AcceptMultipleClients { get; set; }
-
-        event EventHandler<TcpEventArgs> CommandReceivedEventHandler;
-
-        Task<byte[]> ReceiveData(NetworkStream networkStream);
-
-        Task SendData(byte[] data, NetworkStream networkStream);
+        event EventHandler<TcpEventArgs> ClientConnectedEventHandler;
     }
 }
