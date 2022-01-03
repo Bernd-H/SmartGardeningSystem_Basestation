@@ -97,11 +97,13 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
             finally {
                 // let client close the connection
-                //networkStream?.Close();
+                networkStream?.Dispose();
                 //e.TcpClient?.Close();
-                
+
                 // don't close connection, client will close it
                 // there seems to be a problem on the receiver/client side when the connection get's closed right after the last message got sent...
+
+                // -> AesTcpListener will close this connection anyway after this event is finished...
             }
         }
 

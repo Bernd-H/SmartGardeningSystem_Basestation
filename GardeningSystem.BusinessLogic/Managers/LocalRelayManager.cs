@@ -102,6 +102,14 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        public void Stop() {
+            lock (AesTcpClients) {
+                foreach (var client in AesTcpClients) {
+                    client.Value.Stop();
+                }
+            }
+        }
+
         private (Guid, IAesTcpClient) GetConnectionToService(IServicePackage servicePackage, int port) {
             Guid currentSessionId = Guid.Empty;
             IAesTcpClient aesTcpClient = null;

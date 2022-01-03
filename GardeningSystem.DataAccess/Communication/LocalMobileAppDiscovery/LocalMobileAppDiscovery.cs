@@ -8,9 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Specifications;
-using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
+using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.DataObjects;
-using GardeningSystem.DataAccess.Communication.Base;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
@@ -102,9 +101,9 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             }
         }
 
-        public void Start(IListenerSettings listenerSettings) {
+        public void Start(IPEndPoint localEndPoint) {
             UdpListener = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            UdpListener.Bind(listenerSettings.EndPoint);
+            UdpListener.Bind(localEndPoint);
             EndPoint = (IPEndPoint)UdpListener.LocalEndPoint;
             var ct = _cancellationTokenSource.Token;
 

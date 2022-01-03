@@ -2,7 +2,6 @@
 using System.Net;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
-using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
 using GardeningSystem.Common.Specifications.Managers;
 using NLog;
 

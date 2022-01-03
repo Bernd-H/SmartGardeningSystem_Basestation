@@ -25,10 +25,10 @@ namespace GardeningSystem.DataAccess.Communication {
             AesEncrypterDecrypter = aesEncrypterDecrypter;
         }
 
-        public override async Task<byte[]> ReceiveAsync(Stream stream, CancellationToken token = default) {
+        public override async Task<byte[]> ReceiveAsync(Stream stream) {
             Logger.Trace($"[ReceiveData]Waiting to receive data on local endpoint {EndPoint as IPEndPoint}.");
 
-            var data = await base.ReceiveAsync(stream, token);
+            var data = await base.ReceiveAsync(stream);
 
             // decrypt message
             byte[] decryptedPacket = AesEncrypterDecrypter.DecryptToByteArray(data);
@@ -36,13 +36,13 @@ namespace GardeningSystem.DataAccess.Communication {
             return decryptedPacket;
         }
 
-        public override async Task SendAsync(byte[] data, Stream stream, CancellationToken token = default) {
+        public override async Task SendAsync(byte[] data, Stream stream) {
             Logger.Trace($"[SendData] Sending data with length {data.Length}.");
 
             // encrypt message
             var encryptedData = AesEncrypterDecrypter.EncryptByteArray(data);
 
-            await base.SendAsync(encryptedData, stream, token);
+            await base.SendAsync(encryptedData, stream);
         }
 
         protected override void ClientConnected(ClientConnectedArgs clientConnectedArgs) {

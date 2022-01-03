@@ -17,7 +17,8 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// </summary>
         /// <param name="cancellationToken">Cancellation token to stop this relay service.</param>
         /// <param name="localEndPoint">Local end point where the public port relays all its received packages to.</param>
-        void OpenPeerToPeerListenerService(CancellationToken cancellationToken, IPEndPoint localEndPoint);
+        /// <returns>True, when the listener is listening on the <paramref name="localEndPoint"/>.</returns>
+        Task<bool> OpenPeerToPeerListenerService(CancellationToken cancellationToken, IPEndPoint localEndPoint);
 
 
         /// <summary>
@@ -26,6 +27,12 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// </summary>
         /// <param name="cancellationToken">Cancellation token to stop this relay service.</param>
         /// <param name="tunnelId">Id for the external server logic. (For whom this connection was made)</param>
+        /// <returns>True, when a connection to the external server could be established.</returns>
         Task<bool> OpenExternalServerRelayTunnel(CancellationToken cancellationToken, Guid tunnelId);
+
+        /// <summary>
+        /// Stops local relay services or disposes internal resources.
+        /// </summary>
+        void Stop();
     }
 }

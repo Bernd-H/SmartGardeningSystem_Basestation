@@ -9,7 +9,6 @@ using GardeningSystem.BusinessLogic.Managers;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
-using GardeningSystem.Common.Specifications.Communication.LocalMobileAppDiscovery;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;

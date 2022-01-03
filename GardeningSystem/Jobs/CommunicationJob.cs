@@ -54,7 +54,7 @@ namespace GardeningSystem.Jobs {
                     LocalMobileAppDiscoveryManager.Start();
 
                     if (SettingsManager.GetApplicationSettings().ConfigurationModeEnabled) {
-                        AesKeyExchangeManager.StartListener();
+                        await AesKeyExchangeManager.StartListener();
                     }
 
                     await CommandManager.Start();

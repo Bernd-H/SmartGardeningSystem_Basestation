@@ -47,6 +47,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 int port = Convert.ToInt32(Configuration[ConfigurationVars.TUNNELMANAGER_RELAYCONNECTIONSPORT]);
 
                 ISslTcpClient sslTcpClient = AutofacContainer.Resolve<ISslTcpClient>();
+                cancellationToken.Register(() => sslTcpClient.Stop());
                 var clientSettings = new SslClientSettings {
                     RemoteEndPoint = new IPEndPoint(ip, port),
                     TargetHost = Configuration[ConfigurationVars.EXTERNALSERVER_DOMAIN],
@@ -75,7 +76,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
-        public void OpenPeerToPeerListenerService(CancellationToken cancellationToken, IPEndPoint localEndPoint) {
+        public async Task<bool> OpenPeerToPeerListenerService(CancellationToken cancellationToken, IPEndPoint localEndPoint) {
             Logger.Info($"[StartRelayOnly]Starting to listen for a peer to peer connection on {localEndPoint}.");
 
             var listener = AutofacContainer.Resolve<IAesTcpListener>();
@@ -85,10 +86,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 EndPoint = localEndPoint
             };
 
-            listener.Start(listenerSettings);
+            bool connected = await listener.Start(listenerSettings);
             cancellationToken.Register(() => {
                 listener.Stop();
             });
+
+            return connected;
+        }
+
+        public void Stop() {
+            LocalRelayManager.Stop();
         }
 
         private async Task externalServer_startRelaying(ISslTcpClient sslTcpClient) {

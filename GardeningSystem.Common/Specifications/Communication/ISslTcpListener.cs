@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Security;
-using System.Threading;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Specifications.Communication.Base;

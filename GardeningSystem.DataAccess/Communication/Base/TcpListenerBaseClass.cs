@@ -72,7 +72,7 @@ namespace GardeningSystem.DataAccess.Communication.Base {
         }
 
         private void StartListening(SettingsTokenPair settingsTokenPair) {
-            while (true) {
+            while (!settingsTokenPair.Token.IsCancellationRequested) {
                 // Set the event to nonsignaled state.  
                 allDone.Reset();
 
@@ -107,7 +107,7 @@ namespace GardeningSystem.DataAccess.Communication.Base {
                 });
             }
             finally {
-                //client?.Close();
+                client?.Close();
                 if (!allDoneSet) {
                     allDone.Set();
                 }

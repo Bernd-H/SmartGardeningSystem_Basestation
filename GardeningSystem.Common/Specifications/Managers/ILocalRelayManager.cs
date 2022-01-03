@@ -22,5 +22,10 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <param name="closeConnection">True, when the connection should get closed and no data sent.</param>
         /// <returns>Answer, which that service returned.</returns>
         Task<byte[]> MakeTcpRequest(byte[] data, int port, bool closeConnection);
+
+        /// <summary>
+        /// Closes all open connections.
+        /// </summary>
+        void Stop();
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Specifications.Communication.Base;
 

@@ -39,7 +39,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             SettingsManager = settingsManager;
         }
 
-        public void StartListener() {
+        public async Task StartListener() {
             // initialize
             Logger.Info($"[StartListener]Initializing SslListener.");
             var serverCert = CertificateHandler.GetCurrentServerCertificate();
@@ -51,8 +51,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
             };
 
             // start listener
-            Logger.Info($"[StartListener]Starting listening.");
-            SslListener.Start(listenerSettings);
+            if (await SslListener.Start(listenerSettings)) {
+                Logger.Info($"[StartListener]Starting listening.");
+            } 
+            else {
+                Logger.Fatal($"[StartListener]Could not start AesKeyExchangeManager on local endpoint {listenerSettings.EndPoint}.");
+            }
         }
 
         private async void SslListener_ClientConnectedEventHandler(object sender, ClientConnectedEventArgs e) {

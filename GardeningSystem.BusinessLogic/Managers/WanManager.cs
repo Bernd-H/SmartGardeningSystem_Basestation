@@ -52,12 +52,14 @@ namespace GardeningSystem.BusinessLogic.Managers {
         public void Start() {
             Logger.Info($"[Start]Starting a connection to the external server.");
 
-            _ = ConnectToExternalServerLoop(_cancellationTokenSource.Token);
+            _ = connectToExternalServerLoop(_cancellationTokenSource.Token);
         }
 
         public async Task Stop() {
             Logger.Info($"[Stop]Shutting down WanManager. Closing all open connections.");
             _cancellationTokenSource.Cancel();
+            SslTcpClient.Stop();
+            TunnelManager.Stop();
 
             await NatController.CloseAllOpendPorts();
         }
@@ -67,10 +69,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private void OnExternalServerConnectionCollapsedEvent(object sender, EventArgs e) {
             // reconnect to the server
             // connection collapse could be due to a internet outage or a public ip change
-            _ = ConnectToExternalServerLoop(_cancellationTokenSource.Token);
+            _ = connectToExternalServerLoop(_cancellationTokenSource.Token);
         }
 
-        private async Task ConnectToExternalServerLoop(CancellationToken cancellationToken) {
+        private async Task connectToExternalServerLoop(CancellationToken cancellationToken) {
             bool success = false;
             bool resolveExceptionMessageLogged = false;
 
@@ -105,10 +107,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
             } while (!success && !cancellationToken.IsCancellationRequested);
 
             // start receiving
-            await OnConnectedToExternalServer();
+            await onConnectedToExternalServer();
         }
 
-        private async Task OnConnectedToExternalServer() {
+        private async Task onConnectedToExternalServer() {
             // send id
             var id = SettingsManager.GetApplicationSettings().Id.ToByteArray();
             await SslTcpClient.SendAsync(id);
@@ -129,11 +131,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     await SslTcpClient.SendAsync(answer);
                 }
             }
-            catch (ObjectDisposedException ode) {
+            catch (OperationCanceledException) {
+                // cancellation is requested
+            }
+            catch (ObjectDisposedException) {
+                Logger.Warn($"[onConnectedToExternalServer]Connection got closed by the external server.");
                 // conneciton got closed
             }
             catch (Exception ex) {
-                Logger.Fatal(ex, $"[OnConnectedToExternalServer]Package decryption has failed!");
+                Logger.Error(ex, $"[onConnectedToExternalServer]An exception occured. Connection to external server down!");
+                // SslTcpClient will detect that this connection is no longer active after some time (<= KeepAliveInterval)
             }
         }
 
@@ -146,7 +153,13 @@ namespace GardeningSystem.BusinessLogic.Managers {
             var publicEndPoint = await tryGetPublicEndPoint(localPort);
             if (publicEndPoint != null) {
                 // create a listener for a direct connection to a mobile app
-                TunnelManager.OpenPeerToPeerListenerService(_cancellationTokenSource.Token, new IPEndPoint(IPAddress.Any, localPort));
+                var localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
+                bool listening = await TunnelManager.OpenPeerToPeerListenerService(_cancellationTokenSource.Token, localEndPoint);
+                if (!listening) {
+                    // something went wrong while starting the listener...
+                    Logger.Error($"[tryCreatePeerToPeerRelay]Unable to start listener on local endpoint {localEndPoint}.");
+                    return null;
+                }
             }
 
             return publicEndPoint;
