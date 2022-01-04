@@ -13,6 +13,7 @@ using NLog;
 using System.Threading;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Models.Entities;
+using GardeningSystem.Common.Specifications.Repositories.DB;
 
 namespace GardeningSystem.BusinessLogic.Managers {
     public class ModuleManager : IModuleManager {
@@ -20,6 +21,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private ILogger Logger;
 
         private IModulesRepository ModulesRepository;
+
+        private ISensorDataDbRepository SensorDataDbRepository;
 
         private IRfCommunicator RfCommunicator;
 
@@ -30,10 +33,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
         //private static readonly object LOCK_OBJEJCT = new object();
         private static SemaphoreSlim LOCKER = new SemaphoreSlim(1, 1);
 
-        public ModuleManager(ILoggerService logger, IConfiguration configuration, IModulesRepository modulesRepository, IRfCommunicator rfCommunicator) {
+        public ModuleManager(ILoggerService logger, IConfiguration configuration, IModulesRepository modulesRepository,
+            IRfCommunicator rfCommunicator, ISensorDataDbRepository sensorDataDbRepository) {
             Logger = logger.GetLogger<ModuleManager>();
             Configuration = configuration;
             ModulesRepository = modulesRepository;
+            SensorDataDbRepository = sensorDataDbRepository;
             RfCommunicator = rfCommunicator;
 
             basestationGuid = Guid.Parse(Configuration[ConfigurationVars.BASESTATION_GUID]);
@@ -73,7 +78,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             var measurements = new List<ModuleDataDto>();
 
             // get guids and send out requests to all sensors
-            var modules = await GetAllModules();
+            var modules = getAllModules();
             foreach (var module in modules) {
                 if (module.ModuleTyp == ModuleTypeEnum.SENSOR) {
                     RfMessageDto answer = null;
@@ -108,6 +113,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
             LOCKER.Release();
 
+            // store datapoints in local database
+            await storeSensorData(measurements);
+
             return measurements;
         }
 
@@ -119,7 +127,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         public async Task<IEnumerable<ModuleInfoDto>> GetAllModules() {
             await LOCKER.WaitAsync();
-            var result = ModulesRepository.GetAllRegisteredModules().ToDtos();
+            var result = getAllModules();
             LOCKER.Release();
             return result;
         }
@@ -143,6 +151,28 @@ namespace GardeningSystem.BusinessLogic.Managers {
             var result = ModulesRepository.UpdateModule(module.ToDo());
             LOCKER.Release();
             return result;
+        }
+
+        private async Task storeSensorData(List<ModuleDataDto> moduleDataDtos) {
+            foreach (var dataPoint in moduleDataDtos) {
+                try {
+                    var d = dataPoint.FromDto();
+                    bool success = await SensorDataDbRepository.AddDataPoint(d);
+                    if (success) {
+                        Logger.Info($"[storeSensorData]Stored sensor measurement of sensor {d.Id} in database. (dataPointId={d.uniqueDataPointId})");
+                    }
+                    else {
+                        Logger.Error($"[storeSensorData]Unable to store datapoint from sensor {d.Id} with uid={d.uniqueDataPointId} in database.");
+                    }
+                }
+                catch (Exception ex) {
+                    Logger.Error(ex, $"[storeSensorData]An error occured while storing sensor measurement of sensor {dataPoint.Id} in database.");
+                }
+            }
+        }
+
+        private IEnumerable<ModuleInfoDto> getAllModules() {
+            return ModulesRepository.GetAllRegisteredModules().ToDtos();
         }
     }
 }

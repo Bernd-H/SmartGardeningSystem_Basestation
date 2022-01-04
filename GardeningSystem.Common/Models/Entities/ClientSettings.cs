@@ -18,6 +18,8 @@ namespace GardeningSystem.Common.Models.Entities {
         public ClientSettings() {
             LocalEndPoint = new IPEndPoint(IPAddress.Any, 0);
             ConnectTimeout = 5000;
+            SendTimeout = 5000;
+            ReceiveTimeout = 5000;
             KeepAliveInterval = 0;
             SendTimeout = System.Threading.Timeout.Infinite;
             ReceiveTimeout = System.Threading.Timeout.Infinite;

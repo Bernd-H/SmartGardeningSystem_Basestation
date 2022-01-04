@@ -20,5 +20,12 @@ namespace GardeningSystem.Common.Specifications.Communication.Base {
         Task<byte[]> ReceiveAsync();
 
         Task SendAsync(byte[] data);
+
+        /// <summary>
+        /// Made for test purposes.
+        /// (Uses socket.Poll())
+        /// </summary>
+        /// <returns>True, when the connection is still active.</returns>
+        bool IsConnected();
     }
 }

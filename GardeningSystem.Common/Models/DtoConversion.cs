@@ -77,11 +77,17 @@ namespace GardeningSystem.Common.Models {
             };
         }
 
-        //public static UserDto ToDto(this User user) {
-        //    return new UserDto() {
-        //        Id = user.Id,
-        //        Email = user.Email
-        //    };
-        //}
+        public static ModuleData FromDto(this ModuleDataDto moduleDataDto) {
+            double data = -1;
+            if (!double.IsNaN(moduleDataDto.Data)) {
+                // double mysql data type does not know double.NaN
+                data = moduleDataDto.Data;
+            }
+
+            return new ModuleData {
+                Id = moduleDataDto.Id,
+                Data = data
+            };
+        }
     }
 }

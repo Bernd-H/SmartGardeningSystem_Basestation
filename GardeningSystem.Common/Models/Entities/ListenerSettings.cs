@@ -17,6 +17,8 @@ namespace GardeningSystem.Common.Models.Entities {
         public ListenerSettings() {
             AcceptMultipleClients = true;
             Backlog = 100;
+            SendTimeout = 5000;
+            ReceiveTimeout = 5000;
             SendTimeout = System.Threading.Timeout.Infinite;
             ReceiveTimeout = System.Threading.Timeout.Infinite;
         }

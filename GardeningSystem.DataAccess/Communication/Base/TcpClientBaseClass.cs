@@ -85,6 +85,13 @@ namespace GardeningSystem.DataAccess.Communication.Base {
             return base.SendAsync(data, networkStream);
         }
 
+        public bool IsConnected() {
+            try {
+                return !(_client.Poll(1, SelectMode.SelectRead) && _client.Available == 0);
+            }
+            catch (SocketException) { return false; }
+        }
+
         private void StartConnectionCollapseDetectionProcess(int keepAliveInterval) {
             if (keepAliveInterval > 0) {
                 Task.Run(async () => {
