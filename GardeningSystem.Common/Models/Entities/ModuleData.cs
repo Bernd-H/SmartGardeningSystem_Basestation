@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GardeningSystem.Common.Specifications.DataObjects;
+using GardeningSystem.Common.Utilities;
 
 namespace GardeningSystem.Common.Models.Entities {
     public class ModuleData : IDO {
@@ -27,7 +28,7 @@ namespace GardeningSystem.Common.Models.Entities {
 
         public ModuleData() {
             uniqueDataPointId = Guid.NewGuid();
-            TimeStamp = DateTime.UtcNow;
+            TimeStamp = TimeUtils.GetCurrentTime();
         }
     }
 }

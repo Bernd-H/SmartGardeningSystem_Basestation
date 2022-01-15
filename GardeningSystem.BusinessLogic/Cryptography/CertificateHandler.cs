@@ -2,6 +2,8 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using GardeningSystem.Common;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
@@ -82,6 +84,37 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             return currentCert;
         }
 
+        public X509Certificate2 GetPublicServerCertificate() {
+            var cert = GetCurrentServerCertificate();
+            return new X509Certificate2(cert.Export(X509ContentType.Cert)); // export without private key
+        }
+
+
+        public PointerLengthPair DecryptData(byte[] encryptedData) {
+            X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
+            RSA csp = (RSA)x509Certificate2.PrivateKey; // https://www.c-sharpcorner.com/blogs/asp-net-core-encrypt-and-decrypt-public-key-and-private-key
+            var privateKey = x509Certificate2.PrivateKey as RSACryptoServiceProvider;
+            var decryptedData = csp.Decrypt(encryptedData, RSAEncryptionPadding.Pkcs1);
+
+            // store data in unmanaged memory and obfuscate byte array
+            return CryptoUtils.MoveDataToUnmanagedMemory(decryptedData);
+        }
+
+        public byte[] EncryptData(PointerLengthPair plp) {
+            X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
+            using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
+                var rsa = x509Certificate2.GetRSAPrivateKey();
+                RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
+                rsa.Clear(); // TODO: safe?
+
+                using (ISecureMemory sm = new SecureMemory(plp)) {
+                    var data = sm.Object;
+                    return RSAalg.Encrypt(data, fOAEP: false);
+                }
+            }
+        }
+
+
         #region old
         //public X509Certificate2 GetCurrentServerCertificate() {
         //    var applicationSettings = SettingsManager.GetApplicationSettings();
@@ -132,35 +165,6 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         //    //return cert;
         //}
 
-        #endregion
-
-        public (int, IntPtr) DecryptData(byte[] encryptedData) {
-            X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
-            //RSA rsa = (RSA)x509Certificate2.PrivateKey;
-            //(x509Certificate2.PrivateKey as RSA).Key.SetProperty(
-            //    new CngProperty(
-            //        "Export Policy",
-            //        BitConverter.GetBytes((int)CngExportPolicies.AllowPlaintextExport),
-            //        CngPropertyOptions.Persist));
-
-            //RSAParameters RSAParameters = rsa.ExportParameters(true);
-
-            //using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
-            //    var rsa = x509Certificate2.GetRSAPrivateKey();
-            //RSAalg.ImportParameters(exportRSAParametersWithPrivateKey(rsa));
-            //rsa.Clear(); // TODO: safe?
-
-            //byte[] decryptedDta = RSAalg.Decrypt(encryptedData, fOAEP: true);
-            RSA csp = (RSA)x509Certificate2.PrivateKey; // https://www.c-sharpcorner.com/blogs/asp-net-core-encrypt-and-decrypt-public-key-and-private-key
-            var privateKey = x509Certificate2.PrivateKey as RSACryptoServiceProvider;
-            var decryptedData = csp.Decrypt(encryptedData, RSAEncryptionPadding.Pkcs1);
-            //var decryptedData = privateKey.Decrypt(encryptedData, false);
-
-            // store data in unmanaged memory and obfuscate byte array
-            return (decryptedData.Length, CryptoUtils.MoveDataToUnmanagedMemory(decryptedData));
-            //}
-        }
-
         private RSAParameters exportRSAParametersWithPrivateKey(RSA rsa) {
             using (RSA exportRewriter = RSA.Create()) {
                 // Only one KDF iteration is being used here since it's immediately being
@@ -179,37 +183,20 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             }
         }
 
-        public byte[] EncryptDataAndObfuscateSource(byte[] data) {
-            X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
-            using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
-                var rsa = x509Certificate2.GetRSAPrivateKey();
-                RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
-                rsa.Clear(); // TODO: safe?
+        //public byte[] EncryptDataAndObfuscateSource(byte[] data) {
+        //    X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
+        //    using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
+        //        var rsa = x509Certificate2.GetRSAPrivateKey();
+        //        RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
+        //        rsa.Clear(); // TODO: safe?
 
-                byte[] encryptedData = RSAalg.Encrypt(data, fOAEP: false);
+        //        byte[] encryptedData = RSAalg.Encrypt(data, fOAEP: false);
 
-                CryptoUtils.ObfuscateByteArray(data);
-                return encryptedData;
-            }
-        }
+        //        CryptoUtils.ObfuscateByteArray(data);
+        //        return encryptedData;
+        //    }
+        //}
 
-        public byte[] EncryptData(IntPtr dataPtr, int dataLength) {
-            X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
-            using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {
-                var rsa = x509Certificate2.GetRSAPrivateKey();
-                RSAalg.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
-                rsa.Clear(); // TODO: safe?
-
-                byte[] data = new byte[dataLength];
-                CryptoUtils.GetByteArrayFromUM(data, dataPtr, dataLength);
-
-                byte[] encryptedData = RSAalg.Encrypt(data, fOAEP: false);
-
-                CryptoUtils.ObfuscateByteArray(data);
-
-                return encryptedData;
-            }
-        }
 
         //private enum PemStringType {
         //    Certificate,
@@ -250,6 +237,8 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         //}
 
 
+
+        #endregion
 
         #region self signed certifiate generation V2
 
@@ -430,7 +419,6 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         //}
 
         #endregion
-
 
         #region self signed certificate generation from https://stackoverflow.com/questions/22230745/generate-a-self-signed-certificate-on-the-fly
         private static X509Certificate2 GenerateSelfSignedCertificate(string subjectName, string issuerName, AsymmetricKeyParameter issuerPrivKey, int keyStrength = 2048) {

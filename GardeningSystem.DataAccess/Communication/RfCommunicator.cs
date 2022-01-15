@@ -47,7 +47,7 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         public async Task<RfMessageDto> SendMessage_ReceiveAnswer(Guid sender, Guid reciever, byte[] msg) {
-            Logger.Info($"[SendMessage_ReceiveAnswer]Sening message to receiver {reciever} and awaiting for answer.");
+            Logger.Info($"[SendMessage_ReceiveAnswer]Sending message to receiver {reciever} and awaiting for answer.");
             await _sw.WriteLineAsync($"send {Convert.ToBase64String(msg)}");
 
             string returnmsg = await _sr.ReadToEndAsync();

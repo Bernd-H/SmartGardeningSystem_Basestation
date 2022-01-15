@@ -6,6 +6,7 @@ using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Specifications.Repositories;
+using GardeningSystem.Common.Utilities;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
@@ -41,7 +42,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     wateringInfo.Add(new WateringNeccessaryDto() {
                         Id = measurement.Id,
                         IsNeccessary = null,
-                        Time = DateTime.Now,
+                        Time = TimeUtils.GetCurrentTime(),
                         ValveOpenTime = TimeSpan.Zero
                     });
                 } else {
@@ -49,7 +50,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     wateringInfo.Add(new WateringNeccessaryDto() {
                         Id = measurement.Id,
                         IsNeccessary = (algoResult != TimeSpan.Zero),
-                        Time = DateTime.Now,
+                        Time = TimeUtils.GetCurrentTime(),
                         ValveOpenTime = algoResult
                     });
                 }
@@ -115,7 +116,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
             double spanBetweenLastWatering = 0;
             if (lastWateringTime != null) {
-                spanBetweenLastWatering = (DateTime.Now - lastWateringTime.Value).TotalHours;
+                spanBetweenLastWatering = (TimeUtils.GetCurrentTime() - lastWateringTime.Value).TotalHours;
             }
 
             double rainInMilimeterOnTheSameDay = double.NaN;

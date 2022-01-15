@@ -8,12 +8,10 @@ namespace GardeningSystem.Common.Specifications.Managers {
 
         Task GetToken();
 
-        Task<User> GetUserInfo(byte[] email);
-
-        Task<bool> RegisterUser(User user);
-
+        //Task<User> GetUserInfo(byte[] email);
+        //Task<bool> RegisterUser(User user);
         /// <exception cref="UnauthorizedAccessException">Gets thrown when token or the plain text password is not valid.</exception>
-        Task<bool> UpdateHash(ChangeUserInfoDto updatedUserInfo);
+        //Task<bool> UpdateHash(ChangeUserInfoDto updatedUserInfo);
 
         /// <summary>
         /// Updates the public ip address of this system, which gets stored on the external server.

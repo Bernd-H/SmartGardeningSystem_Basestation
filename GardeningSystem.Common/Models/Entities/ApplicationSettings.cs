@@ -7,7 +7,9 @@ namespace GardeningSystem.Common.Models.Entities {
 
         public string PostalCode { get; set; }
 
-
+        /// <summary>
+        /// Thumbprint of the certificate stored in the X509Store.
+        /// </summary>
         public string ServerCertificate { get; set; }
 
         /// <summary>
@@ -24,7 +26,6 @@ namespace GardeningSystem.Common.Models.Entities {
         /// </summary>
         public byte[] AesIV { get; set; }
 
-
         /// <summary>
         /// Creates a wlan access point and starts the AesKeyExchangeManager.
         /// This mode was created for the first configuration of the raspberry with the mobile app.
@@ -36,5 +37,11 @@ namespace GardeningSystem.Common.Models.Entities {
         /// This token get's exchanged in the assembly line and doesn't expire.
         /// </summary>
         public string APIToken { get; set; }
+
+        /// <summary>
+        /// Login username + hasehd password.
+        /// Will be used to compare the login data entered on the mobile app.
+        /// </summary>
+        public LoginSecrets LoginSecrets { get; set; }
     }
 }

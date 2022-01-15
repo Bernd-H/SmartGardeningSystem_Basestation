@@ -11,8 +11,7 @@ namespace GardeningSystem.Common.Specifications.Cryptography {
         /// </summary>
         /// <param name="hashedPassword"></param>
         /// <param name="providedPassword"></param>
-        /// <param name="user">for logging purposes</param>
         /// <returns>1st verified, 2nd needsUpgrade</returns>
-        (bool, bool) VerifyHashedPassword(Guid userId, string hashedPassword, byte[] providedPassword);
+        (bool, bool) VerifyHashedPassword(string hashedPassword, byte[] providedPassword);
     }
 }

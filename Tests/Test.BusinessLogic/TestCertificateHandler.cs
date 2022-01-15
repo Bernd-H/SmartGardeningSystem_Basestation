@@ -33,12 +33,12 @@ namespace Test.BusinessLogic {
                 var m = mock.Create<CertificateHandler>();
 
                 // Act
-                var encryptedData = m.EncryptData(CryptoUtils.MoveDataToUnmanagedMemory(data_laterObfuscated), 20);
+                var encryptedData = m.EncryptData(CryptoUtils.MoveDataToUnmanagedMemory(data_laterObfuscated));
                 var decryptedDataPtr = m.DecryptData(encryptedData);
 
                 // Assert
-                byte[] decryptedData = new byte[decryptedDataPtr.Item1];
-                CryptoUtils.GetByteArrayFromUM(decryptedData, decryptedDataPtr.Item2, decryptedDataPtr.Item1);
+                byte[] decryptedData = new byte[decryptedDataPtr.Length];
+                CryptoUtils.GetByteArrayFromUM(ref decryptedData, decryptedDataPtr);
                 Assert.IsTrue(data.SequenceEqual(decryptedData));
             }
         }

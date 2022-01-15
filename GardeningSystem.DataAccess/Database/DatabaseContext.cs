@@ -9,8 +9,8 @@ namespace GardeningSystem.DataAccess.Database {
         public DbSet<ModuleData> sensordata { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder dbContextOptionsBuilder) {
-            string connectionString = "Data Source=localhost;Initial Catalog=smartgardening_basestation;User ID=root;Password=";
-            //string connectionString = "Data Source=localhost;Initial Catalog=smartgardening_basestation;User ID=root;Password=hmufckmlmycj";
+            //string connectionString = "Data Source=localhost;Initial Catalog=smartgardening_basestation;User ID=root;Password=";
+            string connectionString = "Data Source=localhost;Initial Catalog=smartgardening_basestation;User ID=root;Password=hmufckmlmycj";
             dbContextOptionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
         }
     }

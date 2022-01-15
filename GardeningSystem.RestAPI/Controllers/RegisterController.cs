@@ -30,37 +30,37 @@ namespace GardeningSystem.RestAPI.Controllers {
         }
 
         // POST api/<RegisterController>
-        [HttpPost]
-        public IActionResult RegisterUser([FromBody] UserDto userToAdd) {
-            byte[] email = null, plainTextPwd = null;
-            IActionResult result = Problem();
+        //[HttpPost]
+        //public IActionResult RegisterUser([FromBody] UserDto userToAdd) {
+        //    byte[] email = null, plainTextPwd = null;
+        //    IActionResult result = Problem();
 
-            try {
-                email = AesDecrypter.DecryptToByteArray(userToAdd.AesEncryptedEmail);
-                plainTextPwd = AesDecrypter.DecryptToByteArray(userToAdd.AesEncryptedPassword);
+        //    try {
+        //        email = AesDecrypter.DecryptToByteArray(userToAdd.AesEncryptedEmail);
+        //        plainTextPwd = AesDecrypter.DecryptToByteArray(userToAdd.AesEncryptedPassword);
 
-                // hash password
-                var hashedPassword = PasswordHasher.HashPassword(plainTextPwd);
+        //        // hash password
+        //        var hashedPassword = PasswordHasher.HashPassword(plainTextPwd);
 
-                result = APIManager.RegisterUser(new Common.Models.Entities.User {
-                    Id = userToAdd.Id,
-                    Email = email,
-                    HashedPassword = hashedPassword
-                }).Result ? Ok() : Problem();
-            }catch(Exception ex) {
-                Logger.Error(ex, $"[RegisterUser]An error occured.");
-            }
-            finally {
-                // obfuscate confidential data
-                if (plainTextPwd != null) {
-                    CryptoUtils.ObfuscateByteArray(plainTextPwd);
-                }
-                if (email != null) {
-                    CryptoUtils.ObfuscateByteArray(email);
-                }
-            }
+        //        result = APIManager.RegisterUser(new Common.Models.Entities.User {
+        //            Id = userToAdd.Id,
+        //            Email = email,
+        //            HashedPassword = hashedPassword
+        //        }).Result ? Ok() : Problem();
+        //    }catch(Exception ex) {
+        //        Logger.Error(ex, $"[RegisterUser]An error occured.");
+        //    }
+        //    finally {
+        //        // obfuscate confidential data
+        //        if (plainTextPwd != null) {
+        //            CryptoUtils.ObfuscateByteArray(plainTextPwd);
+        //        }
+        //        if (email != null) {
+        //            CryptoUtils.ObfuscateByteArray(email);
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
     }
 }

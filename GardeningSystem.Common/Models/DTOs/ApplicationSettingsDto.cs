@@ -1,5 +1,7 @@
 ﻿using System;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.DataObjects;
+using GardeningSystem.Common.Utilities;
 
 namespace GardeningSystem.Common.Models.DTOs {
     public class ApplicationSettingsDto : IDO {
@@ -17,13 +19,13 @@ namespace GardeningSystem.Common.Models.DTOs {
         /// Exchanged to the mobile app securley. Used to decrypt
         /// the authentication information (in RestAPI) sent by the mobile app.
         /// </summary>
-        public IntPtr AesKey { get; set; }
+        public PointerLengthPair AesKey { get; set; }
 
         /// <summary>
         /// Exchanged to the mobile app securley. Used to decrypt
         /// the authentication information (in RestAPI) sent by the mobile app.
         /// </summary>
-        public IntPtr AesIV { get; set; }
+        public PointerLengthPair AesIV { get; set; }
 
 
         /// <summary>
@@ -39,16 +41,34 @@ namespace GardeningSystem.Common.Models.DTOs {
         /// </summary>
         public string APIToken { get; set; }
 
+        /// <summary>
+        /// Login username + hasehd password.
+        /// Will be used to compare the login data entered on the mobile app.
+        /// </summary>
+        public LoginSecrets LoginSecrets { get; set; }
+
         public static ApplicationSettingsDto GetStandardSettings() {
             return new ApplicationSettingsDto() {
                 Id = Guid.NewGuid(),
                 PostalCode = string.Empty,
                 ConfigurationModeEnabled = true,
-                AesKey = IntPtr.Zero,
-                AesIV = IntPtr.Zero,
+                AesKey = null,
+                AesIV = null,
                 ServerCertificate = string.Empty,
-                APIToken = string.Empty
+                APIToken = string.Empty,
+                LoginSecrets = null
             };
+        }
+
+        ~ApplicationSettingsDto() {
+            if (AesKey != null) {
+                CryptoUtils.ObfuscateAndFreeMemory(AesKey);
+                AesKey = null;
+            } 
+            if (AesIV != null) {
+                CryptoUtils.ObfuscateAndFreeMemory(AesIV);
+                AesIV = null;
+            }
         }
     }
 }

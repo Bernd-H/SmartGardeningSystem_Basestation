@@ -16,6 +16,10 @@
 
         public static string AP_PASSPHRASE = "ap_passPhrase";
 
+        public static string DEFAULTLOGIN_USERNAME = "defaultLogin_username";
+
+        public static string DEFAULTLOGIN_PASSWORD = "defaultLogin_password";
+
         // Cryptography
         // Server certificate
         public static string CERT_PRIVATEKEY_FILENAME = "cert_privateKey_fileName";

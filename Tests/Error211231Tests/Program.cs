@@ -24,7 +24,8 @@ namespace Error211231Tests
 
         static void Main(string[] args)
         {
-            new Program();
+            //new Program();
+            new Program2();
             Console.WriteLine("Finished Main.");
             Console.ReadLine();
         }

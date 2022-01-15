@@ -96,6 +96,9 @@ namespace GardeningSystem.DataAccess.Communication.Base {
                 }
 
                 client = tcpListener.EndAcceptTcpClient(ar);
+                client.Client.Blocking = true;
+                tcpListener.Server.ReceiveTimeout = stPair.ListenerSettings.ReceiveTimeout;
+                tcpListener.Server.SendTimeout = stPair.ListenerSettings.SendTimeout;
 
                 allDone.Set();
                 allDoneSet = true;

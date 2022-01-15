@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Threading.Tasks;
+using GardeningSystem.Common;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Models.Entities;
@@ -59,42 +60,44 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
-        private async void SslListener_ClientConnectedEventHandler(object sender, ClientConnectedEventArgs e) {
+        private async Task SslListener_ClientConnectedEventHandler(object sender, ClientConnectedEventArgs e) {
             var openStream = (SslStream)e.Stream;
 
-            (IntPtr keyPtr, IntPtr ivPtr) = AesEncrypterDecrypter.GetServerAesKey();
-            byte[] key = new byte[Cryptography.AesEncrypterDecrypter.KEY_SIZE], iv = new byte[Cryptography.AesEncrypterDecrypter.IV_SIZE];
-            CryptoUtils.GetByteArrayFromUM(key, keyPtr, key.Length);
-            CryptoUtils.GetByteArrayFromUM(iv, ivPtr, iv.Length);
-            //Console.WriteLine("BasestationId: " + SettingsManager.GetApplicationSettings().Id); // only for debugging
-            Logger.Info("[SslStreamOpenCallback]Sending aes key to client.");
-            try {
-                // send key
-                await SslListener.SendConfidentialInformation(openStream, key);
+            (PointerLengthPair keyPlp, PointerLengthPair ivPlp) = AesEncrypterDecrypter.GetServerAesKey();
 
-                // get ack
-                var msg = await SslListener.ReceiveAsync(openStream);
-                if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
-                    Logger.Info($"[SslStreamOpenCallback]Received ACK was incorrect.");
-                    return; // abort
+            // use a SecureMemory instance to get a byte array out of a pointer
+            // the SecureMemory instance makes sure that the byte array get's disposed right without leaving a trace of the key in memory
+            using (ISecureMemory sm_key = new SecureMemory(keyPlp)) {
+                using (ISecureMemory sm_iv = new SecureMemory(ivPlp)) {
+                    byte[] key = sm_key.Object; // length: Cryptography.AesEncrypterDecrypter.KEY_SIZE
+                    byte[] iv = sm_iv.Object; // length: Cryptography.AesEncrypterDecrypter.IV_SIZE
+
+                    Logger.Info("[SslStreamOpenCallback]Sending aes key to client.");
+                    try {
+                        // send key
+                        await SslListener.SendConfidentialInformation(openStream, key);
+
+                        // get ack
+                        var msg = await SslListener.ReceiveAsync(openStream);
+                        if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
+                            Logger.Info($"[SslStreamOpenCallback]Received ACK was incorrect.");
+                            return; // abort
+                        }
+
+                        // send iv
+                        await SslListener.SendConfidentialInformation(openStream, iv);
+
+                        // get ack
+                        msg = await SslListener.ReceiveAsync(openStream);
+                        if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
+                            Logger.Info($"[SslStreamOpenCallback]2. received ACK was incorrect.");
+                            return; // abort
+                        }
+                    }
+                    catch (Exception ex) {
+                        Logger.Error(ex, "[SslStreamOpenCallback]An exception occured.");
+                    }
                 }
-
-                // send iv
-                await SslListener.SendConfidentialInformation(openStream, iv);
-
-                // get ack
-                msg = await SslListener.ReceiveAsync(openStream);
-                if (!msg.SequenceEqual(CommunicationCodes.ACK)) {
-                    Logger.Info($"[SslStreamOpenCallback]2. received ACK was incorrect.");
-                    return; // abort
-                }
-            }
-            catch (Exception ex) {
-                Logger.Error(ex, "[SslStreamOpenCallback]An exception occured.");
-            }
-            finally {
-                CryptoUtils.ObfuscateByteArray(key);
-                CryptoUtils.ObfuscateByteArray(iv);
             }
         }
 

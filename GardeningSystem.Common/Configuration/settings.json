@@ -13,6 +13,10 @@
 
   "ap_passPhrase": "Garden!ng",
 
+  "defaultLogin_username": "irrigation",
+
+  "defaultLogin_password": "system",
+
   ///////////////////////// cryptography
   // rest api token
   "rest_api_jwt": {

@@ -13,6 +13,7 @@ using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Specifications.Repositories;
+using GardeningSystem.Common.Specifications.Repositories.DB;
 using GardeningSystem.Common.Specifications.RfCommunication;
 using GardeningSystem.DataAccess;
 using GardeningSystem.DataAccess.Communication;
@@ -85,6 +86,7 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<RfCommunicator>().As<IRfCommunicator>().SingleInstance();
             containerBuilder.RegisterType<WeatherRepository>().As<IWeatherRepository>();
             containerBuilder.RegisterType<CertificateRepository>().As<ICertificateRepository>().SingleInstance();
+            containerBuilder.RegisterType<SensorDataDbRepository>().As<ISensorDataDbRepository>().SingleInstance();
 
             // communication
             containerBuilder.RegisterType<WifiConfigurator>().As<IWifiConfigurator>();

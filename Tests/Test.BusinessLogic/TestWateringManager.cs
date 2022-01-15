@@ -8,6 +8,7 @@ using GardeningSystem.BusinessLogic.Managers;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Specifications.Repositories;
+using GardeningSystem.Common.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NLog;
@@ -24,7 +25,7 @@ namespace Test.BusinessLogic {
                 Func<List<ModuleDataDto>> getMockModuleData = () => {
                     List<ModuleDataDto> data = new List<ModuleDataDto>();
                     data.Add(new ModuleDataDto() { Id = Guid.NewGuid(), Data = (double)0.5, LastWaterings = null });
-                    data.Add(new ModuleDataDto() { Id = Guid.NewGuid(), Data = (double)0.3, LastWaterings = new DateTime[1] { DateTime.Now.AddDays(-1) } });
+                    data.Add(new ModuleDataDto() { Id = Guid.NewGuid(), Data = (double)0.3, LastWaterings = new DateTime[1] { TimeUtils.GetCurrentTime().AddDays(-1) } });
                     data.Add(new ModuleDataDto() { Id = Guid.NewGuid(), Data = (double)0.7, LastWaterings = null });
                     data.Add(new ModuleDataDto() { Id = Guid.NewGuid(), Data = double.NaN, LastWaterings = null });
                     return data;

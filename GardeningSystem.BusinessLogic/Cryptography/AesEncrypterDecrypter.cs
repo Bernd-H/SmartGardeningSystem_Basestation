@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using GardeningSystem.Common;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
@@ -40,49 +42,55 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
         }
 
         public byte[] DecryptToByteArray(byte[] data) {
+            byte[] result;
+
             try {
-                byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
-                CryptoUtils.GetByteArrayFromUM(aesKey, getAllApplicationSettings().AesKey, KEY_SIZE);
-                CryptoUtils.GetByteArrayFromUM(aesIv, getAllApplicationSettings().AesIV, IV_SIZE);
+                using (ISecureMemory sm_key = new SecureMemory(getAllApplicationSettings().AesKey)) {
+                    using (ISecureMemory sm_iv = new SecureMemory(getAllApplicationSettings().AesIV)) {
+                        var aesKey = sm_key.Object;
+                        var aesIv = sm_iv.Object;
 
-                var result = DecryptByteArray(data, aesKey, aesIv);
-
-                CryptoUtils.ObfuscateByteArray(aesKey);
-                CryptoUtils.ObfuscateByteArray(aesIv);
-                return result;
+                        result = DecryptByteArray(data, aesKey, aesIv);
+                    }
+                }
             } catch (Exception) {
-                return new byte[0];
+                result = new byte[0];
             }
+
+            return result;
         }
 
         public byte[] EncryptByteArray(byte[] data) {
+            byte[] result;
+
             try {
-                byte[] aesKey = new byte[KEY_SIZE], aesIv = new byte[IV_SIZE];
-                CryptoUtils.GetByteArrayFromUM(aesKey, getAllApplicationSettings().AesKey, KEY_SIZE);
-                CryptoUtils.GetByteArrayFromUM(aesIv, getAllApplicationSettings().AesIV, IV_SIZE);
+                using (ISecureMemory sm_key = new SecureMemory(getAllApplicationSettings().AesKey)) {
+                    using (ISecureMemory sm_iv = new SecureMemory(getAllApplicationSettings().AesIV)) {
+                        var aesKey = sm_key.Object;
+                        var aesIv = sm_iv.Object;
 
-                byte[] result = EncryptByteArray(data, aesKey, aesIv);
-
-                CryptoUtils.ObfuscateByteArray(aesKey);
-                CryptoUtils.ObfuscateByteArray(aesIv);
-                return result;
+                        result = EncryptByteArray(data, aesKey, aesIv);
+                    }
+                }
             }
             catch (Exception) {
-                return new byte[0];
+                result = new byte[0];
             }
+
+            return result;
         }
 
-        public (IntPtr, IntPtr) GetServerAesKey() {
+        public (PointerLengthPair, PointerLengthPair) GetServerAesKey() {
             Logger.Info($"[GetSymmetricServerKey]Server aes key requested.");
             // create an aes key when there is not one yet.
-            if (getAllApplicationSettings().AesKey == IntPtr.Zero || getAllApplicationSettings().AesIV == IntPtr.Zero) {
-                GenerateAndStoreSymmetricKey();
+            if (getAllApplicationSettings().AesKey == null || getAllApplicationSettings().AesIV == null) {
+                generateAndStoreSymmetricKey();
             }
 
             return (getAllApplicationSettings().AesKey, getAllApplicationSettings().AesIV);
         }
 
-        private void GenerateAndStoreSymmetricKey() {
+        private void generateAndStoreSymmetricKey() {
             Logger.Info($"[GenerateAndStoreSymmetricKey]Generating and storing an aes key.");
             using (var myRijndael = new RijndaelManaged()) {
                 myRijndael.KeySize = KEY_SIZE * 8;

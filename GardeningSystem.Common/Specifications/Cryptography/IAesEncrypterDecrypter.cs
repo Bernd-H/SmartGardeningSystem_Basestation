@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GardeningSystem.Common.Models.Entities;
 
 namespace GardeningSystem.Common.Specifications.Cryptography {
     public interface IAesEncrypterDecrypter {
@@ -39,7 +40,6 @@ namespace GardeningSystem.Common.Specifications.Cryptography {
         /// Creates and stores a new aes key if no one has been created.
         /// </summary>
         /// <returns>Returns the aes server key.</returns>
-        //(byte[], byte[]) GetServerAesKey();
-        (IntPtr, IntPtr) GetServerAesKey();
+        (PointerLengthPair, PointerLengthPair) GetServerAesKey();
     }
 }

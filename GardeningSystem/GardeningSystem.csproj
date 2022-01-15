@@ -5,6 +5,10 @@
     <UserSecretsId>dotnet-GardeningSystem-548823BE-CA26-4407-86A5-A0501B5374BD</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="C:\Users\bernd\.nuget\packages\nlog.config\4.7.11\contentFiles\any\any\NLog.config" />
   </ItemGroup>

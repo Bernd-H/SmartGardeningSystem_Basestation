@@ -82,7 +82,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private void updateSettings(ApplicationSettingsDto newSettings, ICertificateHandler CertificateHandler = null) {
             Logger.Trace("[UpdateSettings]Writing to application settings.");
-            SerializeFileRepository.WriteSingleObjectToFile<ApplicationSettings>(newSettings.ToDo(CertificateHandler, AesEncrypterDecrypter.KEY_SIZE, AesEncrypterDecrypter.IV_SIZE));
+            SerializeFileRepository.WriteSingleObjectToFile<ApplicationSettings>(newSettings.ToDo(CertificateHandler));
         }
     }
 }

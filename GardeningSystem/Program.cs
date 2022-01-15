@@ -2,9 +2,9 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
-using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
+using GardeningSystem.Common.Utilities;
 using GardeningSystem.Jobs;
 using GardeningSystem.RestAPI;
 using Microsoft.AspNetCore.Hosting;
@@ -19,6 +19,8 @@ namespace GardeningSystem {
         public static void Main(string[] args) {
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
             try {
+                TimeUtils.ApplicationStartTime = TimeUtils.GetCurrentTime();
+
                 IoC.Init();
 
                 // development setup
@@ -28,6 +30,9 @@ namespace GardeningSystem {
                 }
 
                 //IoC.Get<IWifiConfigurator>().DisconnectFromWlan();
+
+                // create server aes key if not exists
+                IoC.Get<IAesEncrypterDecrypter>().GetServerAesKey();
 
                 logger.Debug("[Main]init main");
                 var host = CreateHostBuilder(args, IoC.Get<ICertificateHandler>(), IoC.Get<IConfiguration>()).Build();

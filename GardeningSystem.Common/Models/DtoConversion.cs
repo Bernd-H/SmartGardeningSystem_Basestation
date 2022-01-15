@@ -37,17 +37,18 @@ namespace GardeningSystem.Common.Models {
             appSettingsDto.ConfigurationModeEnabled = applicationSettings.ConfigurationModeEnabled;
             appSettingsDto.ServerCertificate = applicationSettings.ServerCertificate;
             appSettingsDto.APIToken = applicationSettings.APIToken;
+            appSettingsDto.LoginSecrets = applicationSettings.LoginSecrets;
             
             if (applicationSettings.AesKey != null && applicationSettings.AesIV != null && certificateHandler != null) {
                 // decrypt aes key/iv
-                appSettingsDto.AesKey = certificateHandler.DecryptData(applicationSettings.AesKey).Item2; // TODO: make appSettingsDto a class with length and pointer
-                appSettingsDto.AesIV = certificateHandler.DecryptData(applicationSettings.AesIV).Item2;
+                appSettingsDto.AesKey = certificateHandler.DecryptData(applicationSettings.AesKey);
+                appSettingsDto.AesIV = certificateHandler.DecryptData(applicationSettings.AesIV);
             }
 
             return appSettingsDto;
         }
 
-        public static ApplicationSettings ToDo(this ApplicationSettingsDto applicationSettingsDto, ICertificateHandler certificateHandler, int AesKeyLength, int AesIvLength) {
+        public static ApplicationSettings ToDo(this ApplicationSettingsDto applicationSettingsDto, ICertificateHandler certificateHandler) {
             var appSettings = new ApplicationSettings();
 
             appSettings.Id = applicationSettingsDto.Id;
@@ -55,11 +56,12 @@ namespace GardeningSystem.Common.Models {
             appSettings.ConfigurationModeEnabled = applicationSettingsDto.ConfigurationModeEnabled;
             appSettings.ServerCertificate = applicationSettingsDto.ServerCertificate;
             appSettings.APIToken = applicationSettingsDto.APIToken;
+            appSettings.LoginSecrets = applicationSettingsDto.LoginSecrets;
 
-            if (applicationSettingsDto.AesKey != IntPtr.Zero && applicationSettingsDto.AesIV != IntPtr.Zero && certificateHandler != null) {
+            if (applicationSettingsDto.AesKey != null && applicationSettingsDto.AesIV != null && certificateHandler != null) {
                 // encrypt aes key/iv
-                appSettings.AesKey = certificateHandler.EncryptData(applicationSettingsDto.AesKey, AesKeyLength);
-                appSettings.AesIV = certificateHandler.EncryptData(applicationSettingsDto.AesIV, AesIvLength);
+                appSettings.AesKey = certificateHandler.EncryptData(applicationSettingsDto.AesKey);
+                appSettings.AesIV = certificateHandler.EncryptData(applicationSettingsDto.AesIV);
             }
 
             return appSettings;

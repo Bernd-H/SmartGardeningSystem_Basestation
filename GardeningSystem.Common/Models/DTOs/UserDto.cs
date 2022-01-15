@@ -1,12 +1,8 @@
-﻿using System;
-using GardeningSystem.Common.Specifications.DataObjects;
+﻿namespace GardeningSystem.Common.Models.DTOs {
+    public class UserDto {
 
-namespace GardeningSystem.Common.Models.DTOs {
-    public class UserDto : IDO {
-        public Guid Id { get; set; }
+        public string Username { get; set; }
 
-        public byte[] AesEncryptedEmail { get; set; }
-
-        public byte[] AesEncryptedPassword { get; set; }
+        public string Password { get; set; }
     }
 }

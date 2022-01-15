@@ -1,5 +1,6 @@
 ﻿using System;
 using GardeningSystem.Common.Specifications.DataObjects;
+using GardeningSystem.Common.Utilities;
 
 namespace GardeningSystem.Common.Models.Entities {
     public class CachedObject : ICachedObject {
@@ -8,14 +9,14 @@ namespace GardeningSystem.Common.Models.Entities {
 
         public TimeSpan Lifetime {
             get {
-                return DateTime.Now - CreationDate;
+                return TimeUtils.GetCurrentTime() - CreationDate;
             }
         }
 
         private DateTime CreationDate;
 
         public CachedObject(object o) {
-            CreationDate = DateTime.Now;
+            CreationDate = TimeUtils.GetCurrentTime();
             Object = o;
         }
     }

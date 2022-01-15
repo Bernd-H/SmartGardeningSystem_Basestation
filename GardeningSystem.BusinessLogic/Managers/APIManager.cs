@@ -76,67 +76,67 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         #region UserController-Methods
 
-        public async Task<User> GetUserInfo(byte[] email) {
-            Logger.Info($"[GetUserInfo]Requesting user information from external server.");
+        //public async Task<User> GetUserInfo(byte[] email) {
+        //    Logger.Info($"[GetUserInfo]Requesting user information from external server.");
 
-            if (!client.DefaultRequestHeaders.Contains("Authorization")) {
-                Logger.Fatal($"[GetUserInfo]Unable perfom this api request with no json web token.");
-                return null;
-            }
+        //    if (!client.DefaultRequestHeaders.Contains("Authorization")) {
+        //        Logger.Fatal($"[GetUserInfo]Unable perfom this api request with no json web token.");
+        //        return null;
+        //    }
 
-            string url = "";
+        //    string url = "";
 
-            try {
-                // build url
-                var config = ConfigurationContainer.Configuration;
-                url = string.Format(config[ConfigurationVars.EXTERNALSERVER_USER_URL], config[ConfigurationVars.EXTERNALSERVER_DOMAIN], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
-                url += $"{Convert.ToBase64String(email)}";
+        //    try {
+        //        // build url
+        //        var config = ConfigurationContainer.Configuration;
+        //        url = string.Format(config[ConfigurationVars.EXTERNALSERVER_USER_URL], config[ConfigurationVars.EXTERNALSERVER_DOMAIN], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
+        //        url += $"{Convert.ToBase64String(email)}";
 
-                var response = await client.GetAsync(url);
-                string result = await response.Content.ReadAsStringAsync();
+        //        var response = await client.GetAsync(url);
+        //        string result = await response.Content.ReadAsStringAsync();
 
-                return JsonConvert.DeserializeObject<User>(result);
-            }
-            catch (Exception ex) {
-                Logger.Error(ex, $"[GetUserInfo]Could not get user details from api. (url={url})");
-            }
+        //        return JsonConvert.DeserializeObject<User>(result);
+        //    }
+        //    catch (Exception ex) {
+        //        Logger.Error(ex, $"[GetUserInfo]Could not get user details from api. (url={url})");
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
-        public async Task<bool> RegisterUser(User user) {
-            Logger.Info($"[RegisterUser]Adding a new user to the external server.");
+        //public async Task<bool> RegisterUser(User user) {
+        //    Logger.Info($"[RegisterUser]Adding a new user to the external server.");
 
-            if (!client.DefaultRequestHeaders.Contains("Authorization")) {
-                Logger.Fatal($"[RegisterUser]Unable perfom this api request with no json web token.");
-                return false;
-            }
+        //    if (!client.DefaultRequestHeaders.Contains("Authorization")) {
+        //        Logger.Fatal($"[RegisterUser]Unable perfom this api request with no json web token.");
+        //        return false;
+        //    }
 
-            string url = "";
+        //    string url = "";
 
-            try {
-                // build url
-                var config = ConfigurationContainer.Configuration;
-                url = string.Format(config[ConfigurationVars.EXTERNALSERVER_USER_URL], config[ConfigurationVars.EXTERNALSERVER_DOMAIN], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
+        //    try {
+        //        // build url
+        //        var config = ConfigurationContainer.Configuration;
+        //        url = string.Format(config[ConfigurationVars.EXTERNALSERVER_USER_URL], config[ConfigurationVars.EXTERNALSERVER_DOMAIN], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
                 
-                // prepare data to send
-                string json = JsonConvert.SerializeObject(user);
+        //        // prepare data to send
+        //        string json = JsonConvert.SerializeObject(user);
 
-                // setup the body of the request
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+        //        // setup the body of the request
+        //        StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PostAsync(url, data);
+        //        var response = await client.PostAsync(url, data);
 
-                if (response.StatusCode == System.Net.HttpStatusCode.OK) {
-                    return true;
-                }
-            }
-            catch (Exception ex) {
-                Logger.Error(ex, $"[RegisterUser]Could not get user details from api. (url={url})");
-            }
+        //        if (response.StatusCode == System.Net.HttpStatusCode.OK) {
+        //            return true;
+        //        }
+        //    }
+        //    catch (Exception ex) {
+        //        Logger.Error(ex, $"[RegisterUser]Could not get user details from api. (url={url})");
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
         public async Task<bool> UpdateHash(ChangeUserInfoDto updatedUserInfo) {
             Logger.Info($"[UpdateHash]Updating hashed password for user with id {updatedUserInfo.Id} in external database.");

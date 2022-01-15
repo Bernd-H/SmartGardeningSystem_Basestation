@@ -6,6 +6,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using GardeningSystem.Common.Events;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
@@ -18,7 +19,7 @@ using NLog;
 namespace GardeningSystem.DataAccess.Communication {
     public class SslTcpListener : TcpListenerBaseClass, ISslTcpListener {
 
-        public event EventHandler<ClientConnectedEventArgs> ClientConnectedEventHandler;
+        public event AsyncEventHandler<ClientConnectedEventArgs> ClientConnectedEventHandler;
 
         public SslTcpListener(ILoggerService loggerService) : base(loggerService.GetLogger<SslTcpListener>()) { }
 
@@ -38,7 +39,7 @@ namespace GardeningSystem.DataAccess.Communication {
                 sslStream.AuthenticateAsServer(settings.ServerCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
 
                 // communicate
-                ClientConnectedEventHandler?.Invoke(this, new ClientConnectedEventArgs(args.TcpClient, sslStream));
+                ClientConnectedEventHandler?.Invoke(this, new ClientConnectedEventArgs(args.TcpClient, sslStream)).Wait();
             }
             catch (AuthenticationException e) {
                 Logger.Error(e, "[AcceptTcpClientCallback]Authentication failed - closing the connection.");
