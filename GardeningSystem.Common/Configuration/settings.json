@@ -52,6 +52,7 @@
   "externalServer_userUrl": "https://{0}:{1}/api/User/",
   "externalServer_getTokenUrl": "https://{0}:{1}/api/Token/",
   "externalServer_ipLookupUrl": "https://{0}:{1}/api/IPLookup/",
+  "externalServer_weatherUrl": "https://{0}:{1}/api/Weather/",
 
   ///////////////////////// Service options
   "wateringJob_enabled": "false",

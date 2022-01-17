@@ -4,6 +4,7 @@ using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
+using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Utilities;
 using GardeningSystem.Jobs;
 using GardeningSystem.RestAPI;
@@ -16,12 +17,16 @@ using NLog.Web;
 
 namespace GardeningSystem {
     public class Program {
+
         public static void Main(string[] args) {
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
             try {
                 TimeUtils.ApplicationStartTime = TimeUtils.GetCurrentTime();
 
                 IoC.Init();
+
+                //var weatherData = IoC.Get<IAPIManager>().GetWeatherForecast("Hanftal").Result;
+                //return;
 
                 // development setup
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
@@ -37,8 +42,6 @@ namespace GardeningSystem {
                 logger.Debug("[Main]init main");
                 var host = CreateHostBuilder(args, IoC.Get<ICertificateHandler>(), IoC.Get<IConfiguration>()).Build();
                 host.Run();
-
-                //var r = IoC.Get<Common.Specifications.Repositories.IWeatherRepository>().GetCurrentWeatherPredictions("Unterstinkenbrunn").Result;
             }
             catch (Exception exception) {
                 //NLog: catch setup errors

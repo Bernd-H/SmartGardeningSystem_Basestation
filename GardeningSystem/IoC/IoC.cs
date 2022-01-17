@@ -21,6 +21,7 @@ using GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery;
 using GardeningSystem.DataAccess.Repositories;
 using GardeningSystem.Jobs;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using NLog;
 
 namespace GardeningSystem {
@@ -50,14 +51,13 @@ namespace GardeningSystem {
         /// <param name="containerBuilder"></param>
         public static void RegisterToContainerBuilder(ref ContainerBuilder containerBuilder) {
             // Register individual components
-            //containerBuilder.Register(c => LogManager.GetLogger("main")).As<ILogger>();
             containerBuilder.RegisterType<LoggerService>().As<ILoggerService>();
             containerBuilder.Register(c => ConfigurationContainer.Configuration).As<IConfiguration>();
             containerBuilder.RegisterType<DevelopmentSetuper>().As<IDevelopmentSetuper>();
             containerBuilder.RegisterType<DependencyResolver>().As<IDependencyResolver>();
 
             /// jobs
-            containerBuilder.RegisterType<WateringJob>().AsSelf();
+            containerBuilder.RegisterType<WateringJob>().AsSelf().SingleInstance();
             containerBuilder.RegisterType<CommunicationJob>().AsSelf();
 
             /// business logic
@@ -84,7 +84,6 @@ namespace GardeningSystem {
             containerBuilder.RegisterGeneric(typeof(SerializedFileRepository<>)).As(typeof(ISerializedFileRepository<>)).InstancePerDependency();
             containerBuilder.RegisterType<ModulesRepository>().As<IModulesRepository>().SingleInstance();
             containerBuilder.RegisterType<RfCommunicator>().As<IRfCommunicator>().SingleInstance();
-            containerBuilder.RegisterType<WeatherRepository>().As<IWeatherRepository>();
             containerBuilder.RegisterType<CertificateRepository>().As<ICertificateRepository>().SingleInstance();
             containerBuilder.RegisterType<SensorDataDbRepository>().As<ISensorDataDbRepository>().SingleInstance();
 

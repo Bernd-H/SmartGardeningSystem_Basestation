@@ -2,11 +2,10 @@
 
     public enum WateringStatus {
         Ready = 0,
-        Watering = 1,
         StartingWatering = 11,
         StoppingWatering = 12,
-        ManualWateringMode = 2,
-        Error = 3
+        AutomaticIrrigationMode = 1,
+        ManualIrrigationMode = 2
     }
 
     public class SystemStatusDto {

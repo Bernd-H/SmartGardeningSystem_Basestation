@@ -8,10 +8,39 @@ using GardeningSystem.Common.Models.DTOs;
 namespace GardeningSystem.Common.Specifications.RfCommunication {
     public interface IRfCommunicator {
 
-        Task<RfMessageDto> SendMessage_ReceiveAnswer(Guid sender, Guid reciever, byte[] msg);
+        /// <summary>
+        /// Initializes the RF Module.
+        /// </summary>
+        /// <returns></returns>
+        Task Start();
 
-        Task<RfMessageDto> SendOutBroadcast(byte[] msg);
+        /// <summary>
+        /// Shuts down the RF Module.
+        /// </summary>
+        /// <returns></returns>
+        Task Stop();
 
-        void Dispose();
+        Task<ModuleInfoDto> DiscoverNewModule();
+
+        Task<bool> PingModule(ModuleInfoDto module);
+
+        Task<(double, double)> GetTempAndSoilMoisture(ModuleInfoDto module);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="timeSpan">Max timespan = 8,5h</param>
+        /// <returns></returns>
+        Task<bool> OpenValve(ModuleInfoDto module, TimeSpan timeSpan);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="module"></param>
+        /// <returns></returns>
+        Task<bool> CloseValve(ModuleInfoDto module);
+
+        Task<float> GetBatteryLevel(ModuleInfoDto module);
     }
 }

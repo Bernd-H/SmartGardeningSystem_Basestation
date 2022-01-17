@@ -1,6 +1,7 @@
 ﻿using System;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
@@ -10,10 +11,13 @@ namespace GardeningSystem.RestAPI.Controllers {
     [ApiController]
     public class SystemStatusController : ControllerBase {
 
+        private ISettingsManager SettingsManager;
+
         private ILogger Logger;
 
-        public SystemStatusController(ILoggerService loggerService) {
+        public SystemStatusController(ILoggerService loggerService, ISettingsManager settingsManager) {
             Logger = loggerService.GetLogger<SystemStatusController>();
+            SettingsManager = settingsManager;
         }
 
         // GET: api/<SystemStatusController>
@@ -25,7 +29,7 @@ namespace GardeningSystem.RestAPI.Controllers {
                 return new SystemStatusDto {
                     SystemUpMinutes = TimeUtils.GetUpTimeInMinutes(),
                     Temperature = 22,
-                    WateringStatus = WateringStatus.Ready
+                    WateringStatus = SettingsManager.GetApplicationSettings().WateringStatus
                 };
             }
             catch (Exception ex) {

@@ -52,7 +52,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
             int attempts = 10;
             bool success = false;
             do {
-                var rfMessageDto = await RfCommunicator.SendMessage_ReceiveAnswer(basestationGuid, sensor, DataAccess.Communication.RfCommunicator.BuildActorMessage(basestationGuid, sensor, state));
+                //var rfMessageDto = await RfCommunicator.SendMessage_ReceiveAnswer(basestationGuid, sensor, DataAccess.Communication.RfCommunicator.BuildActorMessage(basestationGuid, sensor, state));
+                RfMessageDto rfMessageDto = null;
+                throw new NotImplementedException();
 
                 if (rfMessageDto.Id == sensor && (rfMessageDto.Bytes.SequenceEqual(new byte[1] { RfCommunication_Codes.ACK }))) {
                     success = true;
@@ -88,8 +90,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     // communicate with current module, repeat if something went wrong 
                     do {
                         Logger.Trace($"[GetAllMeasurements]Getting measurements from sensor {module.Id}. Attempt: {Math.Abs(maxAttempts - attempts)}.");
-                        byte[] msg = DataAccess.Communication.RfCommunicator.BuildSensorDataMessage(basestationGuid, module.Id);
-                        answer = await RfCommunicator.SendMessage_ReceiveAnswer(basestationGuid, module.Id, msg);
+                        //byte[] msg = DataAccess.Communication.RfCommunicator.BuildSensorDataMessage(basestationGuid, module.Id);
+                        //answer = await RfCommunicator.SendMessage_ReceiveAnswer(basestationGuid, module.Id, msg);
+                        throw new NotImplementedException();
                         attempts--;
                     } while (answer.Id == Guid.Empty && attempts > 0);
 

@@ -25,28 +25,32 @@ namespace GardeningSystem.Jobs {
         }
 
         private async void Start(object s, EventArgs e) {
-            Logger.Info($"[Start]Starting Watering-Check routine.");
-            var wateringInfos = (await WateringManager.IsWateringNeccessary()).ToList();
+            // get sensor measurements and let the irrigation algorithm decide what moisture sensor needs water
+            // if automatic irrigation is enabled
+            if (WateringManager.AutomaticIrrigationEnabled) {
+                Logger.Info($"[Start]Starting Watering-Check routine.");
+                var wateringInfos = (await WateringManager.IsWateringNeccessary()).ToList();
 
-            var wateringTasks = new List<Task>();
+                var wateringTasks = new List<Task>();
 
-            // process watering info
-            foreach (var sensor in wateringInfos) {
-                if (sensor.IsNeccessary == null) {
-                    Logger.Warn($"[Start]Failed to get measurements of sensor with id {sensor.Id.ToString()}. Notifying user.");
+                // process watering info
+                foreach (var sensor in wateringInfos) {
+                    if (!sensor.IsNeccessary.HasValue) {
+                        Logger.Warn($"[Start]Failed to get measurements of sensor with id {sensor.Id.ToString()}. Notifying user.");
 
-                    // notify user
-                    throw new NotImplementedException();
+                        // notify user
+                        throw new NotImplementedException();
+                    }
+                    else if (sensor.IsNeccessary.Value) {
+                        Logger.Info($"[Start]Starting watering for {sensor.ValveOpenTime.ToString()} on sensor {sensor.Id}.");
+                        wateringTasks.Add(WateringManager.StartWatering(sensor));
+                    }
                 }
-                else if (sensor.IsNeccessary.Value) {
-                    Logger.Info($"[Start]Starting watering for {sensor.ValveOpenTime.ToString()} on sensor {sensor.Id}.");
-                    wateringTasks.Add(WateringManager.StartWatering(sensor));
-                }
+
+                // wait for all the end of all watering tasks
+                await Task.WhenAll(wateringTasks);
+                Logger.Trace($"[Start]Watering job finished.");
             }
-
-            // wait for all the end of all watering tasks
-            await Task.WhenAll(wateringTasks);
-            Logger.Trace($"[Start]Watering job finished.");
         }
 
         private async void Stop(object s, EventArgs e) {

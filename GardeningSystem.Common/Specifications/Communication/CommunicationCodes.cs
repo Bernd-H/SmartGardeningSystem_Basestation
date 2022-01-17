@@ -11,6 +11,10 @@
 
         public static byte[] StopManualWateringCommand = new byte[] { 152 };
 
+        public static byte[] StartAutomaticIrrigationCommand = new byte[] { 153 };
+
+        public static byte[] StopAutomaticIrrigationCommand = new byte[] { 154 };
+
         #endregion
     }
 }

@@ -74,6 +74,35 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        public async Task<WeatherForecast> GetWeatherForecast(string location) {
+            Logger.Trace($"[GetWeather]Trying to get a weather forecast.");
+            string url = "";
+
+            try {
+                // build url
+                var config = ConfigurationContainer.Configuration;
+                url = string.Format(config[ConfigurationVars.EXTERNALSERVER_WEATHER_URL], config[ConfigurationVars.EXTERNALSERVER_DOMAIN], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
+                url += location;
+
+                var response = await client.GetAsync(url);
+
+                if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized) {
+                    string result = await response.Content.ReadAsStringAsync();
+                    var weatherForecast = JsonConvert.DeserializeObject<WeatherForecast>(result);
+
+                    return weatherForecast;
+                } 
+                else {
+                    Logger.Error($"[GetWeather]Unauthorized.");
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, $"[GetWeather]Something went wrong. (url={url})");
+            }
+
+            return null;
+        }
+
         #region UserController-Methods
 
         //public async Task<User> GetUserInfo(byte[] email) {
@@ -118,7 +147,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         //        // build url
         //        var config = ConfigurationContainer.Configuration;
         //        url = string.Format(config[ConfigurationVars.EXTERNALSERVER_USER_URL], config[ConfigurationVars.EXTERNALSERVER_DOMAIN], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
-                
+
         //        // prepare data to send
         //        string json = JsonConvert.SerializeObject(user);
 

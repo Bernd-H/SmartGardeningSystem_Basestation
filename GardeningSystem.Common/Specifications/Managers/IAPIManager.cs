@@ -20,5 +20,13 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <param name="dto">Public ip address and basestation id.</param>
         /// <returns></returns>
         Task<bool> UpdateIPStatus(IPStatusDto dto);
+
+
+        /// <summary>
+        /// Requests amount of rain in mm for the next day.
+        /// </summary>
+        /// <param name="location">Location of a near city.</param>
+        /// <returns></returns>
+        Task<WeatherForecast> GetWeatherForecast(string location);
     }
 }

@@ -33,11 +33,13 @@ namespace GardeningSystem.Common.Models {
             var appSettingsDto = new ApplicationSettingsDto();
 
             appSettingsDto.Id = applicationSettings.Id;
-            appSettingsDto.PostalCode = applicationSettings.PostalCode;
+            appSettingsDto.RfSystemId = applicationSettings.RfSystemId;
+            appSettingsDto.CityName = applicationSettings.CityName;
             appSettingsDto.ConfigurationModeEnabled = applicationSettings.ConfigurationModeEnabled;
             appSettingsDto.ServerCertificate = applicationSettings.ServerCertificate;
             appSettingsDto.APIToken = applicationSettings.APIToken;
             appSettingsDto.LoginSecrets = applicationSettings.LoginSecrets;
+            appSettingsDto.AutomaticIrrigationEnabled = applicationSettings.AutomaticIrrigationEnabled;
             
             if (applicationSettings.AesKey != null && applicationSettings.AesIV != null && certificateHandler != null) {
                 // decrypt aes key/iv
@@ -52,11 +54,13 @@ namespace GardeningSystem.Common.Models {
             var appSettings = new ApplicationSettings();
 
             appSettings.Id = applicationSettingsDto.Id;
-            appSettings.PostalCode = applicationSettingsDto.PostalCode;
+            appSettings.RfSystemId = applicationSettingsDto.RfSystemId;
+            appSettings.CityName = applicationSettingsDto.CityName;
             appSettings.ConfigurationModeEnabled = applicationSettingsDto.ConfigurationModeEnabled;
             appSettings.ServerCertificate = applicationSettingsDto.ServerCertificate;
             appSettings.APIToken = applicationSettingsDto.APIToken;
             appSettings.LoginSecrets = applicationSettingsDto.LoginSecrets;
+            appSettings.AutomaticIrrigationEnabled = applicationSettingsDto.AutomaticIrrigationEnabled;
 
             if (applicationSettingsDto.AesKey != null && applicationSettingsDto.AesIV != null && certificateHandler != null) {
                 // encrypt aes key/iv

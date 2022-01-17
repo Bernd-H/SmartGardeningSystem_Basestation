@@ -1,11 +1,19 @@
 ﻿using System;
+using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications.DataObjects;
 
 namespace GardeningSystem.Common.Models.Entities {
     public class ApplicationSettings : IDO {
+
         public Guid Id { get; set; }
 
-        public string PostalCode { get; set; }
+        public byte RfSystemId { get; set; }
+
+        /// <summary>
+        /// Name of a near by city.
+        /// Used to get weather forecasts for this location.
+        /// </summary>
+        public string CityName { get; set; }
 
         /// <summary>
         /// Thumbprint of the certificate stored in the X509Store.
@@ -43,5 +51,9 @@ namespace GardeningSystem.Common.Models.Entities {
         /// Will be used to compare the login data entered on the mobile app.
         /// </summary>
         public LoginSecrets LoginSecrets { get; set; }
+
+        public bool AutomaticIrrigationEnabled { get; set; }
+
+        public WateringStatus WateringStatus { get; set; }
     }
 }

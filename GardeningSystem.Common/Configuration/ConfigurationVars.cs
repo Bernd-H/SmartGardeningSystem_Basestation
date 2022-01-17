@@ -50,6 +50,7 @@
         public static string EXTERNALSERVER_USER_URL = "externalServer_userUrl";
         public static string EXTERNALSERVER_GETTOKEN_URL = "externalServer_getTokenUrl";
         public static string EXTERNALSERVER_IPLOOKUP_URL = "externalServer_ipLookupUrl";
+        public static string EXTERNALSERVER_WEATHER_URL = "externalServer_weatherUrl";
 
 
         // GardeningSystem.RestAPI

@@ -8,7 +8,13 @@ namespace GardeningSystem.Common.Models.DTOs {
 
         public Guid Id { get; set; }
 
-        public string PostalCode { get; set; }
+        public byte RfSystemId { get; set; }
+
+        /// <summary>
+        /// Name of a near by city.
+        /// Used to get weather forecasts for this location.
+        /// </summary>
+        public string CityName { get; set; }
 
         /// <summary>
         /// Thumbprint of the certificate
@@ -47,16 +53,27 @@ namespace GardeningSystem.Common.Models.DTOs {
         /// </summary>
         public LoginSecrets LoginSecrets { get; set; }
 
+        
+        public bool AutomaticIrrigationEnabled { get; set; }
+
+        public WateringStatus WateringStatus { get; set; }
+
         public static ApplicationSettingsDto GetStandardSettings() {
+            var sysId = new byte[1];
+            new Random((int)DateTime.Now.Ticks).NextBytes(sysId);
+
             return new ApplicationSettingsDto() {
                 Id = Guid.NewGuid(),
-                PostalCode = string.Empty,
+                RfSystemId = sysId[0],
+                CityName = string.Empty,
                 ConfigurationModeEnabled = true,
                 AesKey = null,
                 AesIV = null,
                 ServerCertificate = string.Empty,
                 APIToken = string.Empty,
-                LoginSecrets = null
+                LoginSecrets = null,
+                AutomaticIrrigationEnabled = true,
+                WateringStatus = WateringStatus.Ready
             };
         }
 

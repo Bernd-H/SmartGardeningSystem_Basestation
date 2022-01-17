@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models.DTOs;
 
@@ -15,6 +16,8 @@ namespace GardeningSystem.Common.Specifications.Managers
         /// </summary>
         /// <param name="activateWatering">True to start wartering.</param>
         /// <returns>True when all valves got successfully set to the new task.</returns>
-        Task<bool> ManualOverwrite(bool activateWatering);
+        Task<bool> ManualOverwrite(bool activateWatering, TimeSpan? irrigationTimeSpan = null);
+
+        bool AutomaticIrrigationEnabled { get; }
     }
 }

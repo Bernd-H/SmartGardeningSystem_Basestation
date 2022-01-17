@@ -53,7 +53,8 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
                         result = DecryptByteArray(data, aesKey, aesIv);
                     }
                 }
-            } catch (Exception) {
+            } catch (Exception ex) {
+                Logger.Trace(ex, $"[DecryptToByteArray]An error occured while decrypting {data.Length} bytes.");
                 result = new byte[0];
             }
 
@@ -73,7 +74,8 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
                     }
                 }
             }
-            catch (Exception) {
+            catch (Exception ex) {
+                Logger.Trace(ex, $"[EncryptByteArray]An error occured while encrypting {data.Length} bytes.");
                 result = new byte[0];
             }
 
