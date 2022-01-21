@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GardeningSystem</name>
+    </assembly>
+    <members>
+        <member name="M:GardeningSystem.IoC.Init">
+            <summary>
+            Registers all types to a internal containerbuilder.
+            Does not build the cointainer yet.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.IoC.RegisterToContainerBuilder(Autofac.ContainerBuilder@)">
+            <summary>
+            Also needed to register all types to an external container builder.
+            Used in GardeningSystem.RestAPI -> Startup
+            </summary>
+            <param name="containerBuilder"></param>
+        </member>
+        <member name="M:GardeningSystem.IoC.Get``1">
+            <summary>
+            Resolves a specific type
+            </summary>
+            <typeparam name="T"></typeparam>
+            <returns></returns>
+        </member>
+        <member name="F:GardeningSystem.TimedHostedService._waitTillDoWorkHasFinished">
+            <summary>
+            true, if the timer should wait till all work in the doWorkHandler has been done to start the new period
+            </summary>
+        </member>
+    </members>
+</doc>

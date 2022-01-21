@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
@@ -25,9 +26,6 @@ namespace GardeningSystem {
 
                 IoC.Init();
 
-                //var weatherData = IoC.Get<IAPIManager>().GetWeatherForecast("Hanftal").Result;
-                //return;
-
                 // development setup
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
                     logger.Info("[Main]Setting up test development/test enviroment.");
@@ -36,7 +34,8 @@ namespace GardeningSystem {
 
                 //IoC.Get<IWifiConfigurator>().DisconnectFromWlan();
 
-                // create server aes key if not exists
+                // create server certificate and aes key if not exists
+                IoC.Get<ICertificateHandler>().Setup();
                 IoC.Get<IAesEncrypterDecrypter>().GetServerAesKey();
 
                 logger.Debug("[Main]init main");

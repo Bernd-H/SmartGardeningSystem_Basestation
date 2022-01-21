@@ -55,5 +55,16 @@ namespace GardeningSystem.DataAccess.Repositories {
         public bool UpdateModule(ModuleInfo module) {
             return ModulesFileRepo.UpdateItemFromList(module);
         }
+
+        public Guid GetIdFromModuleId(byte moduleId) {
+            var modules = GetAllRegisteredModules();
+            foreach (var module in modules) {
+                if (module.ModuleId == moduleId) {
+                    return module.Id;
+                }
+            }
+
+            return Guid.Empty;
+        }
     }
 }

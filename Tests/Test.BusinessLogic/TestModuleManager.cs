@@ -41,17 +41,17 @@ namespace Test.BusinessLogic {
                     modules.Add(new ModuleInfo() {
                         Id = module1Guid,
                         Name = "Test",
-                        ModuleTyp = ModuleTypeEnum.SENSOR
+                        ModuleType = ModuleType.SENSOR
                     });
                     modules.Add(new ModuleInfo() {
                         Id = Guid.NewGuid(),
                         Name = "Test2",
-                        ModuleTyp = ModuleTypeEnum.VALVE
+                        ModuleType = ModuleType.VALVE
                     });
                     modules.Add(new ModuleInfo() {
                         Id = module3Guid,
                         Name = "Test3",
-                        ModuleTyp = ModuleTypeEnum.SENSOR
+                        ModuleType = ModuleType.SENSOR
                     });
 
                     return modules;

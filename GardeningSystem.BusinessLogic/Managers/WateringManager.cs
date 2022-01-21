@@ -137,8 +137,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 var modules = await ModuleManager.GetAllModules();
                 int valveState = activateWatering ? 1 : 0; // 0 = close valve, 1 = open valve
                 foreach (var module in modules) {
-                    if (module.ModuleTyp == ModuleTypeEnum.VALVE) {
-                        var successfullyChangedValveState = await ModuleManager.ChangeCorrespondingActorState(module.Id, valveState);
+                    if (module.ModuleType == Common.Models.Enums.ModuleType.Valve) {
+                        var successfullyChangedValveState = await ModuleManager.ChangeValveState(module.ModuleId, valveState);
                         Logger.Info($"[ManualOverwrite]Opened/Closed valve with id {Utils.ConvertByteToHex(module.ModuleId)} successfully: {successfullyChangedValveState}");
                         success = success && successfullyChangedValveState;
                     }

@@ -25,5 +25,7 @@ namespace GardeningSystem.Common.Specifications.Repositories {
         /// <param name="module"></param>
         /// <returns>true </returns>
         bool UpdateModule(ModuleInfo module);
+
+        Guid GetIdFromModuleId(byte moduleId);
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 
 namespace GardeningSystem {
-    public class TimedHostedService : IHostedService, IDisposable, IIrrigationService {
+    public class TimedHostedService : IHostedService, IDisposable {
 
         private int executionCount = 0;
         private ILogger _logger;

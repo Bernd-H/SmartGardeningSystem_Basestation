@@ -1,0 +1,579 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GardeningSystem.Common</name>
+    </assembly>
+    <members>
+        <member name="T:GardeningSystem.Common.Configuration.ConfigurationContainer">
+            <summary>
+            Used to pass the settings file from GardeningSystem.Program.cs to StartupRestAPI.cs
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Configuration.ConfigurationContainer.OverwriteSomeSettings(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Overwrites some settings when test environment is set
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto.CityName">
+            <summary>
+            Name of a near by city.
+            Used to get weather forecasts for this location.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto.ServerCertificate">
+            <summary>
+            Thumbprint of the certificate
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto.AesKey">
+            <summary>
+            Exchanged to the mobile app securley. Used to decrypt
+            the authentication information (in RestAPI) sent by the mobile app.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto.AesIV">
+            <summary>
+            Exchanged to the mobile app securley. Used to decrypt
+            the authentication information (in RestAPI) sent by the mobile app.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto.ConfigurationModeEnabled">
+            <summary>
+            Creates a wlan access point and starts the AesKeyExchangeManager.
+            This mode was created for the first configuration of the raspberry with the mobile app.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto.APIToken">
+            <summary>
+            Token needed for API request on the external server.
+            This token get's exchanged in the assembly line and doesn't expire.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto.LoginSecrets">
+            <summary>
+            Login username + hasehd password.
+            Will be used to compare the login data entered on the mobile app.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.IPStatusDto.Id">
+            <summary>
+            Basestation ID
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.IPStatusDto.Ip">
+            <summary>
+            Public IP addres of basestation
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ApplicationSettings.CityName">
+            <summary>
+            Name of a near by city.
+            Used to get weather forecasts for this location.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ApplicationSettings.ServerCertificate">
+            <summary>
+            Thumbprint of the certificate stored in the X509Store.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ApplicationSettings.AesKey">
+            <summary>
+            Encrypted AesKey.
+            Exchanged to the mobile app securley. Used to decrypt
+            the authentication information (in RestAPI) sent by the mobile app.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ApplicationSettings.AesIV">
+            <summary>
+            Encrypted AesIV.
+            Exchanged to the mobile app securley. Used to decrypt
+            the authentication information (in RestAPI) sent by the mobile app.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ApplicationSettings.ConfigurationModeEnabled">
+            <summary>
+            Creates a wlan access point and starts the AesKeyExchangeManager.
+            This mode was created for the first configuration of the raspberry with the mobile app.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ApplicationSettings.APIToken">
+            <summary>
+            Token needed for API request on the external server.
+            This token get's exchanged in the assembly line and doesn't expire.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ApplicationSettings.LoginSecrets">
+            <summary>
+            Login username + hasehd password.
+            Will be used to compare the login data entered on the mobile app.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleData.Id">
+            <summary>
+            Sensor ID
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleData.TimeStamp">
+            <summary>
+            UTC Time
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.SslClientSettings.TargetHost">
+            <summary>
+            The name of the server that shares this System.Net.Security.SslStream.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.Base.INetworkBase.Start(System.Object)">
+            <summary>
+            Starts listening or connects to a specific endpoint.
+            </summary>
+            <param name="args"></param>
+            <returns>True, when the process got started successfully.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.Base.INetworkBase.Stop">
+            <summary>
+            Stops a socket listener or closes a socket client.
+            </summary>
+        </member>
+        <member name="E:GardeningSystem.Common.Specifications.Communication.Base.ITcpClientBaseClass.ConnectionCollapsedEvent">
+            <summary>
+            Gets raised when the connection collapsed.
+            The process, which raises this event is gets only activated when keepAliveInterval got set on start.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.Base.ITcpClientBaseClass.IsConnected">
+            <summary>
+            Made for test purposes.
+            (Uses socket.Poll())
+            </summary>
+            <returns>True, when the connection is still active.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.IAesTcpClient.ReceiveEncryptedData">
+            <summary>
+            Does not decrypt the received data.
+            </summary>
+            <returns>Encrypted data.</returns>
+        </member>
+        <member name="E:GardeningSystem.Common.Specifications.Communication.ILocalMobileAppDiscovery.MobileAppFound">
+            <summary>
+            This event is raised whenever a peer is discovered.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.INatController.OpenPublicPort(System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Maps a specific private and public port via the Upnp or Pmp protocol on all reachable nat devices.
+            </summary>
+            <param name="privatePort"></param>
+            <param name="publicPort"></param>
+            <param name="tcp">True to map a TCP port. False to map a UDP Port.</param>
+            <returns>
+            Public mapped port. Can be different from <paramref name="publicPort"/> if the mapping was not possible.
+            Returns -1 when the mapping failed.
+            </returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.INatController.ClosePublicPort(System.Int32,System.Boolean)">
+            <summary>
+            Deletes a public port that got opend with INatController.OpenPublicPort() on all reachable nat devices.
+            </summary>
+            <param name="publicPort"></param>
+            <param name="tcp">True to map a TCP port. False to map a UDP Port.</param>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Cryptography.IAesEncrypterDecrypter.EncryptByteArray(System.Byte[])">
+            <summary>
+            Encrypts data with a stored aes key.
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Cryptography.IAesEncrypterDecrypter.DecryptToByteArray(System.Byte[])">
+            <summary>
+            Decrypts data with a stored aes key.
+            </summary>
+            <param name="data"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Cryptography.IAesEncrypterDecrypter.GetServerAesKey">
+            <summary>
+            Creates and stores a new aes key if no one has been created.
+            </summary>
+            <returns>Returns the aes server key.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Cryptography.ICertificateHandler.GetCurrentServerCertificate">
+            <summary>
+            Gets the self issued certificate form cache or X509Store.
+            Setup() needs to be called first on startup.
+            </summary>
+            <returns>Certificate WITH PRIVATE RSA-KEY</returns>
+            <exception cref="T:System.Exception">When there is no thumbprint stored in the applicationSettings or the certificate was not found.</exception>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Cryptography.ICertificateHandler.GetPublicServerCertificate">
+            <summary>
+            Creates a new self issued certificate if there is not one stored currently.
+            </summary>
+            <returns>Certificate without private rsa key.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Cryptography.ICertificateHandler.Setup">
+            <summary>
+            Creates a new self issued certificate if there is not one stored currently.
+            Used in Program.cs to avoid a deadlock in SettingsManager.ToDo() and AesEncrypterDecrypter.generateAndStoreSymmetricKey().
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Cryptography.IPasswordHasher.VerifyHashedPassword(System.String,System.Byte[])">
+            <summary>
+            Verifies if both passwords are the same
+            </summary>
+            <param name="hashedPassword"></param>
+            <param name="providedPassword"></param>
+            <returns>1st verified, 2nd needsUpgrade</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:GardeningSystem.Common.Specifications.DataObjects.IClientSettings.ConnectTimeout" -->
+        <!-- Badly formed XML comment ignored for member "P:GardeningSystem.Common.Specifications.DataObjects.IClientSettings.SendTimeout" -->
+        <!-- Badly formed XML comment ignored for member "P:GardeningSystem.Common.Specifications.DataObjects.IClientSettings.ReceiveTimeout" -->
+        <member name="P:GardeningSystem.Common.Specifications.DataObjects.IClientSettings.KeepAliveInterval">
+            <summary>
+            The default value is 0, which deactivates the keep alive feature. Specifying -1 disables also this feature.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:GardeningSystem.Common.Specifications.DataObjects.IListenerSettings.SendTimeout" -->
+        <!-- Badly formed XML comment ignored for member "P:GardeningSystem.Common.Specifications.DataObjects.IListenerSettings.ReceiveTimeout" -->
+        <member name="P:GardeningSystem.Common.Specifications.DataObjects.IListenerSettings.Backlog">
+            <summary>
+            The maximum length of the pending connections queue.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.Common.Specifications.DataObjects.IServiceDetails">
+            <summary>
+            Used in WanPackages, when the user accesses this server via peer to peer or via the external server.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Specifications.DataObjects.IServiceDetails.HoldConnectionOpen">
+            <summary>
+            True, to hold the connection from the LocalRelayManager to the local Service (ServiceType) open
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.Common.Specifications.DataObjects.IServicePackage">
+            <summary>
+            Contains information of what currently active connection should be used in LocalRelayManager to forward Data.
+            Used by MakeAesTcpRequest()
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.Common.Specifications.ISecureMemory">
+            <summary>
+            Class to get a byte array securely from a pointer.
+            Obfuscates the memory of the byte array that was taken from the property SecureObject and
+            frees all resources cleanly when the secure memory object gets disposed.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Specifications.ISecureMemory.Object">
+            <summary>
+            Returns a byte array, that will get disposed securely.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.ISecureMemory.LoadObject(GardeningSystem.Common.Models.Entities.PointerLengthPair)">
+            <summary>
+            Pointer that points to the secure object.
+            </summary>
+            <param name="intPtr"></param>
+            <param name="length"></param>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.IWifiConfigurator.ManagedConnectToWlan(System.String,System.String)">
+            <summary>
+            Shuts down the access point if there is on currently active or disconnects from a wlan first.
+            After that it connects to the wlan with <paramref name="ssid"/> and <paramref name="secret"/>.
+            </summary>
+            <param name="ssid"></param>
+            <param name="secret"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.IWifiConfigurator.ChangeWlan(System.String,System.String)">
+            <summary>
+            Disconnects from current wlan if connected to one and connects to
+            the wlan with given <paramref name="essid"/> and <paramref name="secret"/>
+            </summary>
+            <param name="essid"></param>
+            <param name="secret"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IAPIManager.UpdateIPStatus(GardeningSystem.Common.Models.DTOs.IPStatusDto)">
+            <summary>
+            Updates the public ip address of this system, which gets stored on the external server.
+            This IP is used by the external server to redirect the mobile app to this gardening system basestation.
+            </summary>
+            <param name="dto">Public ip address and basestation id.</param>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IAPIManager.GetWeatherForecast(System.String)">
+            <summary>
+            Requests amount of rain in mm for the next day.
+            </summary>
+            <param name="location">Location of a near city.</param>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ICommandManager.Start">
+            <summary>
+            Starts listening for commands
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ICommandManager.Stop">
+            <summary>
+            Stops listing for commands
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ILocalMobileAppDiscoveryManager.Start">
+            <summary>
+            Starts listening for mobile apps
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ILocalMobileAppDiscoveryManager.Stop">
+            <summary>
+            Stops listening for mobile apps
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ILocalRelayManager.MakeAPIRequest(System.Byte[],System.Int32)">
+            <summary>
+            Sends <paramref name="data"/> to the local API.
+            This method is threadsafe.
+            </summary>
+            <param name="data"></param>
+            <param name="url"></param>
+            <param name="port">Port of the local API.</param>
+            <returns>Answer of the API call.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ILocalRelayManager.MakeTcpRequest(System.Byte[],System.Int32,System.Boolean)">
+            <summary>
+            Sends <paramref name="data"/> to the local service.
+            This method is threadsafe.
+            </summary>
+            <param name="data"></param>
+            <param name="port">Port of the service.</param>
+            <param name="closeConnection">True, when the connection should get closed and no data sent.</param>
+            <returns>Answer, which that service returned.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ILocalRelayManager.Stop">
+            <summary>
+            Closes all open connections.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.ChangeCorrespondingActorState(System.Byte,System.Int32)">
+            <summary>
+            Closes or opens all actors which correspond to the sensor.
+            </summary>
+            <param name="sensor"></param>
+            <param name="state">0 = valve closed, 1 = valve open</param>
+            <returns>true, if change got verified</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ISettingsManager.GetApplicationSettings(GardeningSystem.Common.Specifications.Cryptography.ICertificateHandler)">
+            <param name="CertificateHandler">Must be set when confidential information should get decrypted.</param>
+            <returns>
+            Returns stored application settings.
+            If there are no stored settings then the default settings will be returned.
+            </returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ISettingsManager.UpdateCurrentSettings(System.Func{GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto,GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto},GardeningSystem.Common.Specifications.Cryptography.ICertificateHandler)">
+            <summary>
+            Ensures that up to date settings get passed to updateFunc and
+            multiple threads can not change settings while calling this function.
+            </summary>
+            <param name="updateFunc">gets current settings and must return the changed settings</param>
+            <param name="CertificateHandler">Must be set when confidential information should get decrypted.</param>
+        </member>
+        <member name="T:GardeningSystem.Common.Specifications.Managers.ITunnelManager">
+            <summary>
+            Handles connections from the wan (peer to peer connections and TURN
+            (Traversal Using Relays around NAT) connections over the external server)
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ITunnelManager.OpenPeerToPeerListenerService(System.Threading.CancellationToken,System.Net.IPEndPoint)">
+            <summary>
+            Listens on a specific port. Relays all incoming packages to the local relay manager.
+            Used when a public port was opened successfully.
+            </summary>
+            <param name="cancellationToken">Cancellation token to stop this relay service.</param>
+            <param name="localEndPoint">Local end point where the public port relays all its received packages to.</param>
+            <returns>True, when the listener is listening on the <paramref name="localEndPoint"/>.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ITunnelManager.OpenExternalServerRelayTunnel(System.Threading.CancellationToken,System.Guid)">
+            <summary>
+            Opens a connections to the external server with a specific <paramref name="tunnelId"/>.
+            Relays all incoming packages to the local relay manager.
+            </summary>
+            <param name="cancellationToken">Cancellation token to stop this relay service.</param>
+            <param name="tunnelId">Id for the external server logic. (For whom this connection was made)</param>
+            <returns>True, when a connection to the external server could be established.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.ITunnelManager.Stop">
+            <summary>
+            Stops local relay services or disposes internal resources.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.Common.Specifications.Managers.IWanManager">
+            <summary>
+            Handles connection requests from the wan by keeping a connection to the external server alive.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IWanManager.Start">
+            <summary>
+            Starts a connection to the external server and starts handling incoming connection requests.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IWanManager.Stop">
+            <summary>
+            To stop handling connection requests from the wan.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IWateringManager.ManualOverwrite(System.Boolean,System.Nullable{System.TimeSpan})">
+            <summary>
+            Stops current watering tasks and overrides them with a specific setting.
+            </summary>
+            <param name="activateWatering">True to start wartering.</param>
+            <returns>True when all valves got successfully set to the new task.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Repositories.ICertificateRepository.GetCertificate(System.String)">
+            <summary>
+            Gets a certificate from X509Store or from the internal cache.
+            Reloads it after 5 days in cache.
+            </summary>
+            <param name="certThumbprint"></param>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Repositories.ICertificateRepository.CreateSelfSignedCertificate(System.String)">
+            <summary>
+            Creates a self-signed X509 certificate and stores it in the specified StoreLocation
+            </summary>
+            <returns>Certificate with private key.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Repositories.IModulesRepository.GetAllRegisteredModules">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Repositories.IModulesRepository.GetModuleById(System.Guid)">
+            <returns>Null when not found</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Repositories.IModulesRepository.UpdateModule(GardeningSystem.Common.Models.Entities.ModuleInfo)">
+            <summary>
+            
+            </summary>
+            <param name="module"></param>
+            <returns>true </returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Repositories.ISerializedFileRepository`1.RemoveItemFromFileList(System.Guid)">
+            <param name="Id">Item id</param>
+            <returns>True when one or more items got removed.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Repositories.ISerializedFileRepository`1.UpdateItemFromList(`0)">
+            <param name="itemToUpdate">Updated item</param>
+            <returns>False if not found, otherwise true.</returns>
+        </member>
+        <member name="T:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator">
+            <summary>
+            Sends commands to an c++ application that processes these commands
+            and communicates with the RF Module.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator.Start">
+            <summary>
+            Initializes the RF Module.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator.Stop">
+            <summary>
+            Shuts down the RF Module.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator.DiscoverNewModule">
+            <summary>
+            Sends a discover command to the c++ app to discover a new module.
+            </summary>
+            <returns>Module info object containing data about the newly added module, such as module id or type (valve/sensor).</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator.PingModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <summary>
+            Pings a specific module.
+            </summary>
+            <param name="module">ModuleInfoDto object containing the module id.</param>
+            <returns>True when the module was reachable.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator.GetTempAndSoilMoisture(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <summary>
+            Gets the temperature and the soil moisture of a specific module.
+            </summary>
+            <param name="module">ModuleInfoDto object containing the module id.</param>
+            <returns>Temperature in degree celcius, Soil moisture in percent.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator.OpenValve(GardeningSystem.Common.Models.DTOs.ModuleInfoDto,System.TimeSpan)">
+            <summary>
+            Sends a command to a specific module, to open the valve for a specific period specified in <paramref name="timeSpan"/>.
+            </summary>
+            <param name="module">ModuleInfoDto object containing the module id.</param>
+            <param name="timeSpan">Timespan the valve should stay open. The maximum timespan is 8.5 hours, due to the amout of bytes specified for
+            this variable in the protocoll.</param>
+            <returns>True when everything went good.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator.CloseValve(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <summary>
+            Sends a command to a specific module, to close the valve.
+            </summary>
+            <param name="module">ModuleInfoDto object containing the module id.</param>
+            <remarks>Used to close the valve and to stop irrigating for the timespan sent with OpenValve <seealso cref="M:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator.OpenValve(GardeningSystem.Common.Models.DTOs.ModuleInfoDto,System.TimeSpan)"/>.</remarks>
+            <returns>True when the valve got closed or was already closed.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.RfCommunication.IRfCommunicator.GetBatteryLevel(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <summary>
+            Gets the battery level from a specific module.
+            </summary>
+            <param name="module">ModuleInfoDto object containing the module id.</param>
+            <returns>Battery level in percent.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Utilities.CommunicationUtils.ConnectAsync(System.Net.Sockets.Socket,System.Net.IPEndPoint,System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="client">Socket</param>
+            <param name="remoteEndPoint">Endpoint to connect to.</param>
+            <param name="connectTimeout">Timeout in milliseconds. If 0 or less -> no timeout.</param>
+            <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Utilities.CryptoUtils.ObfuscateAndFreeMemory(GardeningSystem.Common.Models.Entities.PointerLengthPair)">
+            <summary>
+            https://docs.microsoft.com/en-us/dotnet/api/system.io.unmanagedmemorystream?view=net-5.0
+            </summary>
+            <param name="memIntPtr">Pointer to the unmanaged memory</param>
+            <param name="length">Length of memory</param>
+        </member>
+        <member name="M:GardeningSystem.Common.Utilities.CryptoUtils.MoveDataToUnmanagedMemory(System.Byte[])">
+            <summary>
+            Writes a byte array to unmanaged memory and obfuscates the original byte array.
+            </summary>
+            <param name="data"></param>
+            <returns>Pointer to the unmanaged memory.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Utilities.CryptoUtils.ObfuscateByteArray(System.Byte[],System.Nullable{System.Runtime.InteropServices.GCHandle})">
+            <summary>
+            Overwrites a byte array with random bytes.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Utilities.CryptoUtils.GetByteArrayFromUM(System.Byte[]@,GardeningSystem.Common.Models.Entities.PointerLengthPair)">
+            <summary>
+            Returns stored byte[] from intPtr.
+            Does not delete the unmanaged memory.
+            </summary>
+            <param name="result">array to store the data in</param>
+            <param name="intPtr">pointer pointing to the unmanaged memory</param>
+            <param name="length">length of data</param>
+            <returns>
+            GCHandle of <paramref name="result"/>.
+            (Result get's pinned to avoid that the garbage collector copies/moves the object to another place in memory)
+            </returns>
+        </member>
+        <member name="F:GardeningSystem.Common.Utilities.TimeUtils.ApplicationStartTime">
+            <summary>
+            Gets set in Program.cs, when the application gets started.
+            </summary>
+        </member>
+    </members>
+</doc>

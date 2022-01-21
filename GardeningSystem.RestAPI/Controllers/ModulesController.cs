@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.Common.Specifications.Repositories;
+using GardeningSystem.Common.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
@@ -13,13 +15,16 @@ namespace GardeningSystem.RestAPI.Controllers {
     [Authorize]
     public class ModulesController : ControllerBase {
 
+        private IModulesRepository ModulesRepository;
+
         private IModuleManager ModuleManager;
 
         private ILogger Logger;
 
-        public ModulesController(ILoggerService logger, IModuleManager moduleManager) {
+        public ModulesController(ILoggerService logger, IModuleManager moduleManager, IModulesRepository modulesRepository) {
             Logger = logger.GetLogger<ModulesController>();
             ModuleManager = moduleManager;
+            ModulesRepository = modulesRepository;
         }
 
         // GET: api/Modules
@@ -38,13 +43,15 @@ namespace GardeningSystem.RestAPI.Controllers {
 
         // GET api/Modules/{id}
         [HttpGet("{id}")]
-        public ActionResult<ModuleInfoDto> Get(Guid id) {
+        public ActionResult<ModuleInfoDto> Get(string id) {
+            byte moduleId = Utils.ConvertHexToByte(id);
             var userId = ControllerHelperClass.GetUserId(HttpContext);
             Logger.Info($"[Get]User {userId} requested registered module with id={id}.");
 
             ModuleInfoDto module;
             try {
-                module = ModuleManager.GetModuleById(id).Result;
+                var internalModuleId = ModulesRepository.GetIdFromModuleId(moduleId);
+                module = ModuleManager.GetModuleById(internalModuleId).Result;
             }
             catch (Exception ex) {
                 Logger.Error(ex, "[Get]Could not load requested module information.");
@@ -78,14 +85,14 @@ namespace GardeningSystem.RestAPI.Controllers {
         }
 
         // Used to update a already existing module
-        // PUT api/Modules/{id}
-        [HttpPut("{id}")]
-        public IActionResult Put(Guid id, [FromBody] ModuleInfoDto value) {
+        // PUT api/Modules/{idInHex}
+        [HttpPut("{idInHex}")]
+        public IActionResult Put(string idInHex, [FromBody] ModuleInfoDto value) {
             var userId = ControllerHelperClass.GetUserId(HttpContext);
-            Logger.Info($"[Put]User {userId} send module info to update (module id={value.Id}).");
+            Logger.Info($"[Put]User {userId} send module info to update (module id={Utils.ConvertByteToHex(value.ModuleId)}).");
 
             // check request
-            if (id != value.Id) {
+            if (idInHex != Utils.ConvertByteToHex(value.ModuleId)) {
                 Logger.Trace($"[Put]Returned bad request.");
                 return BadRequest();
             }
@@ -96,12 +103,12 @@ namespace GardeningSystem.RestAPI.Controllers {
                     return Ok();
                 }
                 else {
-                    Logger.Error($"[Put]Modulel with id={id} not found.");
+                    Logger.Error($"[Put]Modulel with id={idInHex} not found.");
                     return NotFound();
                 }
             }
             catch (Exception ex) {
-                Logger.Error(ex, $"[Put]Could not update module with id={id}.");
+                Logger.Error(ex, $"[Put]Could not update module with id={idInHex}.");
                 return Problem(ex.Message);
             }
         }

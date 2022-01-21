@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using GardeningSystem.Common.Models.Enums;
 using GardeningSystem.Common.Specifications.DataObjects;
 
 namespace GardeningSystem.Common.Models.Entities {
@@ -11,12 +9,16 @@ namespace GardeningSystem.Common.Models.Entities {
 
         public Guid Id { get; set; }
 
+        public byte ModuleId { get; set; }
+
         public string Name { get; set; }
 
-        public IEnumerable<Guid> AssociatedModules { get; set; }
+        public ModuleType ModuleType { get; set; }
 
-        public string ModuleTyp { get; set; }
+        public IEnumerable<byte> AssociatedModules { get; set; }
 
         public IEnumerable<DateTime> LastWaterings { get; set; }
+
+        public bool EnabledForManualIrrigation { get; set; }
     }
 }

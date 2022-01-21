@@ -44,6 +44,7 @@ namespace GardeningSystem.DataAccess.Communication.Base {
                 _checkConnectionForCollapseTS.Cancel(); // cancle collapse detection task
                 _connectionCollapsedTS.Cancel(); // cancle callback
                 networkStream?.Close();
+                _client?.Close();
             });
 
             try {
@@ -68,6 +69,12 @@ namespace GardeningSystem.DataAccess.Communication.Base {
                 LocalEndPoint = _client.LocalEndPoint;
 
                 return true;
+            }
+            catch (OperationCanceledException) {
+                Logger.Info($"[Start]Operation got cancled.");
+                _checkConnectionForCollapseTS.Cancel();
+                _connectionCollapsedTS.Cancel();
+                return false;
             }
             catch (Exception ex) {
                 Logger.Error(ex, $"[Start]An error occured.");

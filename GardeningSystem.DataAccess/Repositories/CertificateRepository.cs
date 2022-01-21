@@ -39,6 +39,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             if (CachedCertificates.ContainsKey(certThumbprint)) {
                 // check lifespan
                 if (CachedCertificates[certThumbprint].Lifetime.TotalDays < 5) {
+                    Logger.Info($"[GetCertificate]Loading certificate with thumbprint {certThumbprint} from cache.");
                     return CachedCertificates[certThumbprint].Object as X509Certificate2;
                 }
                 else {
@@ -47,7 +48,6 @@ namespace GardeningSystem.DataAccess.Repositories {
                     return GetCertificate(certThumbprint);
                 }
             } else {
-                Logger.Info("[GetCertificate]Loading certificate from X509Store.");
                 var cert = GetCertificateFromStore(certThumbprint);
                 if (cert != null) {
                     CachedCertificates.Add(certThumbprint, new CachedObject(cert));
@@ -59,15 +59,16 @@ namespace GardeningSystem.DataAccess.Repositories {
         /// <summary>
         /// Creates a self-signed X509 certificate and stores it in the specified StoreLocation
         /// </summary>
-        public static X509Certificate2 CreateSelfSignedCertificate(string commonName = "localhost") {
+        public X509Certificate2 CreateSelfSignedCertificate(string commonName = "localhost") {
+            Logger.Info($"[CreateSelfSignedCertificate]Creating a new rsa key for the self issued certificate.");
             RSA key = RSA.Create(KeySize);
             var cert = IssueSelfSignedCertificate(key, commonName);
             var certWithKey = StoreCertificate(cert, key);
             return certWithKey;
         }
 
-        private static X509Certificate2 IssueSelfSignedCertificate(RSA rsa, string commonName) {
-
+        private X509Certificate2 IssueSelfSignedCertificate(RSA rsa, string commonName) {
+            Logger.Info($"[IssueSelfSignedCertificate]Creating cert with commonName={commonName}.");
             var publicParams = rsa.ExportParameters(false);
             var signatureAlgIdentifier = new AlgorithmIdentifier(new DerObjectIdentifier(SignatureAlgorithmOid), DerNull.Instance);
             var subjectName = new X509Name($"CN={commonName}", new X509DefaultEntryConverter());
@@ -77,7 +78,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             certGen.SetSubject(subjectName);
             certGen.SetSerialNumber(new DerInteger(new Org.BouncyCastle.Math.BigInteger(1, Guid.NewGuid().ToByteArray())));
             certGen.SetStartDate(new Time(DateTime.UtcNow));
-            certGen.SetEndDate(new Time(DateTime.UtcNow.AddYears(100)));
+            certGen.SetEndDate(new Time(DateTime.UtcNow.AddYears(int.MaxValue)));
             certGen.SetSignature(signatureAlgIdentifier);
             certGen.SetSubjectPublicKeyInfo(SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(new RsaKeyParameters(
                 false,
@@ -96,7 +97,8 @@ namespace GardeningSystem.DataAccess.Repositories {
         /// <summary>
         /// Associate the key with the certificate.
         /// </summary>
-        private static X509Certificate2 StoreCertificate(X509Certificate2 cert, RSA rsa) {
+        private X509Certificate2 StoreCertificate(X509Certificate2 cert, RSA rsa) {
+            Logger.Info($"[StoreCertificate]Storing certificate with thumbprint {cert.Thumbprint} in X509Store.");
             using (var certWithKey = cert.CopyWithPrivateKey(rsa)) {
 
                 var persistable = new X509Certificate2(certWithKey.Export(X509ContentType.Pfx), "", X509KeyStorageFlags.PersistKeySet);
@@ -118,7 +120,8 @@ namespace GardeningSystem.DataAccess.Repositories {
         /// Gets certificate with specified certThumbprint from the specified StoreLocation.
         /// Returns null when no certificate with the given Thumbprint was found.
         /// </summary>
-        private static X509Certificate2 GetCertificateFromStore(string certThumbprint) {
+        private X509Certificate2 GetCertificateFromStore(string certThumbprint) {
+            Logger.Info($"[GetCertificateFromStore]Loading certificate with thumbprint {certThumbprint} from X509Store.");
             X509Certificate2 cert;
             var store = new X509Store(DefaultStoreName, DefaultStoreLocation);
             store.Open(OpenFlags.ReadOnly);

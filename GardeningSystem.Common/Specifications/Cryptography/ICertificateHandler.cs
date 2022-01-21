@@ -10,9 +10,11 @@ namespace GardeningSystem.Common.Specifications.Cryptography {
     public interface ICertificateHandler {
 
         /// <summary>
-        /// Creates a new self issued certificate if there is not one stored currently.
+        /// Gets the self issued certificate form cache or X509Store.
+        /// Setup() needs to be called first on startup.
         /// </summary>
         /// <returns>Certificate WITH PRIVATE RSA-KEY</returns>
+        /// <exception cref="Exception">When there is no thumbprint stored in the applicationSettings or the certificate was not found.</exception>
         X509Certificate2 GetCurrentServerCertificate();
 
         /// <summary>
@@ -20,6 +22,12 @@ namespace GardeningSystem.Common.Specifications.Cryptography {
         /// </summary>
         /// <returns>Certificate without private rsa key.</returns>
         X509Certificate2 GetPublicServerCertificate();
+
+        /// <summary>
+        /// Creates a new self issued certificate if there is not one stored currently.
+        /// Used in Program.cs to avoid a deadlock in SettingsManager.ToDo() and AesEncrypterDecrypter.generateAndStoreSymmetricKey().
+        /// </summary>
+        void Setup();
 
         void CheckForCertificateUpdate();
 

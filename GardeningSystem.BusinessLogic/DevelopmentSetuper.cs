@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models;
+using GardeningSystem.Common.Models.Enums;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
@@ -58,26 +59,34 @@ namespace GardeningSystem.BusinessLogic {
                 Logger.Info($"[SetupTestEnvironment]Adding new modules to the system.");
                 var valve1Guid = Guid.NewGuid();
                 var valve2Guid = Guid.NewGuid();
+                var random = new Random((int)DateTime.Now.Ticks);
+                byte[] moduleIds = new byte[3];
+                random.NextBytes(moduleIds);
                 ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
                     Id = valve1Guid,
-                    ModuleTyp = ModuleTypeEnum.VALVE,
+                    ModuleId = moduleIds[0],
+                    ModuleType = ModuleType.Valve,
                     Name = "Valve1",
                     LastWaterings = null,
-                    AssociatedModules = null
+                    AssociatedModules = null,
+                    EnabledForManualIrrigation = true
                 });
                 ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
                     Id = valve2Guid,
-                    ModuleTyp = ModuleTypeEnum.VALVE,
+                    ModuleId = moduleIds[1],
+                    ModuleType = ModuleType.Valve,
                     Name = "Valve2",
                     LastWaterings = null,
-                    AssociatedModules = null
+                    AssociatedModules = null,
+                    EnabledForManualIrrigation = false
                 });
                 ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
                     Id = Guid.NewGuid(),
-                    ModuleTyp = ModuleTypeEnum.SENSOR,
+                    ModuleId = moduleIds[2],
+                    ModuleType = ModuleType.Sensor,
                     Name = "Sensor1",
                     LastWaterings = null,
-                    AssociatedModules = new List<Guid>() { valve1Guid, valve2Guid }
+                    AssociatedModules = new List<byte>() { moduleIds[0], moduleIds[1] }
                 });
             }
         }

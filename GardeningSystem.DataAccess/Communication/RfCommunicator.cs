@@ -13,6 +13,8 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
+
+    /// <inheritdoc />
     public class RfCommunicator : IRfCommunicator {
 
         private ProcessStartInfo _RfApplication;
@@ -63,6 +65,7 @@ namespace GardeningSystem.DataAccess.Communication {
             }
         }
 
+        /// <inheritdoc />
         public async Task Start() {
             var response = await sendCommandReceiveAnswer(new byte[] { 0x00 });
             if (response.Length == 1 && response[0] == 0xFF) {
@@ -73,10 +76,12 @@ namespace GardeningSystem.DataAccess.Communication {
             }
         }
 
+        /// <inheritdoc />
         public async Task Stop() {
             await sendCommand(new byte[] { 0x0A });
         }
 
+        /// <inheritdoc />
         public async Task<ModuleInfoDto> DiscoverNewModule() {
             var response = await sendCommandReceiveAnswer(new byte[] { 0x01 });
 
@@ -92,10 +97,20 @@ namespace GardeningSystem.DataAccess.Communication {
             }
         }
 
-        public Task<bool> PingModule(ModuleInfoDto module) {
-            throw new NotImplementedException();
+        /// <inheritdoc />
+        public async Task<bool> PingModule(ModuleInfoDto module) {
+            Logger.Info($"[PingModule]Sending ping to module with id={Utils.ConvertByteToHex(module.ModuleId)}.");
+            var response = await sendCommandReceiveAnswer(new byte[] { 0x03, module.ModuleId, _systemRfId });
+            
+            if (response.Length >= 1 && response[0] == 0xFF) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
 
+        /// <inheritdoc />
         public async Task<(double, double)> GetTempAndSoilMoisture(ModuleInfoDto module) {
             var response = await sendCommandReceiveAnswer(new byte[] { 0x06, module.ModuleId, _systemRfId });
 
@@ -110,7 +125,10 @@ namespace GardeningSystem.DataAccess.Communication {
             }
         }
 
+        /// <inheritdoc />
         public async Task<bool> OpenValve(ModuleInfoDto module, TimeSpan timeSpan) {
+            int minutes = Convert.ToInt32(timeSpan.TotalMinutes);
+            throw new NotImplementedException();
             var response = await sendCommandReceiveAnswer(new byte[] { 0x07, module.ModuleId, _systemRfId });
 
             if (response.Length == 1 && response[0] == 0xFF) {
@@ -123,6 +141,7 @@ namespace GardeningSystem.DataAccess.Communication {
             }
         }
 
+        /// <inheritdoc />
         public async Task<bool> CloseValve(ModuleInfoDto module) {
             var response = await sendCommandReceiveAnswer(new byte[] { 0x08, module.ModuleId, _systemRfId });
 
@@ -136,12 +155,14 @@ namespace GardeningSystem.DataAccess.Communication {
             }
         }
 
+        /// <inheritdoc />
         public async Task<float> GetBatteryLevel(ModuleInfoDto module) {
             var response = await sendCommandReceiveAnswer(new byte[] { 0x09, module.ModuleId, _systemRfId });
 
             if (response.Length >= 1 && response[0] == 0xFF) {
                 Logger.Info($"[GetBatteryLevel]Battery level of module with id={Utils.ConvertByteToHex(module.ModuleId)} successfully requested.");
                 // convert byte to float
+                //BitConverter.ToUInt16()
                 throw new NotImplementedException();
             }
             else {

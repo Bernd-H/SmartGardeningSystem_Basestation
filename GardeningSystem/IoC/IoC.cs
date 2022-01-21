@@ -64,7 +64,7 @@ namespace GardeningSystem {
             // managers
             containerBuilder.RegisterType<WateringManager>().As<IWateringManager>();
             containerBuilder.RegisterType<ModuleManager>().As<IModuleManager>();
-            containerBuilder.RegisterType<SettingsManager>().As<ISettingsManager>();
+            containerBuilder.RegisterType<SettingsManager>().As<ISettingsManager>().SingleInstance();
             containerBuilder.RegisterType<LocalMobileAppDiscoveryManager>().As<ILocalMobileAppDiscoveryManager>();
             containerBuilder.RegisterType<AesKeyExchangeManager>().As<IAesKeyExchangeManager>();
             containerBuilder.RegisterType<CommandManager>().As<ICommandManager>();

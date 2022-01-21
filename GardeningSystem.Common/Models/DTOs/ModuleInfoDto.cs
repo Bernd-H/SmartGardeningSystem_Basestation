@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using GardeningSystem.Common.Models.Entities;
-using GardeningSystem.Common.Specifications.DataObjects;
+using GardeningSystem.Common.Models.Enums;
 
 namespace GardeningSystem.Common.Models.DTOs {
     [Serializable]
-    public class ModuleInfoDto : IDO {
-        public Guid Id { get; set; }
+    public class ModuleInfoDto {
+
+        public byte ModuleId { get; set; }
 
         public string Name { get; set; }
 
-        public IEnumerable<Guid> AssociatedModules { get; set; }
+        public ModuleType ModuleType { get; set; }
 
-        public string ModuleTyp { get; set; }
+        public IEnumerable<byte> AssociatedModules { get; set; }
 
         public IEnumerable<DateTime> LastWaterings { get; set; }
 
-        public byte ModuleId { get; set; }
+        public bool EnabledForManualIrrigation { get; set; }
     }
 }

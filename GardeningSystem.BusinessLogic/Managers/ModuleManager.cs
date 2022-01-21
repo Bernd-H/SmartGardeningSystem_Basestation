@@ -44,7 +44,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             basestationGuid = Guid.Parse(Configuration[ConfigurationVars.BASESTATION_GUID]);
         }
 
-        public async Task<bool> ChangeCorrespondingActorState(Guid sensor, int state) {
+        public async Task<bool> ChangeCorrespondingActorState(byte sensor, int state) {
             await LOCKER.WaitAsync();
 
             Logger.Info($"[ChangeCorrespondingActorState]Changing state of sensor {sensor} to {state}.");
@@ -53,23 +53,27 @@ namespace GardeningSystem.BusinessLogic.Managers {
             bool success = false;
             do {
                 //var rfMessageDto = await RfCommunicator.SendMessage_ReceiveAnswer(basestationGuid, sensor, DataAccess.Communication.RfCommunicator.BuildActorMessage(basestationGuid, sensor, state));
-                RfMessageDto rfMessageDto = null;
+                //RfMessageDto rfMessageDto = null;
                 throw new NotImplementedException();
 
-                if (rfMessageDto.Id == sensor && (rfMessageDto.Bytes.SequenceEqual(new byte[1] { RfCommunication_Codes.ACK }))) {
-                    success = true;
-                }
-                else {
-                    success = false;
-                    attempts--;
-                    if (attempts > 0)
-                        Logger.Warn("[ChangeCorrespondingActorState]Valve state did not get verified. Retrying - " + (10 - attempts));
-                }
+                //if (rfMessageDto.Id == sensor && (rfMessageDto.Bytes.SequenceEqual(new byte[1] { RfCommunication_Codes.ACK }))) {
+                //    success = true;
+                //}
+                //else {
+                //    success = false;
+                //    attempts--;
+                //    if (attempts > 0)
+                //        Logger.Warn("[ChangeCorrespondingActorState]Valve state did not get verified. Retrying - " + (10 - attempts));
+                //}
             } while (!success && attempts > 0);
 
             LOCKER.Release();
 
             return success;
+        }
+
+        public Task<bool> ChangeValveState(byte valveId, int state) {
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<ModuleDataDto>> GetAllMeasurements() {
@@ -82,7 +86,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             // get guids and send out requests to all sensors
             var modules = getAllModules();
             foreach (var module in modules) {
-                if (module.ModuleTyp == ModuleTypeEnum.SENSOR) {
+                if (module.ModuleType == Common.Models.Enums.ModuleType.Sensor) {
                     RfMessageDto answer = null;
                     int maxAttempts = 10;
                     int attempts = maxAttempts;
@@ -124,13 +128,13 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         public async Task AddModule(ModuleInfoDto module) {
             await LOCKER.WaitAsync();
-            ModulesRepository.AddModule(module.ToDo());
+            ModulesRepository.AddModule(module.ToDo(ModulesRepository));
             LOCKER.Release();
         }
 
         public async Task<IEnumerable<ModuleInfoDto>> GetAllModules() {
             await LOCKER.WaitAsync();
-            var result = getAllModules();
+            var result = getAllModules().ToDtos();
             LOCKER.Release();
             return result;
         }
@@ -151,7 +155,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         public async Task<bool> UpdateModule(ModuleInfoDto module) {
             await LOCKER.WaitAsync();
-            var result = ModulesRepository.UpdateModule(module.ToDo());
+            var result = ModulesRepository.UpdateModule(module.ToDo(ModulesRepository));
             LOCKER.Release();
             return result;
         }
@@ -174,8 +178,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
-        private IEnumerable<ModuleInfoDto> getAllModules() {
-            return ModulesRepository.GetAllRegisteredModules().ToDtos();
+        private IEnumerable<ModuleInfo> getAllModules() {
+            return ModulesRepository.GetAllRegisteredModules();
         }
     }
 }

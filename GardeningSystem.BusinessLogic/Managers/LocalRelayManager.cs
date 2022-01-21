@@ -47,11 +47,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
             (sessionId, aesTcpClient) = GetConnectionToService(servicePackage, port);
             if (aesTcpClient == null) {
                 // client tried to proceed a not existing session
+                Logger.Info($"[MakeTcpRequest]Client tried to acces a not existing session (id={servicePackage?.SessionId}).");
                 return new byte[0];
             }
 
             if (closeConnection) {
-                Logger.Info($"[MakeAesTcpRequest]Closeing connection from session with id={sessionId}.");
+                Logger.Info($"[MakeAesTcpRequest]Closing connection from session with id={sessionId}.");
 
                 lock (AesTcpClients) {
                     aesTcpClient?.Stop();
@@ -63,11 +64,13 @@ namespace GardeningSystem.BusinessLogic.Managers {
             else {
                 try {
                     lock (AesTcpClients[sessionId]) {
-                        Logger.Trace($"[MakeAesTcpRequest]Forwarding data to local service with port {port}.");
+                        Logger.Trace($"[MakeAesTcpRequest]Forwarding {servicePackage.Data.Length} bytes to local service with port {port} (sid={sessionId}).");
 
                         // forward data and receive answer
                         aesTcpClient.SendAlreadyEncryptedData(servicePackage.Data).Wait();
                         var encryptedAnswer = aesTcpClient.ReceiveEncryptedData().Result;
+
+                        Logger.Trace($"[MakeAesTcpRequest]Received {encryptedAnswer.Length} bytes from local service (sid={sessionId}).");
 
                         answerPackage = new ServicePackage() {
                             Data = encryptedAnswer,
@@ -86,13 +89,14 @@ namespace GardeningSystem.BusinessLogic.Managers {
         public async Task<byte[]> MakeAPIRequest(byte[] data, int port) {
             await _httpForwarderLock.WaitAsync();
             try {
-                Logger.Info($"[MakeAPIRequest]Forwarding data to local service with port {port}.");
+                Logger.Trace($"[MakeAPIRequest]Forwarding {data.Length} bytes to local service with port {port}.");
                 var connected = await HttpForwarder.Start(new ClientSettings() {
                     RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, port)
                 });
 
                 await HttpForwarder.SendAsync(data);
                 var answer = await HttpForwarder.ReceiveAsync();
+                Logger.Trace($"[MakeAPIRequest]Received {answer.Length} bytes from local service with port {port}.");
 
                 return answer;
             }
@@ -104,6 +108,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         public void Stop() {
             lock (AesTcpClients) {
+                Logger.Info($"[Stop]Stopping {AesTcpClients.Count} tcp clients.");
                 foreach (var client in AesTcpClients) {
                     client.Value.Stop();
                 }
@@ -117,6 +122,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             if (servicePackage.SessionId != Guid.Empty) {
                 // get already existing connection to the local service
                 if (AesTcpClients.ContainsKey(servicePackage.SessionId)) {
+                    Logger.Trace($"[GetConnectionToService]Requested session with id={servicePackage.SessionId}.");
                     aesTcpClient = AesTcpClients[servicePackage.SessionId];
                     currentSessionId = servicePackage.SessionId;
                 }
@@ -129,7 +135,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 currentSessionId = Guid.NewGuid();
                 AesTcpClients.Add(currentSessionId, AutofacContainer.Resolve<IAesTcpClient>());
 
-                Logger.Trace($"[MakeAesTcpRequest]Connecting to local service with port {port}.");
+                Logger.Trace($"[MakeAesTcpRequest]Connecting to local service with port {port} (sessionId={currentSessionId}).");
                 AesTcpClients[currentSessionId].Start(new ClientSettings() {
                     RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, port)
                 });

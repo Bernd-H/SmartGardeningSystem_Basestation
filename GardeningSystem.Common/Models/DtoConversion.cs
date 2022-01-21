@@ -7,6 +7,7 @@ using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.DataObjects;
+using GardeningSystem.Common.Specifications.Repositories;
 
 namespace GardeningSystem.Common.Models {
     public static class DtoConversion {
@@ -21,11 +22,24 @@ namespace GardeningSystem.Common.Models {
 
         public static ModuleInfoDto ToDto(this ModuleInfo module) {
             return new ModuleInfoDto() {
-                Id = module.Id,
+                ModuleId = module.ModuleId,
                 AssociatedModules = module.AssociatedModules,
-                ModuleTyp = module.ModuleTyp,
+                ModuleType = module.ModuleType,
                 Name = module.Name,
-                LastWaterings = module.LastWaterings
+                LastWaterings = module.LastWaterings,
+                EnabledForManualIrrigation = module.EnabledForManualIrrigation
+            };
+        }
+
+        public static ModuleInfo ToDo(this ModuleInfoDto moduleDto, IModulesRepository modulesRepository) {
+            return new ModuleInfo() {
+                Id = modulesRepository.GetIdFromModuleId(moduleDto.ModuleId),
+                ModuleId = moduleDto.ModuleId,
+                AssociatedModules = moduleDto.AssociatedModules,
+                ModuleType = moduleDto.ModuleType,
+                Name = moduleDto.Name,
+                LastWaterings = moduleDto.LastWaterings,
+                EnabledForManualIrrigation = moduleDto.EnabledForManualIrrigation
             };
         }
 
@@ -69,18 +83,6 @@ namespace GardeningSystem.Common.Models {
             }
 
             return appSettings;
-        }
-
-
-
-        public static ModuleInfo ToDo(this ModuleInfoDto moduleDto) {
-            return new ModuleInfo() {
-                Id = moduleDto.Id,
-                AssociatedModules = moduleDto.AssociatedModules,
-                ModuleTyp = moduleDto.ModuleTyp,
-                Name = moduleDto.Name,
-                LastWaterings = moduleDto.LastWaterings
-            };
         }
 
         public static ModuleData FromDto(this ModuleDataDto moduleDataDto) {

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GardeningSystem.BusinessLogic</name>
+    </assembly>
+    <members>
+        <member name="F:GardeningSystem.BusinessLogic.Cryptography.AesEncrypterDecrypter.KEY_SIZE">
+            <summary>
+            Key size in bytes.
+            </summary>
+        </member>
+        <member name="F:GardeningSystem.BusinessLogic.Cryptography.AesEncrypterDecrypter.IV_SIZE">
+            <summary>
+            IV size in bytes
+            </summary>
+        </member>
+        <member name="F:GardeningSystem.BusinessLogic.Cryptography.AesEncrypterDecrypter.CertificateHandler">
+            <summary>
+            Necessary to access the aes key stored in the application settings.
+            </summary>
+        </member>
+    </members>
+</doc>

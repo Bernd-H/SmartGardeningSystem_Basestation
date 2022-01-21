@@ -35,7 +35,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         public async Task GetToken() {
-            Logger.Trace($"[GetToken]Trying to get a token from a server in the local network.");
+            Logger.Info($"[GetToken]Trying to get a token from a server in the local network.");
             string url = "";
 
             try {

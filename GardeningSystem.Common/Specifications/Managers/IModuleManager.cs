@@ -14,8 +14,9 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <param name="sensor"></param>
         /// <param name="state">0 = valve closed, 1 = valve open</param>
         /// <returns>true, if change got verified</returns>
-        Task<bool> ChangeCorrespondingActorState(Guid sensor, int state);
+        Task<bool> ChangeCorrespondingActorState(byte sensor, int state);
 
+        Task<bool> ChangeValveState(byte valveId, int state);
 
         Task AddModule(ModuleInfoDto module);
 

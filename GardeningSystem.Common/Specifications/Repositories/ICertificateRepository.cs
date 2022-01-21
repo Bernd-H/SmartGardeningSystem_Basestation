@@ -10,5 +10,12 @@ namespace GardeningSystem.Common.Specifications.Repositories {
         /// <param name="certThumbprint"></param>
         /// <returns></returns>
         X509Certificate2 GetCertificate(string certThumbprint);
+
+
+        /// <summary>
+        /// Creates a self-signed X509 certificate and stores it in the specified StoreLocation
+        /// </summary>
+        /// <returns>Certificate with private key.</returns>
+        X509Certificate2 CreateSelfSignedCertificate(string commonName = "localhost");
     }
 }

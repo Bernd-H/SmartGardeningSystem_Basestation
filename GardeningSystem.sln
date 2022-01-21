@@ -32,7 +32,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalRelayReceiveTest", "Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Error211231Tests", "Tests\Error211231Tests\Error211231Tests.csproj", "{17B26912-2A86-4E9F-9340-AE9A7024A59D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectionKeepAliveTest", "Tests\ConnectionKeepAliveTest\ConnectionKeepAliveTest.csproj", "{E34E6352-D802-44CA-9FE4-2298CCCD1809}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectionKeepAliveTest", "Tests\ConnectionKeepAliveTest\ConnectionKeepAliveTest.csproj", "{E34E6352-D802-44CA-9FE4-2298CCCD1809}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

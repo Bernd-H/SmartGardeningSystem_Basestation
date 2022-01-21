@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>GardeningSystem.DataAccess</name>
+    </assembly>
+    <members>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.ConfigureKeepAlive_Windows(System.Int32)">
+            <summary>
+            Works only on windows: "Socket.IOControl handles Windows-specific control codes and is not supported on this platform"
+            </summary>
+        </member>
+        <member name="F:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.MulticastAddressV4">
+            <summary>
+            The IPAddress and port of the IPV4 multicast group.
+            </summary>
+        </member>
+        <member name="F:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.GardeningSystemIdentificationString">
+            <summary>
+            String to search for in a message received from the multicast group, indicating that this message is for a
+            gardening system.
+            </summary>
+        </member>
+        <member name="E:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.MobileAppFound">
+            <summary>
+            This asynchronous event is raised whenever a mobile app is discovered.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.UdpListener">
+            <summary>
+            The UdpListener joined to the multicast group on multiple interfaces, which is used to receive the broadcasts
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.RfCommunicator">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.Start">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.Stop">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.DiscoverNewModule">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.PingModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.GetTempAndSoilMoisture(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.OpenValve(GardeningSystem.Common.Models.DTOs.ModuleInfoDto,System.TimeSpan)">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.CloseValve(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.GetBatteryLevel(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.CertificateRepository.CreateSelfSignedCertificate(System.String)">
+            <summary>
+            Creates a self-signed X509 certificate and stores it in the specified StoreLocation
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.CertificateRepository.StoreCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Security.Cryptography.RSA)">
+            <summary>
+            Associate the key with the certificate.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.CertificateRepository.GetCertificateFromStore(System.String)">
+            <summary>
+            Gets certificate with specified certThumbprint from the specified StoreLocation.
+            Returns null when no certificate with the given Thumbprint was found.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.loopFunction(System.Func{System.Boolean},System.Int32,System.Int32)">
+            <summary>
+            Calls every <paramref name="millisecondsInterval"/> ms a function (<paramref name="func"/>).
+            Stops when the function returns true, or <paramref name="maxLoopCount"/> is reached.
+            </summary>
+            <param name="func"></param>
+            <param name="millisecondsInterval"></param>
+            <param name="maxLoopCount"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

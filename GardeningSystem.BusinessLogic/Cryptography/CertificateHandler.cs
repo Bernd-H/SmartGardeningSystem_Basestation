@@ -47,41 +47,35 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             throw new NotImplementedException();
         }
 
+        public void Setup() {
+            var applicationSettings = SettingsManager.GetApplicationSettings();
+
+            // check if certificate already exists
+            if (string.IsNullOrEmpty(applicationSettings.ServerCertificate)) {
+                // create and store certificate
+                string certThumbprint = CertificateRepository.CreateSelfSignedCertificate("localhost").Thumbprint;
+                Logger.Info($"[GetCurrentServerCertificate]Storing thumbprint of new certificate in the application settings.");
+                SettingsManager.UpdateCurrentSettings((currentApplicationSettings) => {
+                    currentApplicationSettings.ServerCertificate = certThumbprint;
+                    return currentApplicationSettings;
+                });
+            }
+        }
+
         public X509Certificate2 GetCurrentServerCertificate() {
             Logger.Trace("[GetCurrentServerCertificate]Certificate requested.");
-            X509Certificate2 currentCert = null;
-            int retryAttempt = 0;
 
-            do {
-                var applicationSettings = SettingsManager.GetApplicationSettings();
+            var applicationSettings = SettingsManager.GetApplicationSettings();
 
-                // check if certificate already exists
-                if (string.IsNullOrEmpty(applicationSettings.ServerCertificate)) {
-                    // create and store certificate
-                    string certThumbprint = DataAccess.Repositories.CertificateRepository.CreateSelfSignedCertificate("localhost").Thumbprint;
-                    Logger.Info($"[GetCurrentServerCertificate]Creating a new certificate.");
-                    SettingsManager.UpdateCurrentSettings((currentApplicationSettings) => {
-                        currentApplicationSettings.ServerCertificate = certThumbprint;
-                        return currentApplicationSettings;
-                    });
-                }
+            // check if certificate already exists
+            if (string.IsNullOrEmpty(applicationSettings.ServerCertificate)) {
+                throw new Exception();
+            }
 
-                var thumbprint = SettingsManager.GetApplicationSettings().ServerCertificate;
+            var thumbprint = SettingsManager.GetApplicationSettings().ServerCertificate;
 
-                // load cert from store
-                currentCert = CertificateRepository.GetCertificate(thumbprint);
-
-                // delete stored thumbprint in settings and retry 1 more time
-                if (currentCert == null) {
-                    Logger.Info($"[GetCurrentServerCertificate]Deleting stored thumbprint.");
-                    SettingsManager.UpdateCurrentSettings((currentSettings) => {
-                        currentSettings.ServerCertificate = string.Empty;
-                        return currentSettings;
-                    });
-                }
-            } while (currentCert == null && (++retryAttempt <= 1));
-
-            return currentCert;
+            // load cert from store
+            return CertificateRepository.GetCertificate(thumbprint); ;
         }
 
         public X509Certificate2 GetPublicServerCertificate() {
