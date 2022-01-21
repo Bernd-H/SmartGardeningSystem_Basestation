@@ -14,6 +14,8 @@ using GardeningSystem.Common.Utilities;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Cryptography {
+
+    /// <inheritdoc/>
     public class AesEncrypterDecrypter : IAesEncrypterDecrypter {
 
         /// <summary>
@@ -41,6 +43,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             Logger = loggerService.GetLogger<AesEncrypterDecrypter>();
         }
 
+        /// <inheritdoc/>
         public byte[] DecryptToByteArray(byte[] data) {
             byte[] result;
 
@@ -61,6 +64,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             return result;
         }
 
+        /// <inheritdoc/>
         public byte[] EncryptByteArray(byte[] data) {
             byte[] result;
 
@@ -82,6 +86,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             return result;
         }
 
+        /// <inheritdoc/>
         public (PointerLengthPair, PointerLengthPair) GetServerAesKey() {
             Logger.Info($"[GetSymmetricServerKey]Server aes key requested.");
             // create an aes key when there is not one yet.

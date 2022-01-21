@@ -18,6 +18,8 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class CommandManager : ICommandManager {
 
         private IAesTcpListener AesTcpListener;
@@ -45,6 +47,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             SettingsManager = settingsManager;
         }
 
+        /// <inheritdoc/>
         public async Task Start() {
             AesTcpListener.ClientConnectedEventHandler += OnCommandReceivedEvent;
             var commandListenerPort = Convert.ToInt32(Configuration[ConfigurationVars.COMMANDLISTENER_LISTENPORT]);
@@ -121,6 +124,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        /// <inheritdoc/>
         public void Stop() {
             AesTcpListener.Stop();
         }

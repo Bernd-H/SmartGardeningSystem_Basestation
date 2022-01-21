@@ -8,6 +8,8 @@ using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Communication.Base;
 
 namespace GardeningSystem.DataAccess.Communication.Base {
+
+    /// <inheritdoc/>
     public abstract class NetworkBase : INetworkBase {
 
         CancellationTokenSource Cancellation { get; set; }
@@ -16,6 +18,7 @@ namespace GardeningSystem.DataAccess.Communication.Base {
 
         }
 
+        /// <inheritdoc/>
         public async Task<bool> Start(object args = null) {
             Cancellation?.Cancel();
             Cancellation = new CancellationTokenSource();
@@ -23,17 +26,21 @@ namespace GardeningSystem.DataAccess.Communication.Base {
             return await Start(Cancellation.Token, args);
         }
 
+        /// <inheritdoc/>
         protected abstract Task<bool> Start(CancellationToken token, object args);
 
+        /// <inheritdoc/>
         public void Stop() {
             Cancellation?.Cancel();
             Cancellation = null;
         }
 
+        /// <inheritdoc/>
         public virtual Task<byte[]> ReceiveAsync(Stream stream) {
             return receiveAsync(stream, Cancellation.Token);
         }
 
+        /// <inheritdoc/>
         public virtual Task SendAsync(byte[] data, Stream stream) {
             return sendAsync(data, stream, Cancellation.Token);
         }

@@ -13,12 +13,17 @@ using GardeningSystem.Common.Utilities;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication.Base {
+
+    /// <inheritdoc/>
     public abstract class TcpClientBaseClass : NetworkBase, ITcpClientBaseClass {
 
+        /// <inheritdoc/>
         public EndPoint RemoteEndPoint { get; private set; }
 
+        /// <inheritdoc/>
         public EndPoint LocalEndPoint { get; private set; }
 
+        /// <inheritdoc/>
         public event EventHandler ConnectionCollapsedEvent;
 
         private Socket _client;
@@ -27,15 +32,17 @@ namespace GardeningSystem.DataAccess.Communication.Base {
 
         private CancellationTokenSource _connectionCollapsedTS;
 
+        /// <inheritdoc/>
         protected NetworkStream networkStream;
 
-
+        /// <inheritdoc/>
         protected readonly ILogger Logger;
 
         public TcpClientBaseClass(ILogger logger) {
             Logger = logger;
         }
 
+        /// <inheritdoc/>
         protected override async Task<bool> Start(CancellationToken token, object _settings) {
             var settings = (IClientSettings)_settings;
             _checkConnectionForCollapseTS = new CancellationTokenSource();
@@ -84,14 +91,17 @@ namespace GardeningSystem.DataAccess.Communication.Base {
             }
         }
 
+        /// <inheritdoc/>
         public virtual Task<byte[]> ReceiveAsync() {
             return base.ReceiveAsync(networkStream);
         }
 
+        /// <inheritdoc/>
         public virtual Task SendAsync(byte[] data) {
             return base.SendAsync(data, networkStream);
         }
 
+        /// <inheritdoc/>
         public bool IsConnected() {
             try {
                 return !(_client.Poll(1, SelectMode.SelectRead) && _client.Available == 0);

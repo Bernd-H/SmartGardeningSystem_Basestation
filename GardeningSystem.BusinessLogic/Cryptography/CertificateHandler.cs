@@ -26,6 +26,8 @@ using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
 
 namespace GardeningSystem.BusinessLogic.Cryptography {
+
+    /// <inheritdoc/>
     public class CertificateHandler : ICertificateHandler {
 
         private ILogger Logger;
@@ -43,10 +45,12 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             CertificateRepository = certificateRepository;
         }
 
+        /// <inheritdoc/>
         public void CheckForCertificateUpdate() {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public void Setup() {
             var applicationSettings = SettingsManager.GetApplicationSettings();
 
@@ -62,6 +66,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             }
         }
 
+        /// <inheritdoc/>
         public X509Certificate2 GetCurrentServerCertificate() {
             Logger.Trace("[GetCurrentServerCertificate]Certificate requested.");
 
@@ -78,12 +83,13 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             return CertificateRepository.GetCertificate(thumbprint); ;
         }
 
+        /// <inheritdoc/>
         public X509Certificate2 GetPublicServerCertificate() {
             var cert = GetCurrentServerCertificate();
             return new X509Certificate2(cert.Export(X509ContentType.Cert)); // export without private key
         }
 
-
+        /// <inheritdoc/>
         public PointerLengthPair DecryptData(byte[] encryptedData) {
             X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
             RSA csp = (RSA)x509Certificate2.PrivateKey; // https://www.c-sharpcorner.com/blogs/asp-net-core-encrypt-and-decrypt-public-key-and-private-key
@@ -94,6 +100,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             return CryptoUtils.MoveDataToUnmanagedMemory(decryptedData);
         }
 
+        /// <inheritdoc/>
         public byte[] EncryptData(PointerLengthPair plp) {
             X509Certificate2 x509Certificate2 = GetCurrentServerCertificate();
             using (RSACryptoServiceProvider RSAalg = new RSACryptoServiceProvider()) {

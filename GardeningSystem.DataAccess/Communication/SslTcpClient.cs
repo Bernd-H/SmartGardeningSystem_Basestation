@@ -10,6 +10,8 @@ using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.DataAccess.Communication.Base;
 
 namespace GardeningSystem.DataAccess.Communication {
+
+    /// <inheritdoc/>
     public class SslTcpClient : TcpClientBaseClass, ISslTcpClient {
 
         private SslStream _sslStream;
@@ -18,6 +20,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
         }
 
+        /// <inheritdoc/>
         protected override async Task<bool> Start(CancellationToken token, object _settings) {
             token.Register(() => _sslStream?.Close());
             var success = await base.Start(token, _settings);
@@ -46,10 +49,12 @@ namespace GardeningSystem.DataAccess.Communication {
             return success;
         }
 
+        /// <inheritdoc/>
         public override Task<byte[]> ReceiveAsync() {
             return base.ReceiveAsync(_sslStream);
         }
 
+        /// <inheritdoc/>
         public override Task SendAsync(byte[] data) {
             return base.SendAsync(data, _sslStream);
         }

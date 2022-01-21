@@ -14,8 +14,11 @@ using GardeningSystem.DataAccess.Communication.Base;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
+
+    /// <inheritdoc/>
     public class AesTcpListener : TcpListenerBaseClass, IAesTcpListener {
 
+        /// <inheritdoc/>
         public event EventHandler<TcpEventArgs> ClientConnectedEventHandler;
 
         private IAesEncrypterDecrypter AesEncrypterDecrypter;
@@ -25,6 +28,7 @@ namespace GardeningSystem.DataAccess.Communication {
             AesEncrypterDecrypter = aesEncrypterDecrypter;
         }
 
+        /// <inheritdoc/>
         public override async Task<byte[]> ReceiveAsync(Stream stream) {
             Logger.Trace($"[ReceiveData]Waiting to receive data on local endpoint {EndPoint as IPEndPoint}.");
 
@@ -36,6 +40,7 @@ namespace GardeningSystem.DataAccess.Communication {
             return decryptedPacket;
         }
 
+        /// <inheritdoc/>
         public override async Task SendAsync(byte[] data, Stream stream) {
             Logger.Trace($"[SendData] Sending data with length {data.Length}.");
 
@@ -45,6 +50,7 @@ namespace GardeningSystem.DataAccess.Communication {
             await base.SendAsync(encryptedData, stream);
         }
 
+        /// <inheritdoc/>
         protected override void ClientConnected(ClientConnectedArgs clientConnectedArgs) {
             ClientConnectedEventHandler?.Invoke(this, new TcpEventArgs(clientConnectedArgs.TcpClient));
         }

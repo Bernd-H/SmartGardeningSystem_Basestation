@@ -9,6 +9,8 @@ using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.DataAccess.Communication.Base;
 
 namespace GardeningSystem.DataAccess.Communication {
+
+    /// <inheritdoc />
     public class AesTcpClient : TcpClientBaseClass, IAesTcpClient {
 
         private IAesEncrypterDecrypter AesEncrypterDecrypter;
@@ -18,6 +20,7 @@ namespace GardeningSystem.DataAccess.Communication {
             AesEncrypterDecrypter = aesEncrypterDecrypter;
         }
 
+        /// <inheritdoc />
         public override async Task<byte[]> ReceiveAsync() {
             Logger.Trace($"[ReceiveData]Waiting to receive data on local endpoint {LocalEndPoint}.");
 
@@ -29,6 +32,7 @@ namespace GardeningSystem.DataAccess.Communication {
             return decryptedPacket;
         }
 
+        /// <inheritdoc />
         public override async Task SendAsync(byte[] data) {
             Logger.Trace($"[SendData] Sending data with length {data.Length}.");
 
@@ -38,12 +42,14 @@ namespace GardeningSystem.DataAccess.Communication {
             await base.SendAsync(encryptedMsg);
         }
 
+        /// <inheritdoc />
         public async Task SendAlreadyEncryptedData(byte[] encryptedData) {
             Logger.Trace($"[SendAlreadyEncryptedData] Sending data with length {encryptedData.Length}.");
 
             await base.SendAsync(encryptedData);
         }
 
+        /// <inheritdoc />
         public async Task<byte[]> ReceiveEncryptedData() {
             Logger.Trace($"[ReceiveEncryptedData]Waiting to receive data on local endpoint {LocalEndPoint}.");
 

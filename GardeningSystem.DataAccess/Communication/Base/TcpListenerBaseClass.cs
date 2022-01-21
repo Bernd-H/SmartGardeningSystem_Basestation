@@ -19,8 +19,10 @@ namespace GardeningSystem.DataAccess.Communication.Base {
         public CancellationToken Token { get; set; }
     }
 
+    /// <inheritdoc/>
     public abstract class TcpListenerBaseClass : NetworkBase, ITcpListenerBaseClass {
 
+        /// <inheritdoc/>
         public EndPoint EndPoint { get; private set; }
 
         private TcpListener tcpListener;
@@ -35,8 +37,10 @@ namespace GardeningSystem.DataAccess.Communication.Base {
             allDone = new ManualResetEvent(false);
         }
 
+        /// <inheritdoc/>
         protected abstract void ClientConnected(ClientConnectedArgs clientConnectedArgs);
 
+        /// <inheritdoc/>
         protected override Task<bool> Start(CancellationToken token, object _settings) {
             var settings = (IListenerSettings)_settings;
 

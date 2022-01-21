@@ -15,6 +15,8 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class SettingsManager : ISettingsManager {
 
         private ILogger Logger;
@@ -40,6 +42,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        /// <inheritdoc/>
         public ApplicationSettingsDto GetApplicationSettings(ICertificateHandler CertificateHandler = null) {
             try {
                 Logger.Trace("[GetApplicationSettings]Loading application settings.");
@@ -55,6 +58,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        /// <inheritdoc/>
         public void UpdateCurrentSettings(Func<ApplicationSettingsDto, ApplicationSettingsDto> updateFunc, ICertificateHandler CertificateHandler = null) {
             LOCKER.Wait();
 
@@ -63,6 +67,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             LOCKER.Release();
         }
 
+        /// <inheritdoc/>
         public void DeleteSettings() {
             LOCKER.Wait();
 

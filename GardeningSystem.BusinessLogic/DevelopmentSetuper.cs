@@ -13,6 +13,8 @@ using GardeningSystem.Common.Specifications.Repositories;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic {
+
+    /// <inheritdoc/>
     public class DevelopmentSetuper : IDevelopmentSetuper {
 
         private ILogger Logger;
@@ -30,6 +32,7 @@ namespace GardeningSystem.BusinessLogic {
             ModulesRepository = modulesRepository;
         }
 
+        /// <inheritdoc/>
         public void SetupTestEnvironment() {
             Logger.Info($"[SetupTestEnvironment]Setting up test/development environment.");
 

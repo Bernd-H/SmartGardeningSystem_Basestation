@@ -7,15 +7,17 @@ using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Specifications.Repositories;
-using GardeningSystem.Common.Specifications.RfCommunication;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using System.Threading;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.Repositories.DB;
+using GardeningSystem.Common.Specifications.Communication;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class ModuleManager : IModuleManager {
 
         private ILogger Logger;
@@ -44,6 +46,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             basestationGuid = Guid.Parse(Configuration[ConfigurationVars.BASESTATION_GUID]);
         }
 
+        /// <inheritdoc/>
         public async Task<bool> ChangeCorrespondingActorState(byte sensor, int state) {
             await LOCKER.WaitAsync();
 
@@ -72,10 +75,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return success;
         }
 
+        /// <inheritdoc/>
         public Task<bool> ChangeValveState(byte valveId, int state) {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<ModuleDataDto>> GetAllMeasurements() {
             await LOCKER.WaitAsync();
 
@@ -126,12 +131,14 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return measurements;
         }
 
+        /// <inheritdoc/>
         public async Task AddModule(ModuleInfoDto module) {
             await LOCKER.WaitAsync();
             ModulesRepository.AddModule(module.ToDo(ModulesRepository));
             LOCKER.Release();
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<ModuleInfoDto>> GetAllModules() {
             await LOCKER.WaitAsync();
             var result = getAllModules().ToDtos();
@@ -139,6 +146,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return result;
         }
 
+        /// <inheritdoc/>
         public async Task<ModuleInfoDto> GetModuleById(Guid id) {
             await LOCKER.WaitAsync();
             var result = ModulesRepository.GetModuleById(id).ToDto();
@@ -146,6 +154,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return result;
         }
 
+        /// <inheritdoc/>
         public async Task<bool> RemoveModule(Guid moduleId) {
             await LOCKER.WaitAsync();
             var result = ModulesRepository.RemoveModule(moduleId);
@@ -153,6 +162,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return result;
         }
 
+        /// <inheritdoc/>
         public async Task<bool> UpdateModule(ModuleInfoDto module) {
             await LOCKER.WaitAsync();
             var result = ModulesRepository.UpdateModule(module.ToDo(ModulesRepository));

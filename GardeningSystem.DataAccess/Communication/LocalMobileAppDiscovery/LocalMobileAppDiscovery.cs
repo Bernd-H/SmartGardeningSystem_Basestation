@@ -15,7 +15,7 @@ using NLog;
 namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
 
     // State object for reading client data asynchronously  
-    public class StateObject {
+    internal class StateObject {
         // Size of receive buffer.  
         public const int BufferSize = 1024;
 
@@ -28,6 +28,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         public EndPoint remoteEndpoint = null;
     }
 
+    /// <inheritdoc/>
     public class LocalMobileAppDiscovery : ILocalMobileAppDiscovery {
 
         /// <summary>
@@ -46,12 +47,13 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
         /// </summary>
         public event EventHandler<LocalMobileAppFoundEventArgs> MobileAppFound;
 
+        /// <inheritdoc/>
+        public EndPoint EndPoint { get; private set; }
+
         /// <summary>
         /// The UdpListener joined to the multicast group on multiple interfaces, which is used to receive the broadcasts
         /// </summary>
-        Socket UdpListener { get; set; }
-
-        public EndPoint EndPoint { get; set; }
+        private Socket UdpListener { get; set; }
 
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -101,6 +103,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             }
         }
 
+        /// <inheritdoc/>
         public void Start(IPEndPoint localEndPoint) {
             UdpListener = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             UdpListener.Bind(localEndPoint);
@@ -115,6 +118,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             Task.Run(() => StartListening(ct), ct);
         }
 
+        /// <inheritdoc/>
         public void Stop() {
             _cancellationTokenSource.Cancel();
         }

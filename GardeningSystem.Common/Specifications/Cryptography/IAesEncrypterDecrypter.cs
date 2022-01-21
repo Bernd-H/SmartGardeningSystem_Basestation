@@ -1,45 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GardeningSystem.Common.Models.Entities;
+﻿using GardeningSystem.Common.Models.Entities;
 
 namespace GardeningSystem.Common.Specifications.Cryptography {
+
+    /// <summary>
+    /// Class to encrypt and decrypt byte arrays with RijndaelManaged.
+    /// </summary>
     public interface IAesEncrypterDecrypter {
 
         /// <summary>
-        /// Encrypts data with a stored aes key.
+        /// Encrypts a byte array with the Aes key, stored in the application settings.
         /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        //byte[] Encrypt(string data);
-
-        /// <summary>
-        /// Encrypts data with a stored aes key.
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
+        /// <param name="data">Data to encrypt.</param>
+        /// <returns>Encrypted data.</returns>
         byte[] EncryptByteArray(byte[] data);
 
         /// <summary>
-        /// Decrypts data with a stored aes key.
+        /// Decrypts a byte array with the Aes key, stored in the application settings.
         /// </summary>
-        /// <param name="data"></param>
-        /// <returns>string.Empty when data made no sense.</returns>
-        //string Decrypt(byte[] data);
-
-        /// <summary>
-        /// Decrypts data with a stored aes key.
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
+        /// <param name="data">Encrypted data.</param>
+        /// <returns>Decrypted byte array.</returns>
         byte[] DecryptToByteArray(byte[] data);
 
         /// <summary>
-        /// Creates and stores a new aes key if no one has been created.
+        /// Creates and stores a new Aes key if no one has been created and stored.
         /// </summary>
-        /// <returns>Returns the aes server key.</returns>
+        /// <returns>The Aes server key.</returns>
         (PointerLengthPair, PointerLengthPair) GetServerAesKey();
     }
 }

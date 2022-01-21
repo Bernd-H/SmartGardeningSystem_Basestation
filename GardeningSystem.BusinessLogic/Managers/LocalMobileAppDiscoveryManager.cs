@@ -6,6 +6,8 @@ using GardeningSystem.Common.Specifications.Managers;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class LocalMobileAppDiscoveryManager : ILocalMobileAppDiscoveryManager {
 
         private readonly ILogger Logger;
@@ -31,11 +33,13 @@ namespace GardeningSystem.BusinessLogic.Managers {
             await SocketSender.SendToAllInterfacesAsync(settings.Id.ToByteArray(), e.EndPoint); // send 16 byte id
         }
 
+        /// <inheritdoc/>
         public void Start() {
             Logger.Info($"[Start]Starting local mobile app discovery.");
             LocalMobileAppDiscovery.Start(new IPEndPoint(IPAddress.Any, DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.MulticastAddressV4.Port));
         }
 
+        /// <inheritdoc/>
         public void Stop() {
             Logger.Info($"[Stop]Stopping local mobile app discovery.");
             LocalMobileAppDiscovery.Stop();

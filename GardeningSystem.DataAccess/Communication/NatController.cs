@@ -9,6 +9,7 @@ using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
 
+    /// <inheritdoc/>
     public class NatController : INatController {
 
         private readonly SemaphoreSlim locker = new SemaphoreSlim(1, 1);
@@ -24,12 +25,14 @@ namespace GardeningSystem.DataAccess.Communication {
             Logger = loggerService.GetLogger<NatController>();
         }
 
+        /// <inheritdoc/>
         public void StartSearchingForNatDevices() {
             Logger.Info($"[StartSearchingForNatDevices]Searching for nats.");
             NatUtility.DeviceFound += deviceFound;
             NatUtility.StartDiscovery();
         }
 
+        /// <inheritdoc/>
         public async Task CloseAllOpendPorts() {
             await locker.WaitAsync();
             try {
@@ -45,6 +48,7 @@ namespace GardeningSystem.DataAccess.Communication {
             }
         }
 
+        /// <inheritdoc/>
         public async Task ClosePublicPort(int publicPort, bool tcp = true) {
             await locker.WaitAsync();
             try {
@@ -63,6 +67,7 @@ namespace GardeningSystem.DataAccess.Communication {
             }
         }
 
+        /// <inheritdoc/>
         public async Task<int> OpenPublicPort(int privatePort, int publicPort, bool tcp = true) {
             await locker.WaitAsync();
             Protocol protocol = tcp ? Protocol.Tcp : Protocol.Udp;

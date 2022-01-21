@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models.DTOs;
 
-namespace GardeningSystem.Common.Specifications.RfCommunication {
+namespace GardeningSystem.Common.Specifications.Communication {
 
     /// <summary>
     /// Sends commands to an c++ application that processes these commands

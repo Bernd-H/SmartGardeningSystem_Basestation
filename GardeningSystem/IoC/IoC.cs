@@ -14,7 +14,6 @@ using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Specifications.Repositories;
 using GardeningSystem.Common.Specifications.Repositories.DB;
-using GardeningSystem.Common.Specifications.RfCommunication;
 using GardeningSystem.DataAccess;
 using GardeningSystem.DataAccess.Communication;
 using GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery;

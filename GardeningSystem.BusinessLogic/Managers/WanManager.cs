@@ -18,6 +18,8 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class WanManager : IWanManager {
 
         private CancellationTokenSource _cancellationTokenSource;
@@ -49,12 +51,14 @@ namespace GardeningSystem.BusinessLogic.Managers {
             SslTcpClient.ConnectionCollapsedEvent += OnExternalServerConnectionCollapsedEvent;
         }
 
+        /// <inheritdoc/>
         public void Start() {
             Logger.Info($"[Start]Starting a connection to the external server.");
 
             _ = connectToExternalServerLoop(_cancellationTokenSource.Token);
         }
 
+        /// <inheritdoc/>
         public async Task Stop() {
             Logger.Info($"[Stop]Shutting down WanManager. Closing all open connections.");
             _cancellationTokenSource.Cancel();

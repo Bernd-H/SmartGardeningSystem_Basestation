@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace GardeningSystem.Common.Specifications.Configuration_Logging {
 
-namespace GardeningSystem.Common.Specifications.Configuration_Logging {
+    /// <summary>
+    /// Class with methods to setup a test environment.
+    /// </summary>
     public interface IDevelopmentSetuper {
+
+        /// <summary>
+        /// Registers some fake modules.
+        /// </summary>
         void SetupTestEnvironment();
     }
 }

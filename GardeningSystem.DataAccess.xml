@@ -4,10 +4,112 @@
         <name>GardeningSystem.DataAccess</name>
     </assembly>
     <members>
+        <member name="T:GardeningSystem.DataAccess.Communication.AesTcpClient">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.AesTcpClient.ReceiveAsync">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.AesTcpClient.SendAsync(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.AesTcpClient.SendAlreadyEncryptedData(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.AesTcpClient.ReceiveEncryptedData">
+            <inheritdoc />
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.AesTcpListener">
+            <inheritdoc/>
+        </member>
+        <member name="E:GardeningSystem.DataAccess.Communication.AesTcpListener.ClientConnectedEventHandler">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.AesTcpListener.ReceiveAsync(System.IO.Stream)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.AesTcpListener.SendAsync(System.Byte[],System.IO.Stream)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.AesTcpListener.ClientConnected(GardeningSystem.Common.Models.Entities.ClientConnectedArgs)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.Base.NetworkBase">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.NetworkBase.Start(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.NetworkBase.Start(System.Threading.CancellationToken,System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.NetworkBase.Stop">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.NetworkBase.ReceiveAsync(System.IO.Stream)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.NetworkBase.SendAsync(System.Byte[],System.IO.Stream)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass">
+            <inheritdoc/>
+        </member>
+        <member name="P:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.RemoteEndPoint">
+            <inheritdoc/>
+        </member>
+        <member name="P:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.LocalEndPoint">
+            <inheritdoc/>
+        </member>
+        <member name="E:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.ConnectionCollapsedEvent">
+            <inheritdoc/>
+        </member>
+        <member name="F:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.networkStream">
+            <inheritdoc/>
+        </member>
+        <member name="F:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.Logger">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.Start(System.Threading.CancellationToken,System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.ReceiveAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.SendAsync(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.IsConnected">
+            <inheritdoc/>
+        </member>
         <member name="M:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.ConfigureKeepAlive_Windows(System.Int32)">
             <summary>
             Works only on windows: "Socket.IOControl handles Windows-specific control codes and is not supported on this platform"
             </summary>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.Base.TcpListenerBaseClass">
+            <inheritdoc/>
+        </member>
+        <member name="P:GardeningSystem.DataAccess.Communication.Base.TcpListenerBaseClass.EndPoint">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.TcpListenerBaseClass.ClientConnected(GardeningSystem.Common.Models.Entities.ClientConnectedArgs)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.Base.TcpListenerBaseClass.Start(System.Threading.CancellationToken,System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.HttpForwarder">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.HttpForwarder.ReceiveAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.HttpForwarder.SendAsync(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery">
+            <inheritdoc/>
         </member>
         <member name="F:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.MulticastAddressV4">
             <summary>
@@ -25,10 +127,43 @@
             This asynchronous event is raised whenever a mobile app is discovered.
             </summary>
         </member>
+        <member name="P:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.EndPoint">
+            <inheritdoc/>
+        </member>
         <member name="P:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.UdpListener">
             <summary>
             The UdpListener joined to the multicast group on multiple interfaces, which is used to receive the broadcasts
             </summary>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.Start(System.Net.IPEndPoint)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.LocalMobileAppDiscovery.Stop">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.UdpSocketSender">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.UdpSocketSender.SendAsync(System.Byte[],System.Net.IPEndPoint)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery.UdpSocketSender.SendToAllInterfacesAsync(System.Byte[],System.Net.IPEndPoint)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.NatController">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.NatController.StartSearchingForNatDevices">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.NatController.CloseAllOpendPorts">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.NatController.ClosePublicPort(System.Int32,System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.NatController.OpenPublicPort(System.Int32,System.Int32,System.Boolean)">
+            <inheritdoc/>
         </member>
         <member name="T:GardeningSystem.DataAccess.Communication.RfCommunicator">
             <inheritdoc />
@@ -56,6 +191,30 @@
         </member>
         <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.GetBatteryLevel(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
             <inheritdoc />
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.SslTcpClient">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.SslTcpClient.Start(System.Threading.CancellationToken,System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.SslTcpClient.ReceiveAsync">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.SslTcpClient.SendAsync(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Communication.SslTcpListener">
+            <inheritdoc/>
+        </member>
+        <member name="E:GardeningSystem.DataAccess.Communication.SslTcpListener.ClientConnectedEventHandler">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.SslTcpListener.ClientConnected(GardeningSystem.Common.Models.Entities.ClientConnectedArgs)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.SslTcpListener.SendConfidentialInformation(System.Net.Security.SslStream,System.Byte[])">
+            <inheritdoc/>
         </member>
         <member name="M:GardeningSystem.DataAccess.Repositories.CertificateRepository.CreateSelfSignedCertificate(System.String)">
             <summary>

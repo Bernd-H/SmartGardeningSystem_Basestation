@@ -17,12 +17,16 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
+
+    /// <inheritdoc/>
     public class SslTcpListener : TcpListenerBaseClass, ISslTcpListener {
 
+        /// <inheritdoc/>
         public event AsyncEventHandler<ClientConnectedEventArgs> ClientConnectedEventHandler;
 
         public SslTcpListener(ILoggerService loggerService) : base(loggerService.GetLogger<SslTcpListener>()) { }
 
+        /// <inheritdoc/>
         protected override void ClientConnected(ClientConnectedArgs args) {
             Logger.Info($"[AcceptTcpClientCallback]Accepting client.");
             SslStream sslStream = null;
@@ -58,6 +62,7 @@ namespace GardeningSystem.DataAccess.Communication {
             }
         }
 
+        /// <inheritdoc/>
         public async Task SendConfidentialInformation(SslStream sslStream, byte[] data) {
             await base.SendAsync(data, sslStream);
 

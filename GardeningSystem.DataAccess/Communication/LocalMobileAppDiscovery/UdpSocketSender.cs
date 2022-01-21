@@ -8,6 +8,8 @@ using GardeningSystem.Common.Specifications.Communication;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
+
+    /// <inheritdoc/>
     public class UdpSocketSender : IUdpSocketSender {
 
         private ILogger Logger;
@@ -16,6 +18,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             Logger = loggerService.GetLogger<UdpSocketSender>();
         }
 
+        /// <inheritdoc/>
         public async Task<bool> SendAsync(byte[] data, IPEndPoint endPoint) {
             using (var sendClient = new UdpClient()) {
                 try {
@@ -30,6 +33,7 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             return true;
         }
 
+        /// <inheritdoc/>
         public async Task SendToAllInterfacesAsync(byte[] data, IPEndPoint endPoint) {
             var nics = NetworkInterface.GetAllNetworkInterfaces();
 

@@ -4,6 +4,9 @@
         <name>GardeningSystem.BusinessLogic</name>
     </assembly>
     <members>
+        <member name="T:GardeningSystem.BusinessLogic.Cryptography.AesEncrypterDecrypter">
+            <inheritdoc/>
+        </member>
         <member name="F:GardeningSystem.BusinessLogic.Cryptography.AesEncrypterDecrypter.KEY_SIZE">
             <summary>
             Key size in bytes.
@@ -18,6 +21,180 @@
             <summary>
             Necessary to access the aes key stored in the application settings.
             </summary>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.AesEncrypterDecrypter.DecryptToByteArray(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.AesEncrypterDecrypter.EncryptByteArray(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.AesEncrypterDecrypter.GetServerAesKey">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Cryptography.CertificateHandler">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.CertificateHandler.CheckForCertificateUpdate">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.CertificateHandler.Setup">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.CertificateHandler.GetCurrentServerCertificate">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.CertificateHandler.GetPublicServerCertificate">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.CertificateHandler.DecryptData(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.CertificateHandler.EncryptData(GardeningSystem.Common.Models.Entities.PointerLengthPair)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Cryptography.PasswordHasher">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.PasswordHasher.HashPassword(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Cryptography.PasswordHasher.VerifyHashedPassword(System.String,System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.DevelopmentSetuper">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.DevelopmentSetuper.SetupTestEnvironment">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.LoggerService">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.LoggerService.GetLogger``1">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.AesKeyExchangeManager">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.AesKeyExchangeManager.StartListener">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.AesKeyExchangeManager.Stop">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.APIManager">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.APIManager.GetToken">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.APIManager.GetWeatherForecast(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.APIManager.UpdateIPStatus(GardeningSystem.Common.Models.DTOs.IPStatusDto)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.CommandManager">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.CommandManager.Start">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.CommandManager.Stop">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.LocalMobileAppDiscoveryManager">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.LocalMobileAppDiscoveryManager.Start">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.LocalMobileAppDiscoveryManager.Stop">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.LocalRelayManager">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.LocalRelayManager.MakeTcpRequest(System.Byte[],System.Int32,System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.LocalRelayManager.MakeAPIRequest(System.Byte[],System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.ModuleManager">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.ChangeCorrespondingActorState(System.Byte,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.ChangeValveState(System.Byte,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.GetAllMeasurements">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.AddModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.GetAllModules">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.GetModuleById(System.Guid)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.RemoveModule(System.Guid)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.UpdateModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.SettingsManager">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.SettingsManager.GetApplicationSettings(GardeningSystem.Common.Specifications.Cryptography.ICertificateHandler)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.SettingsManager.UpdateCurrentSettings(System.Func{GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto,GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto},GardeningSystem.Common.Specifications.Cryptography.ICertificateHandler)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.SettingsManager.DeleteSettings">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.TunnelManager">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.TunnelManager.OpenExternalServerRelayTunnel(System.Threading.CancellationToken,System.Guid)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.TunnelManager.OpenPeerToPeerListenerService(System.Threading.CancellationToken,System.Net.IPEndPoint)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.TunnelManager.Stop">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.WanManager">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WanManager.Start">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WanManager.Stop">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.BusinessLogic.Managers.WateringManager">
+            <inheritdoc/>
+        </member>
+        <member name="P:GardeningSystem.BusinessLogic.Managers.WateringManager.AutomaticIrrigationEnabled">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.IsWateringNeccessary">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.StartWatering(GardeningSystem.Common.Models.DTOs.WateringNeccessaryDto)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.ManualOverwrite(System.Boolean,System.Nullable{System.TimeSpan})">
+            <inheritdoc/>
         </member>
     </members>
 </doc>

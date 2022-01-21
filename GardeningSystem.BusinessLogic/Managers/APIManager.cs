@@ -13,6 +13,8 @@ using Newtonsoft.Json;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class APIManager : IAPIManager {
 
         private readonly HttpClient client;
@@ -34,6 +36,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             TryAddWebTokenToHeader();
         }
 
+        /// <inheritdoc/>
         public async Task GetToken() {
             Logger.Info($"[GetToken]Trying to get a token from a server in the local network.");
             string url = "";
@@ -74,6 +77,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        /// <inheritdoc/>
         public async Task<WeatherForecast> GetWeatherForecast(string location) {
             Logger.Trace($"[GetWeather]Trying to get a weather forecast.");
             string url = "";
@@ -211,6 +215,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         #endregion
 
+        /// <inheritdoc/>
         public async Task<bool> UpdateIPStatus(IPStatusDto dto) {
             Logger.Info($"[UpdateIPStatus]Transmitting public ip to external server.");
 

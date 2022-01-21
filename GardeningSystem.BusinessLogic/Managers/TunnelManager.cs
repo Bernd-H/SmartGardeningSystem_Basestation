@@ -17,6 +17,8 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class TunnelManager : ITunnelManager {
 
         private IDependencyResolver AutofacContainer;
@@ -38,6 +40,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             Configuration = configuration;
         }
 
+        /// <inheritdoc/>
         public async Task<bool> OpenExternalServerRelayTunnel(CancellationToken cancellationToken, Guid tunnelId) {
             Logger.Info($"[OpenExternalServerRelayTunnel]Establishing a relay tunnel to the external server (tunnelId={tunnelId}).");
             bool success = false;
@@ -76,6 +79,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> OpenPeerToPeerListenerService(CancellationToken cancellationToken, IPEndPoint localEndPoint) {
             Logger.Info($"[StartRelayOnly]Starting to listen for a peer to peer connection on {localEndPoint}.");
 
@@ -94,6 +98,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return connected;
         }
 
+        /// <inheritdoc/>
         public void Stop() {
             LocalRelayManager.Stop();
         }

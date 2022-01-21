@@ -7,11 +7,23 @@ using GardeningSystem.Common.Specifications.Communication.Base;
 
 namespace GardeningSystem.Common.Specifications.Communication {
 
+    /// <summary>
+    /// A Tcp listener that sends and receives all packages over a ssl stream.
+    /// </summary>
     public interface ISslTcpListener : ITcpListenerBaseClass {
 
-        //event EventHandler<ClientConnectedEventArgs> ClientConnectedEventHandler;
+        /// <summary>
+        /// Event that occurs when a new client has successfully connected.
+        /// </summary>
         event AsyncEventHandler<ClientConnectedEventArgs> ClientConnectedEventHandler;
 
+        /// <summary>
+        /// Sends <paramref name="data"/> over the <paramref name="sslStream"/> and
+        /// tries to leak no data. (Obfuscates the byte array after it is sent)
+        /// </summary>
+        /// <param name="sslStream">Active ssl stream.</param>
+        /// <param name="data">Data to send.</param>
+        /// <returns>A task that represents the asynchronous send operation.</returns>
         Task SendConfidentialInformation(SslStream sslStream, byte[] data);
     }
 }

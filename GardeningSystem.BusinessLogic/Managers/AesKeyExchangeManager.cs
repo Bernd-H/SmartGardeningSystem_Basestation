@@ -16,6 +16,8 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class AesKeyExchangeManager : IAesKeyExchangeManager {
 
         private ISslTcpListener SslListener;
@@ -40,6 +42,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             SettingsManager = settingsManager;
         }
 
+        /// <inheritdoc/>
         public async Task StartListener() {
             // initialize
             Logger.Info($"[StartListener]Initializing SslListener.");
@@ -101,6 +104,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        /// <inheritdoc/>
         public void Stop() {
             Logger.Info($"[Stop]Stopping SslListener.");
             SslListener.Stop();

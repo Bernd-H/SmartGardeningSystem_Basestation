@@ -15,6 +15,8 @@ using Newtonsoft.Json;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class LocalRelayManager : ILocalRelayManager {
 
         private SemaphoreSlim _httpForwarderLock = new SemaphoreSlim(1, 1);
@@ -38,6 +40,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             AesTcpClients = new Dictionary<Guid, IAesTcpClient>();
         }
 
+        /// <inheritdoc/>
         public async Task<byte[]> MakeTcpRequest(byte[] data, int port, bool closeConnection) {
             IServicePackage servicePackage = CommunicationUtils.DeserializeObject<ServicePackage>(data);
             IAesTcpClient aesTcpClient = null;
@@ -86,6 +89,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        /// <inheritdoc/>
         public async Task<byte[]> MakeAPIRequest(byte[] data, int port) {
             await _httpForwarderLock.WaitAsync();
             try {

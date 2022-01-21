@@ -6,6 +6,12 @@ using GardeningSystem.Common.Specifications.Cryptography;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Cryptography {
+
+    internal sealed class HashingOptions {
+        public int Iterations { get; set; } = 10000;
+    }
+
+    /// <inheritdoc/>
     public sealed class PasswordHasher : IPasswordHasher {
         private const int SaltSize = 16; // 128 bit 
         private const int KeySize = 32; // 256 bit
@@ -19,6 +25,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             Options = new HashingOptions();
         }
 
+        /// <inheritdoc/>
         public string HashPassword(byte[] password) {
             byte[] salt = new byte[SaltSize];
             new Random().NextBytes(salt);
@@ -30,6 +37,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             }
         }
 
+        /// <inheritdoc/>
         public (bool, bool) VerifyHashedPassword(string hashedPassword, byte[] providedPassword) {
             try {
                 var parts = hashedPassword.Split('.', 3);
@@ -64,9 +72,5 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
 
             return (false, false);
         }
-    }
-
-    internal sealed class HashingOptions {
-        public int Iterations { get; set; } = 10000;
     }
 }

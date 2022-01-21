@@ -12,8 +12,11 @@ using GardeningSystem.Common.Utilities;
 using NLog;
 
 namespace GardeningSystem.BusinessLogic.Managers {
+
+    /// <inheritdoc/>
     public class WateringManager : IWateringManager {
 
+        /// <inheritdoc/>
         public bool AutomaticIrrigationEnabled {
             get {
                 return SettingsManager.GetApplicationSettings().AutomaticIrrigationEnabled;
@@ -37,6 +40,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             SettingsManager = settingsManager;
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<WateringNeccessaryDto>> IsWateringNeccessary() {
             try {
                 await locker.WaitAsync();
@@ -80,6 +84,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
+        /// <inheritdoc/>
         public Task StartWatering(WateringNeccessaryDto wateringInfo) {
             Logger.Info($"[StartWatering]Starting watering for sensor with id={wateringInfo.Id.ToString()} for {wateringInfo.ValveOpenTime.TotalHours} hours.");
 
@@ -128,6 +133,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             });
         }
 
+        /// <inheritdoc/>
         public async Task<bool> ManualOverwrite(bool activateWatering, TimeSpan? irrigationTimeSpan = null) {
             // TODO: send irrigationTimeSpan to the valves
             try {

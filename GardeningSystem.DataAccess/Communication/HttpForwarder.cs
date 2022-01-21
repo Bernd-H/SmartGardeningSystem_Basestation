@@ -13,12 +13,15 @@ using GardeningSystem.DataAccess.Communication.Base;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
+
+    /// <inheritdoc/>
     public class HttpForwarder : TcpClientBaseClass, IHttpForwarder {
 
         public HttpForwarder(ILoggerService loggerService) : base(loggerService.GetLogger<HttpForwarder>()) {
 
         }
 
+        /// <inheritdoc/>
         public override async Task<byte[]> ReceiveAsync() {
             Logger.Trace($"[Receive]Receiveing from {RemoteEndPoint}.");
 
@@ -35,6 +38,7 @@ namespace GardeningSystem.DataAccess.Communication {
             return packet;
         }
 
+        /// <inheritdoc/>
         public override async Task SendAsync(byte[] data) {
             Logger.Trace($"[Send]Sending {data.Length} bytes to {RemoteEndPoint}.");
 
