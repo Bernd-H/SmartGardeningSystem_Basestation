@@ -14,6 +14,11 @@
             Overwrites some settings when test environment is set
             </summary>
         </member>
+        <member name="F:GardeningSystem.Common.Configuration.ConfigurationVars.DAEMON_NAME">
+            <summary>
+            Name under which the linux daemon runs (this process).
+            </summary>
+        </member>
         <member name="P:GardeningSystem.Common.Models.DTOs.ApplicationSettingsDto.CityName">
             <summary>
             Name of a near by city.
@@ -622,7 +627,9 @@
             </summary>
             <param name="ssid">Ssid of the wlan.</param>
             <param name="secret">Plaintext password of the wlan.</param>
+            <remarks>ReloadDaemon() requiered afterwards!</remarks>
             <returns>True, when the wlan got changed successfully.</returns>
+            <see cref="M:GardeningSystem.Common.Specifications.IWifiConfigurator.ReloadDaemon"/>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.IWifiConfigurator.IsConnectedToWlan">
             <summary>
@@ -648,7 +655,9 @@
             </summary>
             <param name="essid">Essid of the wlan.</param>
             <param name="secret">Plaintext password of the wlan.</param>
+            <remarks>ReloadDaemon() requiered afterwards!</remarks>
             <returns>True, when the wlan got changed successfully.</returns>
+            <see cref="M:GardeningSystem.Common.Specifications.IWifiConfigurator.ReloadDaemon"/>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.IWifiConfigurator.DisconnectFromWlan">
             <summary>
@@ -667,6 +676,15 @@
             Shuts down the access point.
             </summary>
             <returns>True, when the operation was successfull.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.IWifiConfigurator.ReloadDaemon">
+            <summary>
+            Sends a systemctl reload command.
+            Necessary after ChangeWlan().
+            </summary>
+            <remarks>Shutsdown the service and starts it again.</remarks>
+            <seealso cref="M:GardeningSystem.Common.Specifications.IWifiConfigurator.ChangeWlan(System.String,System.String)"/>
+            <seealso cref="M:GardeningSystem.Common.Specifications.IWifiConfigurator.ManagedConnectToWlan(System.String,System.String)"/>
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Managers.IAesKeyExchangeManager">
             <summary>

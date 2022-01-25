@@ -20,6 +20,11 @@
 
         public static string DEFAULTLOGIN_PASSWORD = "defaultLogin_password";
 
+        /// <summary>
+        /// Name under which the linux daemon runs (this process).
+        /// </summary>
+        public static string DAEMON_NAME = "daemon_name";
+
         // Cryptography
         // Server certificate
         public static string CERT_PRIVATEKEY_FILENAME = "cert_privateKey_fileName";

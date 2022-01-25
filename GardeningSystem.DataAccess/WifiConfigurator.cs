@@ -174,6 +174,11 @@ namespace GardeningSystem.DataAccess {
             return false;
         }
 
+        /// <inheritdoc/>
+        public bool IsAccessPointUp() {
+            return AccessPointStarted;
+        }
+
         #region Old access point methods
 
         [Obsolete]
@@ -274,8 +279,9 @@ namespace GardeningSystem.DataAccess {
         #endregion
 
         /// <inheritdoc/>
-        public bool IsAccessPointUp() {
-            return AccessPointStarted;
+        public void ReloadDaemon() {
+            Logger.Info($"[ReloadDaemon]Sending reload command.");
+            executeCommand($"sudo systemctl reload-or-restart {Configuration[ConfigurationVars.DAEMON_NAME]}.service");
         }
 
         /// <summary>

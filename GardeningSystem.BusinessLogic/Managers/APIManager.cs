@@ -171,47 +171,45 @@ namespace GardeningSystem.BusinessLogic.Managers {
         //    return false;
         //}
 
-        public async Task<bool> UpdateHash(ChangeUserInfoDto updatedUserInfo) {
-            Logger.Info($"[UpdateHash]Updating hashed password for user with id {updatedUserInfo.Id} in external database.");
+        //public async Task<bool> UpdateHash(ChangeUserInfoDto updatedUserInfo) {
+        //    Logger.Info($"[UpdateHash]Updating hashed password for user with id {updatedUserInfo.Id} in external database.");
 
-            if (!client.DefaultRequestHeaders.Contains("Authorization")) {
-                Logger.Fatal($"[UpdateHash]Unable perfom this api request with no json web token.");
-                return false;
-            }
+        //    if (!client.DefaultRequestHeaders.Contains("Authorization")) {
+        //        Logger.Fatal($"[UpdateHash]Unable perfom this api request with no json web token.");
+        //        return false;
+        //    }
 
-            string url = "";
+        //    string url = "";
 
-            try {
-                // build url
-                var config = ConfigurationContainer.Configuration;
-                url = string.Format(config[ConfigurationVars.EXTERNALSERVER_USER_URL], config[ConfigurationVars.EXTERNALSERVER_DOMAIN], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
+        //    try {
+        //        // build url
+        //        var config = ConfigurationContainer.Configuration;
+        //        url = string.Format(config[ConfigurationVars.EXTERNALSERVER_USER_URL], config[ConfigurationVars.EXTERNALSERVER_DOMAIN], config[ConfigurationVars.EXTERNALSERVER_APIPORT]);
 
-                // prepare data to send
-                string json = JsonConvert.SerializeObject(updatedUserInfo);
+        //        // prepare data to send
+        //        string json = JsonConvert.SerializeObject(updatedUserInfo);
 
-                // setup the body of the request
-                StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
+        //        // setup the body of the request
+        //        StringContent data = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PutAsync(url, data);
+        //        var response = await client.PutAsync(url, data);
 
-                if (response.StatusCode == System.Net.HttpStatusCode.OK) {
-                    return true;
-                }
-                else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) {
-                    return false;
-                }
-                else {
-                    Logger.Error($"[UpdateHash]API returned code: {response.StatusCode.ToString()}.");
-                }
-            }
-            catch (Exception ex) {
-                Logger.Error(ex, $"[UpdateHash]Could not update a hash from rest api. (url={url})");
-            }
+        //        if (response.StatusCode == System.Net.HttpStatusCode.OK) {
+        //            return true;
+        //        }
+        //        else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) {
+        //            return false;
+        //        }
+        //        else {
+        //            Logger.Error($"[UpdateHash]API returned code: {response.StatusCode.ToString()}.");
+        //        }
+        //    }
+        //    catch (Exception ex) {
+        //        Logger.Error(ex, $"[UpdateHash]Could not update a hash from rest api. (url={url})");
+        //    }
 
-            return false;
-        }
-
-
+        //    return false;
+        //}
 
         #endregion
 

@@ -9,6 +9,7 @@ using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.DataObjects;
 using GardeningSystem.Common.Specifications.Repositories;
 using Microsoft.Extensions.Configuration;
 using NLog;
@@ -17,6 +18,9 @@ namespace GardeningSystem.DataAccess.Repositories {
 
     /// <inheritdoc/>
     public class ModulesRepository : IModulesRepository {
+
+        //private ICachedObject _modules = null;
+
 
         private ISerializedFileRepository<ModuleInfo> ModulesFileRepo;
 

@@ -139,7 +139,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private bool processCommand_ConnectToWlan(WlanInfoDto connectInfo) {
             Logger.Info($"[processCommand_ConnectToWlan]Connecting to wlan with ssid={connectInfo.Ssid}.");
             string decryptedSecret = Encoding.UTF8.GetString(AesEncrypterDecrypter.DecryptToByteArray(connectInfo.EncryptedPassword));
-            return WifiConfigurator.ManagedConnectToWlan(connectInfo.Ssid, decryptedSecret);
+            var connectToWlan = WifiConfigurator.ManagedConnectToWlan(connectInfo.Ssid, decryptedSecret);
+            if (connectToWlan) {
+                WifiConfigurator.ReloadDaemon();
+            }
+
+            return connectToWlan;
         }
 
         private bool processCommand_DisconnectFromWlan() {

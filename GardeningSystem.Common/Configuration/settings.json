@@ -17,6 +17,8 @@
 
   "defaultLogin_password": "system",
 
+  "daemon_name": "smartgardeningsystem",
+
   ///////////////////////// cryptography
   // rest api token
   "rest_api_jwt": {

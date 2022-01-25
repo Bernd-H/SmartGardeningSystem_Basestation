@@ -386,6 +386,9 @@
         <member name="M:GardeningSystem.DataAccess.WifiConfigurator.IsAccessPointUp">
             <inheritdoc/>
         </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.ReloadDaemon">
+            <inheritdoc/>
+        </member>
         <member name="M:GardeningSystem.DataAccess.WifiConfigurator.loopFunction(System.Func{System.Boolean},System.Int32,System.Int32)">
             <summary>
             Calls every <paramref name="millisecondsInterval"/> ms a function (<paramref name="func"/>).

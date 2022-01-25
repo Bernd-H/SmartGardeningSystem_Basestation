@@ -20,7 +20,9 @@ namespace GardeningSystem.Common.Specifications {
         /// </summary>
         /// <param name="ssid">Ssid of the wlan.</param>
         /// <param name="secret">Plaintext password of the wlan.</param>
+        /// <remarks>ReloadDaemon() requiered afterwards!</remarks>
         /// <returns>True, when the wlan got changed successfully.</returns>
+        /// <see cref="ReloadDaemon"/>
         bool ManagedConnectToWlan(string ssid, string secret);
 
         /// <summary>
@@ -46,7 +48,9 @@ namespace GardeningSystem.Common.Specifications {
         /// </summary>
         /// <param name="essid">Essid of the wlan.</param>
         /// <param name="secret">Plaintext password of the wlan.</param>
+        /// <remarks>ReloadDaemon() requiered afterwards!</remarks>
         /// <returns>True, when the wlan got changed successfully.</returns>
+        /// <see cref="ReloadDaemon"/>
         bool ChangeWlan(string essid, string secret);
 
         /// <summary>
@@ -66,5 +70,14 @@ namespace GardeningSystem.Common.Specifications {
         /// </summary>
         /// <returns>True, when the operation was successfull.</returns>
         bool ShutdownAP();
+
+        /// <summary>
+        /// Sends a systemctl reload command.
+        /// Necessary after ChangeWlan().
+        /// </summary>
+        /// <remarks>Shutsdown the service and starts it again.</remarks>
+        /// <seealso cref="ChangeWlan(string, string)"/>
+        /// <seealso cref="ManagedConnectToWlan(string, string)"/>
+        void ReloadDaemon();
     }
 }

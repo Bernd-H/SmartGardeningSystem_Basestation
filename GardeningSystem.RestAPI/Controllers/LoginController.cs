@@ -74,6 +74,28 @@ namespace GardeningSystem.RestAPI.Controllers {
             return response;
         }
 
+        // PUT api/<LoginController>
+        [Authorize]
+        [HttpPut]
+        public IActionResult UpdateUser([FromBody] UpdateUserDto updateUserDto) {
+            if (AuthenticateUser(new UserDto { Username = updateUserDto.Username, Password = updateUserDto.Password })) {
+                Logger.Info($"[UpdateUser]Updating the login information.");
+
+                // update login information
+                SettingsManager.UpdateCurrentSettings((currentSettings) => {
+                    currentSettings.LoginSecrets = new LoginSecrets {
+                        UserName = updateUserDto.NewUsername,
+                        HashedPassword = PasswordHasher.HashPassword(Encoding.UTF8.GetBytes(updateUserDto.NewPassword))
+                    };
+                    return currentSettings;
+                });
+
+                return Ok();
+            }
+
+            return BadRequest();
+        }
+
         private IActionResult GenerateJSONWebToken() {
             //Logger.Info($"[GenerateJSONWebToken]Generating json web token for user {userInfo.Id}.");
             Logger.Info($"[GenerateJSONWebToken]Generating a json web token.");
