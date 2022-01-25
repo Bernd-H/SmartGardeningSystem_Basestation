@@ -5,6 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace GardeningSystem.Common.Specifications.Repositories {
+
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IFileRepository {
 
         string[] GetContent(string filePath);

@@ -16,13 +16,15 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.DataAccess {
+
+    /// <inheritdoc/>
     public class WifiConfigurator : IWifiConfigurator {
 
         static string changeWlanScriptName = "changeWlanScript";
 
         static string disconnectFromWlanScriptName = "disconnectFromWlanScript";
 
-
+        /// <inheritdoc/>
         public bool AccessPointStarted { get; private set; } = false;
 
 
@@ -41,6 +43,7 @@ namespace GardeningSystem.DataAccess {
             Configuration = configuration;
         }
 
+        /// <inheritdoc/>
         public bool ManagedConnectToWlan(string ssid, string secret) {
             if (IsAccessPointUp()) {
                 Logger.Info($"[ManagedConnectToWlan]Shutting down the access point: {ShutdownAP()}.");
@@ -49,6 +52,7 @@ namespace GardeningSystem.DataAccess {
             return ChangeWlan(ssid, secret);
         }
 
+        /// <inheritdoc/>
         public bool ChangeWlan(string essid, string secret) {
             Logger.Info($"[ConnectToWlan]Trying to connect to wlan wiht essid={essid}.");
             setScriptExecutionRights(changeWlanScriptName);
@@ -60,6 +64,7 @@ namespace GardeningSystem.DataAccess {
             return loopFunction(IsConnectedToWlan, 2000, 30);
         }
 
+        /// <inheritdoc/>
         public bool DisconnectFromWlan() {
             Logger.Info($"[DisconnectFromWlan]Disconnecting from current wlan.");
             setScriptExecutionRights(disconnectFromWlanScriptName);
@@ -71,6 +76,7 @@ namespace GardeningSystem.DataAccess {
             return loopFunction(() => !IsConnectedToWlan(), 2000, 30);
         }
 
+        /// <inheritdoc/>
         public IEnumerable<WlanInfo> GetAllWlans() {
             Logger.Info($"[GetAllWlans]Searching for reachable wifis.");
             var finalIds = new List<WlanInfo>();
@@ -101,11 +107,13 @@ namespace GardeningSystem.DataAccess {
             return finalIds;
         }
 
+        /// <inheritdoc/>
         public bool HasInternet() {
             Logger.Trace($"[HasInternet]Checking internet connection.");
             return pingHost("google.com");
         }
 
+        /// <inheritdoc/>
         public bool IsConnectedToWlan() {
             Logger.Trace($"[IsConnectedToWlan]Checking wifi connection.");
 
@@ -134,6 +142,7 @@ namespace GardeningSystem.DataAccess {
             return false;
         }
 
+        /// <inheritdoc/>
         public bool CreateAP() {
             try {
                 Logger.Info($"[CreateAP]Starting up the access point...");
@@ -149,6 +158,7 @@ namespace GardeningSystem.DataAccess {
             return false;
         }
 
+        /// <inheritdoc/>
         public bool ShutdownAP() {
             try {
                 Logger.Info($"[ShutdownAP]Shutting down the access point.");
@@ -263,6 +273,7 @@ namespace GardeningSystem.DataAccess {
 
         #endregion
 
+        /// <inheritdoc/>
         public bool IsAccessPointUp() {
             return AccessPointStarted;
         }
@@ -401,7 +412,7 @@ namespace GardeningSystem.DataAccess {
             return proc;
         }
 
-        public void executeCommand(string command) {
+        private void executeCommand(string command) {
             console(command, null);
         }
 

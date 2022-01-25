@@ -14,6 +14,8 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Repositories {
+
+    /// <inheritdoc/>
     public class ModulesRepository : IModulesRepository {
 
         private ISerializedFileRepository<ModuleInfo> ModulesFileRepo;
@@ -29,19 +31,23 @@ namespace GardeningSystem.DataAccess.Repositories {
             ModulesFileRepo.Init(Configuration[ConfigurationVars.MODULES_FILENAME]);
         }
 
+        /// <inheritdoc/>
         public void AddModule(ModuleInfo module) {
             ModulesFileRepo.AppendToFileList(module);
         }
 
+        /// <inheritdoc/>
         public IEnumerable<ModuleInfo> GetAllRegisteredModules() {
             return ModulesFileRepo.ReadListFromFile();
         }
 
+        /// <inheritdoc/>
         public ModuleInfo GetModuleById(Guid id) {
             var modules = GetAllRegisteredModules().ToList();
             return modules.Find(m => m.Id == id);
         }
 
+        /// <inheritdoc/>
         public bool RemoveModule(Guid moduleId) {
             var removed = ModulesFileRepo.RemoveItemFromFileList(moduleId);
             if (!removed) {
@@ -52,10 +58,12 @@ namespace GardeningSystem.DataAccess.Repositories {
             return true;
         }
 
+        /// <inheritdoc/>
         public bool UpdateModule(ModuleInfo module) {
             return ModulesFileRepo.UpdateItemFromList(module);
         }
 
+        /// <inheritdoc/>
         public Guid GetIdFromModuleId(byte moduleId) {
             var modules = GetAllRegisteredModules();
             foreach (var module in modules) {

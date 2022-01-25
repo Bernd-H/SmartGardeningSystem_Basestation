@@ -24,6 +24,10 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 
 namespace GardeningSystem {
+
+    /// <summary>
+    /// Class to create an autofac dependency container and to resolve services.
+    /// </summary>
     public static class IoC {
 
         private static IContainer applicationContext;
@@ -103,7 +107,7 @@ namespace GardeningSystem {
         }
 
         /// <summary>
-        /// Resolves a specific type
+        /// Resolves a registered service.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -115,6 +119,10 @@ namespace GardeningSystem {
             return applicationContext.Resolve<T>();
         }
 
+        /// <summary>
+        /// Gets the autofac IContainer.
+        /// </summary>
+        /// <returns>Container that creates, wires dependencies and manages lifetime for a set of components.</returns>
         public static IContainer GetContainer() {
             if (applicationContext == null) {
                 applicationContext = builder.Build();
@@ -123,7 +131,10 @@ namespace GardeningSystem {
             return applicationContext;
         }
 
-
+        /// <summary>
+        /// Gets the autofac ContainerBuilder.
+        /// </summary>
+        /// <returns>ContainerBuilder used to build an Autofac.IContainer from component registrations.</returns>
         public static ContainerBuilder GetContainerBuilder() {
             if (applicationContext != null)
                 throw new System.Exception("Cannot return a containerbuilder, because a container got already build.");

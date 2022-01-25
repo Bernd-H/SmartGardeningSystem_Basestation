@@ -4,6 +4,17 @@
         <name>GardeningSystem</name>
     </assembly>
     <members>
+        <member name="T:GardeningSystem.DependencyResolver">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DependencyResolver.Resolve``1">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.IoC">
+            <summary>
+            Class to create an autofac dependency container and to resolve services.
+            </summary>
+        </member>
         <member name="M:GardeningSystem.IoC.Init">
             <summary>
             Registers all types to a internal containerbuilder.
@@ -19,15 +30,72 @@
         </member>
         <member name="M:GardeningSystem.IoC.Get``1">
             <summary>
-            Resolves a specific type
+            Resolves a registered service.
             </summary>
             <typeparam name="T"></typeparam>
             <returns></returns>
+        </member>
+        <member name="M:GardeningSystem.IoC.GetContainer">
+            <summary>
+            Gets the autofac IContainer.
+            </summary>
+            <returns>Container that creates, wires dependencies and manages lifetime for a set of components.</returns>
+        </member>
+        <member name="M:GardeningSystem.IoC.GetContainerBuilder">
+            <summary>
+            Gets the autofac ContainerBuilder.
+            </summary>
+            <returns>ContainerBuilder used to build an Autofac.IContainer from component registrations.</returns>
+        </member>
+        <member name="T:GardeningSystem.Jobs.AccessPointJob">
+            <summary>
+            Service that checks the wifi connection state every minute and starts up an access point,
+            when the computer is not connected to an wifi.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.Jobs.CommunicationJob">
+            <summary>
+            Service that starts and stops all communication managers.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Jobs.CommunicationJob.StartAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.Jobs.CommunicationJob.StopAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.Jobs.WateringJob">
+            <summary>
+            Service that collects the soil moisture measurements frequently and instructs the irrigation with neccessary.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.TimedHostedService">
+            <summary>
+            Service base class that starts a service in specific intervals.
+            </summary>
         </member>
         <member name="F:GardeningSystem.TimedHostedService._waitTillDoWorkHasFinished">
             <summary>
             true, if the timer should wait till all work in the doWorkHandler has been done to start the new period
             </summary>
+        </member>
+        <member name="M:GardeningSystem.TimedHostedService.SetStartEventHandler(System.EventHandler)">
+            <summary>
+            Sets the Start event handler.
+            </summary>
+            <param name="doWorkHandler">Eventhandler that gets invoked when the service should get started.</param>
+        </member>
+        <member name="M:GardeningSystem.TimedHostedService.SetStopEventHandler(System.EventHandler)">
+            <summary>
+            Sets the Stop event handler.
+            </summary>
+            <param name="stopHandler">Eventhandler that gets invoked when the service should get stopped.</param>
+        </member>
+        <member name="M:GardeningSystem.TimedHostedService.StartAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.TimedHostedService.StopAsync(System.Threading.CancellationToken)">
+            <inheritdoc/>
         </member>
     </members>
 </doc>

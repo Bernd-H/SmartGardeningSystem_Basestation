@@ -8,6 +8,10 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 
 namespace GardeningSystem.Jobs {
+
+    /// <summary>
+    /// Service that starts and stops all communication managers.
+    /// </summary>
     public class CommunicationJob : IHostedService {
 
         private ILocalMobileAppDiscoveryManager LocalMobileAppDiscoveryManager;
@@ -39,6 +43,7 @@ namespace GardeningSystem.Jobs {
             NatController = natController;
         }
 
+        /// <inheritdoc/>
         public Task StartAsync(CancellationToken cancellationToken) {
             return Task.Run(async () => {
                 try {
@@ -66,6 +71,7 @@ namespace GardeningSystem.Jobs {
             });
         }
 
+        /// <inheritdoc/>
         public async Task StopAsync(CancellationToken cancellationToken) {
             try {
                 Logger.Info($"[StopAsync]Stop requested.");

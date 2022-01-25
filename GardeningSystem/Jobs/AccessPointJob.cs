@@ -3,6 +3,11 @@ using GardeningSystem.Common.Specifications;
 using NLog;
 
 namespace GardeningSystem.Jobs {
+
+    /// <summary>
+    /// Service that checks the wifi connection state every minute and starts up an access point,
+    /// when the computer is not connected to an wifi.
+    /// </summary>
     public class AccessPointJob : TimedHostedService {
 
         static readonly TimeSpan PERIOD = TimeSpan.FromMinutes(1);
@@ -24,7 +29,7 @@ namespace GardeningSystem.Jobs {
         private void Start(object s, EventArgs e) {
             //if (!WifiConfigurator.IsConnectedToWlan()) {
             if (!WifiConfigurator.HasInternet()) {
-                if (!WifiConfigurator.IsAccessPointUp()) {
+                if (!WifiConfigurator.AccessPointStarted) {
                     Logger.Trace($"[Start]Starting access point: {WifiConfigurator.CreateAP()}.");
                 }
                 else {
@@ -32,7 +37,7 @@ namespace GardeningSystem.Jobs {
                 }
             }
             else {
-                if (WifiConfigurator.IsAccessPointUp()) {
+                if (WifiConfigurator.AccessPointStarted) {
                     Logger.Trace($"[Start]Shutting down access point: {WifiConfigurator.ShutdownAP()}.");
                 }
                 else {

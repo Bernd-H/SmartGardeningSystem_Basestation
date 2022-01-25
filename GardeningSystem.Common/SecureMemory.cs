@@ -5,6 +5,8 @@ using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Utilities;
 
 namespace GardeningSystem.Common {
+
+    /// <inheritdoc/>
     public class SecureMemory : ISecureMemory {
 
         private PointerLengthPair _plp;
@@ -25,6 +27,7 @@ namespace GardeningSystem.Common {
         //    }
         //}
 
+        /// <inheritdoc/>
         public byte[] GetObject() {
             if (_secureObject != null) {
                 throw new Exception($"The secure object has already been requested.");
@@ -44,10 +47,12 @@ namespace GardeningSystem.Common {
             _plp = plp;
         }
 
+        /// <inheritdoc/>
         public void LoadObject(PointerLengthPair plp) {
             _plp = plp;
         }
 
+        /// <inheritdoc/>
         public void Dispose() {
             CryptoUtils.ObfuscateByteArray(_secureObject, _gchOfSecureObject);
             _secureObject = null;

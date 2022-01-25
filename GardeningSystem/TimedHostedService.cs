@@ -6,6 +6,10 @@ using Microsoft.Extensions.Hosting;
 using NLog;
 
 namespace GardeningSystem {
+
+    /// <summary>
+    /// Service base class that starts a service in specific intervals.
+    /// </summary>
     public class TimedHostedService : IHostedService, IDisposable {
 
         private int executionCount = 0;
@@ -28,14 +32,23 @@ namespace GardeningSystem {
             _waitTillDoWorkHasFinished = waitTillDoWorkHasFinished;
         }
 
+        /// <summary>
+        /// Sets the Start event handler.
+        /// </summary>
+        /// <param name="doWorkHandler">Eventhandler that gets invoked when the service should get started.</param>
         protected void SetStartEventHandler(EventHandler doWorkHandler) {
             _doWorkHandler = doWorkHandler;
         }
 
+        /// <summary>
+        /// Sets the Stop event handler.
+        /// </summary>
+        /// <param name="stopHandler">Eventhandler that gets invoked when the service should get stopped.</param>
         protected void SetStopEventHandler(EventHandler stopHandler) {
             _stopHandler = stopHandler;
         }
 
+        /// <inheritdoc/>
         public Task StartAsync(CancellationToken stoppingToken) {
             _logger.Trace($"[StartAsync]{_serviceName} is starting");
 
@@ -51,7 +64,7 @@ namespace GardeningSystem {
             return Task.CompletedTask;
         }
 
-        protected virtual void DoWork(object state) {
+        private void DoWork(object state) {
             var count = Interlocked.Increment(ref executionCount);
 
             _logger.Trace($"[DoWork]{_serviceName} started. (execution count: {count})");
@@ -64,6 +77,7 @@ namespace GardeningSystem {
             }
         }
 
+        /// <inheritdoc/>
         public Task StopAsync(CancellationToken stoppingToken) {
             _logger.Warn($"[StopAsync]{_serviceName} is stopping.");
 

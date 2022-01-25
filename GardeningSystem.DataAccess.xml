@@ -216,10 +216,66 @@
         <member name="M:GardeningSystem.DataAccess.Communication.SslTcpListener.SendConfidentialInformation(System.Net.Security.SslStream,System.Byte[])">
             <inheritdoc/>
         </member>
-        <member name="M:GardeningSystem.DataAccess.Repositories.CertificateRepository.CreateSelfSignedCertificate(System.String)">
+        <member name="T:GardeningSystem.DataAccess.Database.DatabaseContext">
             <summary>
-            Creates a self-signed X509 certificate and stores it in the specified StoreLocation
+            Inherits from DbContext.
+            Class that contains the connection string for the mysql database and multiple tabels as DbSet instance.
             </summary>
+        </member>
+        <member name="P:GardeningSystem.DataAccess.Database.DatabaseContext.sensordata">
+            <summary>
+            Table where the sensor measurements get stored.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Database.DbBaseRepository`1">
+            <summary>
+            Base class of all database repositories.
+            </summary>
+            <typeparam name="T">Data object of the repository.</typeparam>
+        </member>
+        <member name="F:GardeningSystem.DataAccess.Database.DbBaseRepository`1.LOCKER">
+            <summary>
+            SemaphoreSlim to lock concurrent table accesses.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Database.DbBaseRepository`1.AddToTable(`0,System.Threading.CancellationToken)">
+            <summary>
+            Adds a new object to the table with the type <typeparamref name="T"/>..
+            </summary>
+            <param name="o">Object to add.</param>
+            <param name="cancellationToken">A System.Threading.CancellationToken to stop the asynchron task, when requested.</param>
+            <returns>A task that represents the asynchronous add operation. The task result contains
+            the number of state entries written to the database.</returns>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Database.DbBaseRepository`1.RemoveFromTable(`0,System.Threading.CancellationToken)">
+            <summary>
+            Removes a object from the table with the type <typeparamref name="T"/>..
+            </summary>
+            <param name="o">Object to remove.</param>
+            <param name="cancellationToken">A System.Threading.CancellationToken to stop the asynchron task, when requested.</param>
+            <returns>A task that represents the asynchronous remove operation. The task result contains
+            the number of state entries written to the database.</returns>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Database.DbBaseRepository`1.UpdateObject(`0,System.Threading.CancellationToken)">
+            <summary>
+            Updates a existing object from the table with the type <typeparamref name="T"/>.
+            </summary>
+            <param name="o">Updated object.</param>
+            <param name="cancellationToken">A System.Threading.CancellationToken to stop the asynchron task, when requested.</param>
+            <returns>A task that represents the asynchronous update operation. The task result contains
+            a boolean that is true when an object (with the same Id as the updated object) got successfully updated.</returns>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Database.DbBaseRepository`1.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Repositories.CertificateRepository">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.CertificateRepository.GetCertificate(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.CertificateRepository.CreateSelfSignedCertificate(System.String)">
+            <inheritdoc/>
         </member>
         <member name="M:GardeningSystem.DataAccess.Repositories.CertificateRepository.StoreCertificate(System.Security.Cryptography.X509Certificates.X509Certificate2,System.Security.Cryptography.RSA)">
             <summary>
@@ -231,6 +287,104 @@
             Gets certificate with specified certThumbprint from the specified StoreLocation.
             Returns null when no certificate with the given Thumbprint was found.
             </summary>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Repositories.SensorDataDbRepository">
+            <inheritdoc/>
+            <seealso cref="T:GardeningSystem.DataAccess.Database.DbBaseRepository`1"/>
+            <seealso cref="T:GardeningSystem.DataAccess.Database.DatabaseContext"/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SensorDataDbRepository.AddDataPoint(GardeningSystem.Common.Models.Entities.ModuleData)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SensorDataDbRepository.RemoveDataPoint(GardeningSystem.Common.Models.Entities.ModuleData)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SensorDataDbRepository.GetAllDataPoints">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SensorDataDbRepository.QueryDataPointsById(System.Guid)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Repositories.ModulesRepository">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.ModulesRepository.AddModule(GardeningSystem.Common.Models.Entities.ModuleInfo)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.ModulesRepository.GetAllRegisteredModules">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.ModulesRepository.GetModuleById(System.Guid)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.ModulesRepository.RemoveModule(System.Guid)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.ModulesRepository.UpdateModule(GardeningSystem.Common.Models.Entities.ModuleInfo)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.ModulesRepository.GetIdFromModuleId(System.Byte)">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.Repositories.SerializedFileRepository`1">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SerializedFileRepository`1.Init(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SerializedFileRepository`1.AppendToFileList(`0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SerializedFileRepository`1.ReadListFromFile">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SerializedFileRepository`1.WriteListToFile(System.Collections.Generic.IEnumerable{`0})">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SerializedFileRepository`1.RemoveItemFromFileList(System.Guid)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SerializedFileRepository`1.UpdateItemFromList(`0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SerializedFileRepository`1.WriteSingleObjectToFile``1(``0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Repositories.SerializedFileRepository`1.ReadSingleObjectFromFile``1">
+            <inheritdoc/>
+        </member>
+        <member name="T:GardeningSystem.DataAccess.WifiConfigurator">
+            <inheritdoc/>
+        </member>
+        <member name="P:GardeningSystem.DataAccess.WifiConfigurator.AccessPointStarted">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.ManagedConnectToWlan(System.String,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.ChangeWlan(System.String,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.DisconnectFromWlan">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.GetAllWlans">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.HasInternet">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.IsConnectedToWlan">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.CreateAP">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.ShutdownAP">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.IsAccessPointUp">
+            <inheritdoc/>
         </member>
         <member name="M:GardeningSystem.DataAccess.WifiConfigurator.loopFunction(System.Func{System.Boolean},System.Int32,System.Int32)">
             <summary>

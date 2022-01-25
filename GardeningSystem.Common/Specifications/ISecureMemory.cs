@@ -14,14 +14,12 @@ namespace GardeningSystem.Common.Specifications {
         /// Returns a byte array, that will get disposed securely.
         /// </summary>
         //byte[] Object { get; }
-
         byte[] GetObject();
 
         /// <summary>
         /// Pointer that points to the secure object.
         /// </summary>
-        /// <param name="intPtr"></param>
-        /// <param name="length"></param>
+        /// <param name="plp"></param>
         void LoadObject(PointerLengthPair plp);
     }
 }

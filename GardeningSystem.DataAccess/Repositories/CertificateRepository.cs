@@ -13,6 +13,8 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace GardeningSystem.DataAccess.Repositories {
+
+    /// <inheritdoc/>
     public class CertificateRepository : ICertificateRepository {
 
         private const string SignatureAlgorithmOid = "1.2.840.113549.1.1.11"; // SHA-256 with RSA
@@ -35,6 +37,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             CachedCertificates = new Dictionary<string, ICachedObject>();
         }
 
+        /// <inheritdoc/>
         public X509Certificate2 GetCertificate(string certThumbprint) {
             if (CachedCertificates.ContainsKey(certThumbprint)) {
                 // check lifespan
@@ -56,9 +59,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             }
         }
 
-        /// <summary>
-        /// Creates a self-signed X509 certificate and stores it in the specified StoreLocation
-        /// </summary>
+        /// <inheritdoc/>
         public X509Certificate2 CreateSelfSignedCertificate(string commonName = "localhost") {
             Logger.Info($"[CreateSelfSignedCertificate]Creating a new rsa key for the self issued certificate.");
             RSA key = RSA.Create(KeySize);

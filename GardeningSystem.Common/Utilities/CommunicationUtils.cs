@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using NLog;
 
 namespace GardeningSystem.Common.Utilities {
+
     public static class CommunicationUtils {
 
         /// <summary>

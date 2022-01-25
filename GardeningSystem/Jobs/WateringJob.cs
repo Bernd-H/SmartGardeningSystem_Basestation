@@ -7,6 +7,10 @@ using GardeningSystem.Common.Specifications.Managers;
 using NLog;
 
 namespace GardeningSystem.Jobs {
+
+    /// <summary>
+    /// Service that collects the soil moisture measurements frequently and instructs the irrigation with neccessary.
+    /// </summary>
     public class WateringJob : TimedHostedService {
 
         static readonly TimeSpan PERIOD = TimeSpan.FromHours(5);

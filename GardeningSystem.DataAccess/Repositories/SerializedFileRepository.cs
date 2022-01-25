@@ -14,6 +14,8 @@ using GardeningSystem.Common.Specifications.Repositories;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Repositories {
+
+    /// <inheritdoc/>
     public class SerializedFileRepository<T> : ISerializedFileRepository<T> where T : IDO {
 
         private static object OBJECT_LOCKER = new object();
@@ -38,6 +40,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             _logger = logger.GetLogger<SerializedFileRepository<T>>();
         }
 
+        /// <inheritdoc/>
         public void Init(string fileName) {
             _filePath = ConfigurationContainer.GetFullPath(fileName);
             _logger.Trace($"[Init]Repository filepath set to {_filePath}.");
@@ -45,6 +48,7 @@ namespace GardeningSystem.DataAccess.Repositories {
 
         #region Serilize list of objects
 
+        /// <inheritdoc/>
         public void AppendToFileList(T o) {
             lock (LIST_LOCKER) {
                 _logger.Trace($"[AppendToFileList]Appending object with id={o.Id} to list at {new FileInfo(_filePath).Name}.");
@@ -54,18 +58,21 @@ namespace GardeningSystem.DataAccess.Repositories {
             }
         }
 
+        /// <inheritdoc/>
         public IEnumerable<T> ReadListFromFile() {
             lock (LIST_LOCKER) {
                 return readListFromFile();
             }
         }
 
+        /// <inheritdoc/>
         public void WriteListToFile(IEnumerable<T> objects) {
             lock(LIST_LOCKER) {
                 writeListToFile(objects);
             }
         }
 
+        /// <inheritdoc/>
         public bool RemoveItemFromFileList(Guid Id) {
             lock (LIST_LOCKER) {
                 _logger.Trace($"[RemoveItemFromFileList]Removing object with id={Id} from file {new FileInfo(_filePath).Name}.");
@@ -80,6 +87,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             }
         }
 
+        /// <inheritdoc/>
         public bool UpdateItemFromList(T itemToUpdate) {
             lock (LIST_LOCKER) {
                 _logger.Trace($"[UpdateItemFromList]Updating object with id={itemToUpdate.Id} from file {new FileInfo(_filePath).Name}.");
@@ -123,13 +131,15 @@ namespace GardeningSystem.DataAccess.Repositories {
 
         #endregion
 
-        public void WriteSingleObjectToFile<T2>(T2 o) {
+        /// <inheritdoc/>
+        public void WriteSingleObjectToFile<T2>(T2 o) where T2 : class {
             lock (OBJECT_LOCKER) {
                 _logger.Trace($"[WriteSingleObjectToFile]Writing object to file {new FileInfo(_filePath).Name}.");
                 File.WriteAllText(_filePath, JsonSerializer.Serialize(o));
             }
         }
 
+        /// <inheritdoc/>
         public T2 ReadSingleObjectFromFile<T2>() where T2 : class {
             lock (OBJECT_LOCKER) {
                 if (File.Exists(_filePath)) {

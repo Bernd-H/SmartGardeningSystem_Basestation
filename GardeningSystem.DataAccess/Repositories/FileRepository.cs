@@ -5,7 +5,10 @@ using GardeningSystem.Common.Specifications.Repositories;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Repositories {
+
+
     public class FileRepository : IFileRepository {
+
         private ILogger Logger;
 
         public FileRepository(ILoggerService logger) {
