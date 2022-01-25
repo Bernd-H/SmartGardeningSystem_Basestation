@@ -7,6 +7,8 @@
 
         public static byte[] WlanCommand = new byte[] { 150 };
 
+        public static byte[] DisconnectFromWlanCommand = new byte[] { 149 };
+
         public static byte[] StartManualWateringCommand = new byte[] { 151 };
 
         public static byte[] StopManualWateringCommand = new byte[] { 152 };

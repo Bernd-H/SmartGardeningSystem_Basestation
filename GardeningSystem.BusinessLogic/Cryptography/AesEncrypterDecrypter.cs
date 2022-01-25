@@ -50,13 +50,13 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             try {
                 using (ISecureMemory sm_key = new SecureMemory(getAllApplicationSettings().AesKey)) {
                     using (ISecureMemory sm_iv = new SecureMemory(getAllApplicationSettings().AesIV)) {
-                        var aesKey = sm_key.Object;
-                        var aesIv = sm_iv.Object;
+                        var aesKey = sm_key.GetObject();
+                        var aesIv = sm_iv.GetObject();
 
                         result = DecryptByteArray(data, aesKey, aesIv);
                     }
                 }
-            } catch (Exception ex) {
+            } catch (Exception ex)  {
                 Logger.Trace(ex, $"[DecryptToByteArray]An error occured while decrypting {data.Length} bytes.");
                 result = new byte[0];
             }
@@ -71,8 +71,8 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
             try {
                 using (ISecureMemory sm_key = new SecureMemory(getAllApplicationSettings().AesKey)) {
                     using (ISecureMemory sm_iv = new SecureMemory(getAllApplicationSettings().AesIV)) {
-                        var aesKey = sm_key.Object;
-                        var aesIv = sm_iv.Object;
+                        var aesKey = sm_key.GetObject();
+                        var aesIv = sm_iv.GetObject();
 
                         result = EncryptByteArray(data, aesKey, aesIv);
                     }

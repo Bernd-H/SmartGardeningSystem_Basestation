@@ -4,6 +4,8 @@ using GardeningSystem.Common.Models.Entities;
 namespace GardeningSystem.Common.Specifications {
     public interface IWifiConfigurator {
 
+        bool AccessPointStarted { get; }
+
         /// <summary>
         /// Shuts down the access point if there is on currently active or disconnects from a wlan first.
         /// After that it connects to the wlan with <paramref name="ssid"/> and <paramref name="secret"/>.

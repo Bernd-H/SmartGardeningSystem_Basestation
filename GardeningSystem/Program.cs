@@ -14,13 +14,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog;
 using NLog.Web;
 
 namespace GardeningSystem {
     public class Program {
 
         public static void Main(string[] args) {
+            // There is a systemd shutdown problem because of NLog's shutdown.
+            // Therefore disabling NLog's shutdown and doing it manually in the finally-block
+            LogManager.AutoShutdown = false;
+            
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
+
             try {
                 TimeUtils.ApplicationStartTime = TimeUtils.GetCurrentTime();
 
@@ -31,8 +37,6 @@ namespace GardeningSystem {
                     logger.Info("[Main]Setting up test development/test enviroment.");
                     IoC.Get<IDevelopmentSetuper>().SetupTestEnvironment();
                 }
-
-                //IoC.Get<IWifiConfigurator>().DisconnectFromWlan();
 
                 // create server certificate and aes key if not exists
                 IoC.Get<ICertificateHandler>().Setup();
@@ -60,8 +64,8 @@ namespace GardeningSystem {
         public static IHostBuilder CreateHostBuilder(string[] args, ICertificateHandler certificateHandler, IConfiguration configuration) =>
             Host.CreateDefaultBuilder(args)
                 .UseSystemd() // configures console logging to the systemd format
-                              // configure logging
-                .ConfigureLogging(config => {
+                              // systemd support
+                .ConfigureLogging(config => { // configure logging
                     config.ClearProviders(); // remove default logging
                     config.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
                 })

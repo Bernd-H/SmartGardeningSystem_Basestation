@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Events.Communication;
+using GardeningSystem.Common.Exceptions;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
@@ -84,6 +85,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                         success = processCommand_ConnectToWlan(connectInfo);
                     }
+                    else if (command.SequenceEqual(CommunicationCodes.DisconnectFromWlanCommand)) {
+                        success = processCommand_DisconnectFromWlan();
+                    }
                     else if (command.SequenceEqual(CommunicationCodes.StartManualWateringCommand)) {
                         // receive irrigation timespan
                         var minutes = Convert.ToDouble(await AesTcpListener.ReceiveAsync(networkStream));
@@ -109,6 +113,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 // send return code
                 await AesTcpListener.SendAsync(BitConverter.GetBytes(success), networkStream);
             }
+            catch (ConnectionClosedException) {
+                Logger.Info($"[OnCommandReceivedEvent]Connection disposed/got closed.");
+            }
             catch (Exception ex) {
                 Logger.Error(ex, $"[OnCommandReceivedEvent]An error occured while processing a received command.");
             }
@@ -133,6 +140,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
             Logger.Info($"[processCommand_ConnectToWlan]Connecting to wlan with ssid={connectInfo.Ssid}.");
             string decryptedSecret = Encoding.UTF8.GetString(AesEncrypterDecrypter.DecryptToByteArray(connectInfo.EncryptedPassword));
             return WifiConfigurator.ManagedConnectToWlan(connectInfo.Ssid, decryptedSecret);
+        }
+
+        private bool processCommand_DisconnectFromWlan() {
+            Logger.Info($"[processCommand_DisconnectFromWlan]Disconnecting from wlan.");
+            return WifiConfigurator.DisconnectFromWlan();
         }
 
         private async Task<bool> processCommand_StartManualIrrigation(TimeSpan timeSpan) {

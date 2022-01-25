@@ -72,8 +72,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
             // the SecureMemory instance makes sure that the byte array get's disposed right without leaving a trace of the key in memory
             using (ISecureMemory sm_key = new SecureMemory(keyPlp)) {
                 using (ISecureMemory sm_iv = new SecureMemory(ivPlp)) {
-                    byte[] key = sm_key.Object; // length: Cryptography.AesEncrypterDecrypter.KEY_SIZE
-                    byte[] iv = sm_iv.Object; // length: Cryptography.AesEncrypterDecrypter.IV_SIZE
+                    byte[] key = sm_key.GetObject(); // length: Cryptography.AesEncrypterDecrypter.KEY_SIZE
+                    byte[] iv = sm_iv.GetObject(); // length: Cryptography.AesEncrypterDecrypter.IV_SIZE
 
                     Logger.Info("[SslStreamOpenCallback]Sending aes key to client.");
                     try {

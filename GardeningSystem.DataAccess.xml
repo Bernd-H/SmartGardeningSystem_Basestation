@@ -242,5 +242,13 @@
             <param name="maxLoopCount"></param>
             <returns></returns>
         </member>
+        <member name="M:GardeningSystem.DataAccess.WifiConfigurator.consoleV2(System.String,System.Diagnostics.DataReceivedEventHandler)">
+            <summary>
+            Does not wait for close the started process.
+            </summary>
+            <param name="command"></param>
+            <param name="dataReceivedEventHandler"></param>
+            <returns></returns>
+        </member>
     </members>
 </doc>

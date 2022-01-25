@@ -13,7 +13,9 @@ namespace GardeningSystem.Common.Specifications {
         /// <summary>
         /// Returns a byte array, that will get disposed securely.
         /// </summary>
-        byte[] Object { get; }
+        //byte[] Object { get; }
+
+        byte[] GetObject();
 
         /// <summary>
         /// Pointer that points to the secure object.

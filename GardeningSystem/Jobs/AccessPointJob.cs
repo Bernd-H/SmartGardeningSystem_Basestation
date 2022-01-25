@@ -22,7 +22,8 @@ namespace GardeningSystem.Jobs {
         }
 
         private void Start(object s, EventArgs e) {
-            if (!WifiConfigurator.IsConnectedToWlan()) {
+            //if (!WifiConfigurator.IsConnectedToWlan()) {
+            if (!WifiConfigurator.HasInternet()) {
                 if (!WifiConfigurator.IsAccessPointUp()) {
                     Logger.Trace($"[Start]Starting access point: {WifiConfigurator.CreateAP()}.");
                 }

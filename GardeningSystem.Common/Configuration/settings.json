@@ -57,7 +57,7 @@
   ///////////////////////// Service options
   "wateringJob_enabled": "false",
   "communicationJob_enabled": "true",
-  "accessPointJob_enabled": "false",
+  "accessPointJob_enabled": "true",
 
   ///////////////////////// Test Environment options
   "isTestEnvironment": "true"

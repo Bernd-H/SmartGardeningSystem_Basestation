@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using GardeningSystem.Common.Configuration;
@@ -20,6 +21,15 @@ namespace GardeningSystem.DataAccess {
         static string changeWlanScriptName = "changeWlanScript";
 
         static string disconnectFromWlanScriptName = "disconnectFromWlanScript";
+
+
+        public bool AccessPointStarted { get; private set; } = false;
+
+
+        private Process _accessPointProcess = null;
+
+        private StringBuilder _accessPointProcessOutput = new StringBuilder();
+
 
 
         private ILogger Logger;
@@ -92,7 +102,7 @@ namespace GardeningSystem.DataAccess {
         }
 
         public bool HasInternet() {
-            Logger.Info($"[HasInternet]Checking internet connection.");
+            Logger.Trace($"[HasInternet]Checking internet connection.");
             return pingHost("google.com");
         }
 
@@ -101,14 +111,12 @@ namespace GardeningSystem.DataAccess {
 
             try {
                 var myIp = getLocalIpThroughTerminal();
-                Logger.Info($"myIP: " + myIp?.ToString());
                 if (myIp == null || !myIp.IsPrivateAddress()) {
                     return false;
                 }
 
                 var networkIpAddress = myIp.GetNetworkAddress(IpUtils.GetSubnetMask(myIp));
                 var firstAddressInTheNetwork = networkIpAddress.GetNextIPAddress();
-                Logger.Info($"FirstIP: " + firstAddressInTheNetwork.ToString());
 
                 // check if first address in the network is our ip address
                 // if so -> we are probably the router (access point is up)
@@ -127,26 +135,14 @@ namespace GardeningSystem.DataAccess {
         }
 
         public bool CreateAP() {
-            Logger.Info($"[CreateAP]Creating AP.");
-
             try {
-                // create an access point without internet sharing and client isolation (clients can't talk to each other)
-                string command = $"sudo create_ap --isolate-clients -n {Configuration[ConfigurationVars.WLANINTERFACE_NAME]} " +
-                    $"{Configuration[ConfigurationVars.AP_SSID]} {Configuration[ConfigurationVars.AP_PASSPHRASE]}";
-                bool error = false;
-                executeCommand(command);
+                Logger.Info($"[CreateAP]Starting up the access point...");
 
-                if (error) {
-                    return false;
-                }
-
-                // start service
-                string startServiceCommand = "sudo systemctl start create_ap";
-                executeCommand(startServiceCommand);
-
-                // verfiy that ap is active
-                return loopFunction(IsAccessPointUp, 6000, 10);
-            } catch (Exception ex) {
+                executeCommand("sudo systemctl start create_ap.service");
+                AccessPointStarted = true;
+                return true;
+            }
+            catch (Exception ex) {
                 Logger.Error(ex, "[CreateAP]Exception while creating access point.");
             }
 
@@ -154,15 +150,12 @@ namespace GardeningSystem.DataAccess {
         }
 
         public bool ShutdownAP() {
-            Logger.Info($"[ShutdownAP]Shutting down AP.");
-
             try {
-                // stop service
-                string stopServiceCommand = "sudo systemctl stop create_ap";
-                executeCommand(stopServiceCommand);
+                Logger.Info($"[ShutdownAP]Shutting down the access point.");
 
-                // verfiy that ap is deactivated
-                return loopFunction(() => !IsAccessPointUp(), 2000, 30);
+                executeCommand("sudo systemctl stop create_ap.service");
+                AccessPointStarted = false;
+                return true;
             }
             catch (Exception ex) {
                 Logger.Error(ex, "[ShutdownAP]Exception while closing access point.");
@@ -171,7 +164,77 @@ namespace GardeningSystem.DataAccess {
             return false;
         }
 
-        public bool IsAccessPointUp() {
+        #region Old access point methods
+
+        [Obsolete]
+        public bool CreateAP_old() {
+            if (_accessPointProcess != null && !_accessPointProcess.HasExited) {
+                Logger.Info($"[CreateAP]Process is already running.");
+                return false;
+            }
+
+            try {
+                Logger.Info($"[CreateAP]Starting up the access point...");
+                _accessPointProcessOutput = _accessPointProcessOutput.Clear();
+
+                // create an access point without internet sharing and client isolation (clients can't talk to each other)
+                string command = $"sudo create_ap --isolate-clients -n {Configuration[ConfigurationVars.WLANINTERFACE_NAME]} " +
+                    $"{Configuration[ConfigurationVars.AP_SSID]} {Configuration[ConfigurationVars.AP_PASSPHRASE]}";
+
+                var process = consoleV2(command, new DataReceivedEventHandler((sender, e) => {
+                    Logger.Trace($"[CreateAP-consoleV2]: {e.Data}");
+                    if (!String.IsNullOrEmpty(e.Data)) {
+                        _accessPointProcessOutput.Append("\n" + e.Data);
+                    }
+                }));
+
+                // verfiy that ap is active
+                var accessPointIsUp = loopFunction(IsAccessPointUp, 30000, 3);
+                if (accessPointIsUp) {
+                    _accessPointProcess = process;
+                }
+
+                return accessPointIsUp;
+            } catch (Exception ex) {
+                Logger.Error(ex, "[CreateAP]Exception while creating access point.");
+            }
+
+            return false;
+        }
+
+        [Obsolete]
+        public bool ShutdownAP_old() {
+            try {
+                if (_accessPointProcess != null && !_accessPointProcess.HasExited) {
+                    Logger.Info($"[ShutdownAP]Shutting down the access point.");
+
+                    // get pid
+                    string pid = extractPidFromString(_accessPointProcessOutput.ToString());
+                    Logger.Info($"[ShutdownAP]Pid of the access point process: {pid}");
+
+                    // shutdown ap
+                    executeCommand($"sudo kill -INT {pid}");
+                    _accessPointProcess.Close();
+                    _accessPointProcess = null;
+
+                    // verfiy that ap is deactivated
+                    //return loopFunction(() => !IsAccessPointUp(), 30000, 3);
+                    return true;
+                }
+                else {
+                    Logger.Info($"[ShutdownAP]Access point is inactive.");
+                    return true;
+                }
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, "[ShutdownAP]Exception while closing access point.");
+            }
+
+            return false;
+        }
+
+        [Obsolete]
+        public bool IsAccessPointUp_old() {
             Logger.Trace($"[IsAccessPointUp]Checking mode of interface {Configuration[ConfigurationVars.WLANINTERFACE_NAME]}.");
 
             try {
@@ -183,8 +246,10 @@ namespace GardeningSystem.DataAccess {
                 });
 
                 if (outputText.Contains("Mode:")) {
-                    string textStartingWithMode = outputText.Substring(outputText.IndexOf("Mode:")+5);
-                    if (textStartingWithMode.Substring(0, textStartingWithMode.IndexOf(" ")) == "Master") {
+                    string textStartingWithMode = outputText.Substring(outputText.IndexOf("Mode:") + 5);
+                    string mode = textStartingWithMode.Substring(0, textStartingWithMode.IndexOf(" "));
+                    Logger.Info($"[IsAccessPointUp]Interface {Configuration[ConfigurationVars.WLANINTERFACE_NAME]} mode: {mode}.");
+                    if (mode == "Master") {
                         return true;
                     }
                 }
@@ -194,6 +259,12 @@ namespace GardeningSystem.DataAccess {
             }
 
             return false;
+        }
+
+        #endregion
+
+        public bool IsAccessPointUp() {
+            return AccessPointStarted;
         }
 
         /// <summary>
@@ -226,6 +297,17 @@ namespace GardeningSystem.DataAccess {
             if (!match.Success) return null;
 
             return match.Value;
+        }
+
+        private string extractPidFromString(string s) {
+            var regex = new Regex(@"PID: [0-9]{1,10}", RegexOptions.Compiled);
+
+            var match = regex.Match(s);
+            if (!match.Success) return null;
+
+            var pid = match.Value;
+
+            return pid.Substring(5);
         }
 
         private IPAddress getLocalIpThroughTerminal() {
@@ -273,7 +355,7 @@ namespace GardeningSystem.DataAccess {
             return pingable;
         }
 
-        private static void console(string command, Action<StreamWriter, StreamReader> openedConsoleAction) {
+        private void console(string command, Action<StreamWriter, StreamReader> openedConsoleAction) {
             ProcessStartInfo startInfo = new ProcessStartInfo() { FileName = "/bin/bash", Arguments = $"-c \"{command}\"",
                 UseShellExecute = false,
                 RedirectStandardInput = openedConsoleAction != null ? true : false,
@@ -284,14 +366,46 @@ namespace GardeningSystem.DataAccess {
 
             openedConsoleAction?.Invoke(proc.StandardInput, proc.StandardOutput);
 
+            Logger.Trace($"[console]Waiting till command \"{command}\" has finished.");
+            proc.WaitForExit();
+            Logger.Trace($"[console]Command \"{command}\" has finished.");
             proc.Close();
         }
 
-        public static void executeCommand(string command) {
+
+        /// <summary>
+        /// Does not wait for close the started process.
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="dataReceivedEventHandler"></param>
+        /// <returns></returns>
+        private Process consoleV2(string command, DataReceivedEventHandler dataReceivedEventHandler) {
+            ProcessStartInfo startInfo = new ProcessStartInfo() {
+                FileName = "/bin/bash",
+                Arguments = $"-c \"{command}\"",
+                UseShellExecute = false,
+                RedirectStandardInput = false,
+                RedirectStandardOutput = true
+            };
+            Process proc = new Process() { StartInfo = startInfo, };
+            proc.Start();
+
+            if (dataReceivedEventHandler != null) {
+                proc.OutputDataReceived += dataReceivedEventHandler;
+
+                // Asynchronously read the standard output of the spawned process. 
+                // This raises OutputDataReceived events for each line of output.
+                proc.BeginOutputReadLine();
+            }
+
+            return proc;
+        }
+
+        public void executeCommand(string command) {
             console(command, null);
         }
 
-        private static void setScriptExecutionRights(string scriptPath) {
+        private void setScriptExecutionRights(string scriptPath) {
             try {
                 executeCommand($"chmod +x {scriptPath}");
             }

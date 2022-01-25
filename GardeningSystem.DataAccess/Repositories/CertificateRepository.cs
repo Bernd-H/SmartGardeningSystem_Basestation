@@ -78,7 +78,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             certGen.SetSubject(subjectName);
             certGen.SetSerialNumber(new DerInteger(new Org.BouncyCastle.Math.BigInteger(1, Guid.NewGuid().ToByteArray())));
             certGen.SetStartDate(new Time(DateTime.UtcNow));
-            certGen.SetEndDate(new Time(DateTime.UtcNow.AddYears(int.MaxValue)));
+            certGen.SetEndDate(new Time(DateTime.UtcNow.AddYears(1000)));
             certGen.SetSignature(signatureAlgIdentifier);
             certGen.SetSubjectPublicKeyInfo(SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(new RsaKeyParameters(
                 false,

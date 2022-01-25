@@ -569,7 +569,7 @@
             frees all resources cleanly when the secure memory object gets disposed.
             </summary>
         </member>
-        <member name="P:GardeningSystem.Common.Specifications.ISecureMemory.Object">
+        <member name="M:GardeningSystem.Common.Specifications.ISecureMemory.GetObject">
             <summary>
             Returns a byte array, that will get disposed securely.
             </summary>

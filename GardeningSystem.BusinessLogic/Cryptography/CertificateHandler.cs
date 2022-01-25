@@ -109,7 +109,7 @@ namespace GardeningSystem.BusinessLogic.Cryptography {
                 rsa.Clear(); // TODO: safe?
 
                 using (ISecureMemory sm = new SecureMemory(plp)) {
-                    var data = sm.Object;
+                    var data = sm.GetObject();
                     return RSAalg.Encrypt(data, fOAEP: false);
                 }
             }

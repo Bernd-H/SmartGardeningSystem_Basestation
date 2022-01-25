@@ -78,8 +78,13 @@ namespace GardeningSystem.DataAccess.Communication.Base {
         }
 
         private static async Task sendAsync(byte[] msg, Stream networkStream, CancellationToken cancellationToken = default) {
-            await networkStream.WriteAsync(msg, 0, msg.Length, cancellationToken);
-            await networkStream.FlushAsync();
+            try {
+                await networkStream.WriteAsync(msg, 0, msg.Length, cancellationToken);
+                await networkStream.FlushAsync();
+            }
+            catch (ObjectDisposedException) {
+                throw new ConnectionClosedException();
+            }
         }
 
         #endregion
