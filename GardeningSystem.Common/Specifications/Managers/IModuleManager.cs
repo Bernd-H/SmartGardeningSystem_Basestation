@@ -40,7 +40,16 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// </summary>
         /// <param name="module">Information about the new module.</param>
         /// <returns>A task that represents an asynchronous operation.</returns>
-        Task AddModule(ModuleInfoDto module);
+        //Task AddModule(ModuleInfoDto module);
+
+
+        /// <summary>
+        /// Searches for a new module, exchanges all neccessary information/keys with the module and stores
+        /// it in the ModuleRepository.
+        /// </summary>
+        /// <returns>A task that represents an asynchronous operation. The value of the TResult
+        /// parameter contains a ModuleInfoDto object.</returns>
+        Task<ModuleInfoDto> DiscoverANewModule();
 
         /// <summary>
         /// Gets all stored modules.

@@ -823,12 +823,13 @@
             <returns>A task that represents an asynchronous operation. The value of the TResult
             parameter contains a boolean that is true when the change got verified.</returns>
         </member>
-        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.AddModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.DiscoverANewModule">
             <summary>
-            Adds a new module to the system.
+            Searches for a new module, exchanges all neccessary information/keys with the module and stores
+            it in the ModuleRepository.
             </summary>
-            <param name="module">Information about the new module.</param>
-            <returns>A task that represents an asynchronous operation.</returns>
+            <returns>A task that represents an asynchronous operation. The value of the TResult
+            parameter contains a ModuleInfoDto object.</returns>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.GetAllModules">
             <summary>
@@ -1011,7 +1012,7 @@
         <member name="M:GardeningSystem.Common.Specifications.Repositories.ICertificateRepository.GetCertificate(System.String)">
             <summary>
             Gets a certificate from X509Store or from the internal cache.
-            Reloads a cached certificate after 5 days in cache.
+            Reloads a cached certificate after 5 days.
             </summary>
             <param name="certThumbprint">Thumbprint of the certificate.</param>
             <returns>A X509 certificate that contains also it's private key.</returns>

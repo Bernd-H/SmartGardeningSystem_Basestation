@@ -7,7 +7,8 @@ namespace GardeningSystem.Common.Specifications.DataObjects {
         Relay = 1,
         PeerToPeerInit = 2,
         ExternalServerRelayInit = 3,
-        Error = 4
+        Error = 4,
+        RelayTest = 5
     }
 
     public interface IWanPackage {

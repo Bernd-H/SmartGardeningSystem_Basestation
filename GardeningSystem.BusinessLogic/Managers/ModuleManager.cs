@@ -131,11 +131,29 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return measurements;
         }
 
+        ///// <inheritdoc/>
+        //private async Task AddModule(ModuleInfoDto module) {
+        //    await LOCKER.WaitAsync();
+        //    ModulesRepository.AddModule(module.ToDo(ModulesRepository));
+        //    LOCKER.Release();
+        //}
+
         /// <inheritdoc/>
-        public async Task AddModule(ModuleInfoDto module) {
-            await LOCKER.WaitAsync();
-            ModulesRepository.AddModule(module.ToDo(ModulesRepository));
-            LOCKER.Release();
+        public async Task<ModuleInfoDto> DiscoverANewModule() {
+            try {
+                await LOCKER.WaitAsync();
+
+                var module = await RfCommunicator.DiscoverNewModule();
+                if (module != null) {
+                    // save new module
+                    ModulesRepository.AddModule(module.ToDo(ModulesRepository));
+                }
+
+                return module;
+            }
+            finally {
+                LOCKER.Release();
+            }
         }
 
         /// <inheritdoc/>

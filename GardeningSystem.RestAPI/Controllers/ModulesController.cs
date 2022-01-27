@@ -65,24 +65,24 @@ namespace GardeningSystem.RestAPI.Controllers {
             return module;
         }
 
-        // Used to add a new module
-        // POST api/Modules
-        [HttpPost]
-        public IActionResult Post([FromBody] ModuleInfoDto value) {
-            var userId = ControllerHelperClass.GetUserId(HttpContext);
-            Logger.Info($"[Post]User {userId} send new module info to add.");
+        //// Used to add a new module
+        //// POST api/Modules
+        //[HttpPost]
+        //public IActionResult Post([FromBody] ModuleInfoDto value) {
+        //    var userId = ControllerHelperClass.GetUserId(HttpContext);
+        //    Logger.Info($"[Post]User {userId} send new module info to add.");
 
-            try {
-                ModuleManager.AddModule(value);
-            }
-            catch (Exception ex) {
-                Logger.Error(ex, "[Post]Could not add new module info.");
+        //    try {
+        //        ModuleManager.AddModule(value);
+        //    }
+        //    catch (Exception ex) {
+        //        Logger.Error(ex, "[Post]Could not add new module info.");
 
-                return Problem(ex.Message);
-            }
+        //        return Problem(ex.Message);
+        //    }
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
 
         // Used to update a already existing module
         // PUT api/Modules/{idInHex}

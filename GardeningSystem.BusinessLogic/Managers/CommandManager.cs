@@ -35,10 +35,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ISettingsManager SettingsManager;
 
+        private IModuleManager ModuleManager;
+
         private ILogger Logger;
 
         public CommandManager(ILoggerService loggerService, IAesTcpListener aesTcpListener, IWifiConfigurator wifiConfigurator, IAesEncrypterDecrypter aesEncrypterDecrypter,
-            IConfiguration configuration, IWateringManager wateringManager, ISettingsManager settingsManager) {
+            IConfiguration configuration, IWateringManager wateringManager, ISettingsManager settingsManager, IModuleManager moduleManager) {
             Logger = loggerService.GetLogger<CommandManager>();
             AesTcpListener = aesTcpListener;
             WifiConfigurator = wifiConfigurator;
@@ -46,6 +48,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             Configuration = configuration;
             WateringManager = wateringManager;
             SettingsManager = settingsManager;
+            ModuleManager = moduleManager;
         }
 
         /// <inheritdoc/>
@@ -104,6 +107,18 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     else if (command.SequenceEqual(CommunicationCodes.StopAutomaticIrrigationCommand)) {
                         success = await processCommand_StopAutomaticIrrigation();
                     }
+                    else if (command.SequenceEqual(CommunicationCodes.DiscoverNewModuleCommand)) {
+                        var module = await processCommand_DiscoverNewModule();
+                        byte[] dataToSend = new byte[0]; 
+                        
+                        if (module != null) {
+                            dataToSend = CommunicationUtils.SerializeObject(module);
+                            success = true;
+                        }
+
+                        // send moduleInfo
+                        await AesTcpListener.SendAsync(dataToSend, networkStream);
+                    }
                     // process other commands here
                 }
                 catch (Exception ex) {
@@ -151,6 +166,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
             Logger.Info($"[processCommand_DisconnectFromWlan]Disconnecting from wlan.");
             return WifiConfigurator.DisconnectFromWlan();
         }
+
+        #region irrigation commands
 
         private async Task<bool> processCommand_StartManualIrrigation(TimeSpan timeSpan) {
             Logger.Info($"[processCommand_StartManualIrrigation]Starting manual irrigation for {timeSpan.TotalMinutes} minutes.");
@@ -233,6 +250,13 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 Logger.Info($"[processCommand_StopAutomaticIrrigation]Skipping automatic-irrigation-stop-command.");
                 return false;
             }
+        }
+
+        #endregion
+
+        private async Task<ModuleInfoDto> processCommand_DiscoverNewModule() {
+            Logger.Info($"[processCommand_DiscoverNewModule]Executing discover-new-module-command.");
+            return await ModuleManager.DiscoverANewModule();
         }
     }
 }

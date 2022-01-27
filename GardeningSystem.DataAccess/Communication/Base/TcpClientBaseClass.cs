@@ -133,6 +133,7 @@ namespace GardeningSystem.DataAccess.Communication.Base {
                 _client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, keepAliveInterval);
                 _client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 5);
                 _client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 2);
+                //_client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.KeepAlive, true);
                 _client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
             }
         }

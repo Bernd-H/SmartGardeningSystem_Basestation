@@ -9,7 +9,7 @@ namespace GardeningSystem.Common.Specifications.Repositories {
 
         /// <summary>
         /// Gets a certificate from X509Store or from the internal cache.
-        /// Reloads a cached certificate after 5 days in cache.
+        /// Reloads a cached certificate after 5 days.
         /// </summary>
         /// <param name="certThumbprint">Thumbprint of the certificate.</param>
         /// <returns>A X509 certificate that contains also it's private key.</returns>

@@ -133,7 +133,7 @@
         <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.GetAllMeasurements">
             <inheritdoc/>
         </member>
-        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.AddModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.DiscoverANewModule">
             <inheritdoc/>
         </member>
         <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.GetAllModules">

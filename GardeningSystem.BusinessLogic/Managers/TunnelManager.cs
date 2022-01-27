@@ -170,6 +170,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         ServiceDetails = packetO.ServiceDetails
                     });
                 }
+                else if (packetO.PackageType == PackageType.RelayTest) {
+                    Logger.Info($"[forwardPackagesToLocalServices]Relay test package received.");
+
+                    // send the same package back
+                    answer = CommunicationUtils.SerializeObject<WanPackage>(new WanPackage() {
+                        PackageType = PackageType.RelayTest,
+                        Package = packetO.Package,
+                        ServiceDetails = packetO?.ServiceDetails
+                    });
+                }
             }
             catch (Exception ex) {
                 Logger.Error(ex, $"[forwardPackagesToLocalServices]An error occured.");
