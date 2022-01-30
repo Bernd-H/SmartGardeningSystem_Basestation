@@ -139,7 +139,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 // conneciton got closed
             }
         }
-
+        
         private async Task<byte[]> forwardPackagesToLocalServices(byte[] packet) {
             Logger.Trace($"[forwardPackagesToLocalServices]Handling received package with length={packet.Length}.");
             byte[] answer = null;

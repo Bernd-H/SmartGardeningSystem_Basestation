@@ -21,8 +21,6 @@ namespace GardeningSystem.Common.Models.Entities {
             SendTimeout = 5000;
             ReceiveTimeout = 5000;
             KeepAliveInterval = 0;
-            SendTimeout = System.Threading.Timeout.Infinite;
-            ReceiveTimeout = System.Threading.Timeout.Infinite;
         }
     }
 }

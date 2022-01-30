@@ -8,6 +8,7 @@ using Autofac.Extras.Moq;
 using GardeningSystem;
 using GardeningSystem.BusinessLogic.Cryptography;
 using GardeningSystem.BusinessLogic.Managers;
+using GardeningSystem.Common.Specifications.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NLog;
@@ -28,10 +29,11 @@ namespace Test.BusinessLogic {
                     logcount++;
                 });
                 var random = new Random();
-                byte[] data = new byte[20];
+                byte[] data = new byte[136588];
                 random.NextBytes(data);
 
                 var m = mock.Create<AesEncrypterDecrypter>();
+                mock.Create<ICertificateHandler>().Setup(); // setup cert handler
                 m.GetServerAesKey(); // create new aes key
 
                 // Act

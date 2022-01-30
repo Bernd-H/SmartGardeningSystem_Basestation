@@ -16,8 +16,10 @@ namespace GardeningSystem.Common.Exceptions {
             : base(message, inner) {
         }
 
-        public ConnectionClosedException(Guid networkStreamId) {
-            NetworkStreamId = networkStreamId;
+        public ConnectionClosedException(Guid? networkStreamId) {
+            if (networkStreamId.HasValue) {
+                NetworkStreamId = networkStreamId.Value;
+            }
         }
     }
 }
