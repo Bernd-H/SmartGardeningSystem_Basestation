@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Models.Entities;
 
 namespace GardeningSystem.Common.Specifications.Managers {
 
@@ -18,30 +19,32 @@ namespace GardeningSystem.Common.Specifications.Managers {
         Task<IEnumerable<ModuleDataDto>> GetAllMeasurements();
 
         /// <summary>
-        /// Closes or opens all actors which are associated with a specific <paramref name="sensor"/>.
+        /// Closes a specific valve.
         /// </summary>
-        /// <param name="sensor">Id of the sensor.</param>
-        /// <param name="state">0 = valve closed, 1 = valve open</param>
+        /// <param name="valveId">Id of the module.</param>
         /// <returns>A task that represents an asynchronous operation. The value of the TResult
-        /// parameter contains a boolean that is true, if all state changes got verified.</returns>
-        Task<bool> ChangeCorrespondingActorState(byte sensor, int state);
+        /// parameter contains a boolean that is true when the valve got closed successfully.</returns>
+        Task<bool> CloseValve(Guid valveId);
 
         /// <summary>
-        /// Closes or opens a specific valve.
+        /// Opens a valve for a specific time span (<paramref name="valveOpenTime"/>).
         /// </summary>
-        /// <param name="valveId">Id of the valve module.</param>
-        /// <param name="state">0 = valve closed, 1 = valve open</param>
+        /// <param name="valveId">Internal storage Id of the valve/module.</param>
+        /// <param name="valveOpenTime">Timespan the valve should stay open.</param>
+        /// <remarks>The valve closes automatically after the given time span. Event if the module can't be reached.</remarks>
         /// <returns>A task that represents an asynchronous operation. The value of the TResult
-        /// parameter contains a boolean that is true when the change got verified.</returns>
-        Task<bool> ChangeValveState(byte valveId, int state);
+        /// parameter contains a boolean that is true when the valve opend successfully.</returns>
+        Task<bool> OpenValve(Guid valveId, TimeSpan valveOpenTime);
 
         /// <summary>
-        /// Adds a new module to the system.
+        /// Opens a valve for a specific time span (<paramref name="valveOpenTime"/>).
         /// </summary>
-        /// <param name="module">Information about the new module.</param>
-        /// <returns>A task that represents an asynchronous operation.</returns>
-        //Task AddModule(ModuleInfoDto module);
-
+        /// <param name="externalValveId">External Id of the valve/module (= ModuleInfo.ModuleId).</param>
+        /// <param name="valveOpenTime">Timespan the valve should stay open.</param>
+        /// <remarks>The valve closes automatically after the given time span. Event if the module can't be reached.</remarks>
+        /// <returns>A task that represents an asynchronous operation. The value of the TResult
+        /// parameter contains a boolean that is true when the valve opend successfully.</returns>
+        Task<bool> OpenValve(byte externalValveId, TimeSpan valveOpenTime);
 
         /// <summary>
         /// Searches for a new module, exchanges all neccessary information/keys with the module and stores
@@ -56,7 +59,7 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// </summary>
         /// <returns>A task that represents an asynchronous operation. The value of the TResult
         /// parameter contains a list of all modules.</returns>
-        Task<IEnumerable<ModuleInfoDto>> GetAllModules();
+        Task<IEnumerable<ModuleInfo>> GetAllModules();
 
         /// <summary>
         /// Gets more information about a specific module.

@@ -308,7 +308,7 @@
         <member name="T:GardeningSystem.DataAccess.Repositories.ModulesRepository">
             <inheritdoc/>
         </member>
-        <member name="M:GardeningSystem.DataAccess.Repositories.ModulesRepository.AddModule(GardeningSystem.Common.Models.Entities.ModuleInfo)">
+        <member name="M:GardeningSystem.DataAccess.Repositories.ModulesRepository.AddModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
             <inheritdoc/>
         </member>
         <member name="M:GardeningSystem.DataAccess.Repositories.ModulesRepository.GetAllRegisteredModules">

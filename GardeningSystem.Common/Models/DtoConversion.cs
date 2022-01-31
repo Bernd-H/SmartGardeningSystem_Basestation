@@ -33,7 +33,7 @@ namespace GardeningSystem.Common.Models {
 
         public static ModuleInfo ToDo(this ModuleInfoDto moduleDto, IModulesRepository modulesRepository) {
             return new ModuleInfo() {
-                Id = modulesRepository.GetIdFromModuleId(moduleDto.ModuleId),
+                Id = modulesRepository?.GetIdFromModuleId(moduleDto.ModuleId) ?? Guid.Empty,
                 ModuleId = moduleDto.ModuleId,
                 AssociatedModules = moduleDto.AssociatedModules,
                 ModuleType = moduleDto.ModuleType,

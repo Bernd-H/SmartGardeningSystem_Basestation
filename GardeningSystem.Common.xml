@@ -805,23 +805,33 @@
             <returns>A task that represents an asynchronous operation. The value of the TResult
             parameter contains a list of all collected measurements.</returns>
         </member>
-        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.ChangeCorrespondingActorState(System.Byte,System.Int32)">
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.CloseValve(System.Guid)">
             <summary>
-            Closes or opens all actors which are associated with a specific <paramref name="sensor"/>.
+            Closes a specific valve.
             </summary>
-            <param name="sensor">Id of the sensor.</param>
-            <param name="state">0 = valve closed, 1 = valve open</param>
+            <param name="valveId">Id of the module.</param>
             <returns>A task that represents an asynchronous operation. The value of the TResult
-            parameter contains a boolean that is true, if all state changes got verified.</returns>
+            parameter contains a boolean that is true when the valve got closed successfully.</returns>
         </member>
-        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.ChangeValveState(System.Byte,System.Int32)">
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.OpenValve(System.Guid,System.TimeSpan)">
             <summary>
-            Closes or opens a specific valve.
+            Opens a valve for a specific time span (<paramref name="valveOpenTime"/>).
             </summary>
-            <param name="valveId">Id of the valve module.</param>
-            <param name="state">0 = valve closed, 1 = valve open</param>
+            <param name="valveId">Internal storage Id of the valve/module.</param>
+            <param name="valveOpenTime">Timespan the valve should stay open.</param>
+            <remarks>The valve closes automatically after the given time span. Event if the module can't be reached.</remarks>
             <returns>A task that represents an asynchronous operation. The value of the TResult
-            parameter contains a boolean that is true when the change got verified.</returns>
+            parameter contains a boolean that is true when the valve opend successfully.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.OpenValve(System.Byte,System.TimeSpan)">
+            <summary>
+            Opens a valve for a specific time span (<paramref name="valveOpenTime"/>).
+            </summary>
+            <param name="externalValveId">External Id of the valve/module (= ModuleInfo.ModuleId).</param>
+            <param name="valveOpenTime">Timespan the valve should stay open.</param>
+            <remarks>The valve closes automatically after the given time span. Event if the module can't be reached.</remarks>
+            <returns>A task that represents an asynchronous operation. The value of the TResult
+            parameter contains a boolean that is true when the valve opend successfully.</returns>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.DiscoverANewModule">
             <summary>
@@ -1046,11 +1056,12 @@
             <param name="id">Id of the module.</param>
             <returns>Null when there is no stored module with the provided <paramref name="id"/>.</returns>
         </member>
-        <member name="M:GardeningSystem.Common.Specifications.Repositories.IModulesRepository.AddModule(GardeningSystem.Common.Models.Entities.ModuleInfo)">
+        <member name="M:GardeningSystem.Common.Specifications.Repositories.IModulesRepository.AddModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
             <summary>
             Saves a new module.
             </summary>
-            <param name="module">Module to save.</param>
+            <param name="module">ModuleInfo without a internal storage id (ModuleInfo.Id).</param>
+            <returns>ModuleInfo object containing the module information and the internal storage id (ModuleInfo.Id).</returns>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Repositories.IModulesRepository.RemoveModule(System.Guid)">
             <summary>

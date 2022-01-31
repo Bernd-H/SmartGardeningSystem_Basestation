@@ -124,10 +124,13 @@
         <member name="T:GardeningSystem.BusinessLogic.Managers.ModuleManager">
             <inheritdoc/>
         </member>
-        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.ChangeCorrespondingActorState(System.Byte,System.Int32)">
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.CloseValve(System.Guid)">
             <inheritdoc/>
         </member>
-        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.ChangeValveState(System.Byte,System.Int32)">
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.OpenValve(System.Guid,System.TimeSpan)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.OpenValve(System.Byte,System.TimeSpan)">
             <inheritdoc/>
         </member>
         <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.GetAllMeasurements">

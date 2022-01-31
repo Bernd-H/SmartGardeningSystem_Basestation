@@ -47,37 +47,21 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ChangeCorrespondingActorState(byte sensor, int state) {
-            await LOCKER.WaitAsync();
-
-            Logger.Info($"[ChangeCorrespondingActorState]Changing state of sensor {sensor} to {state}.");
-
-            int attempts = 10;
-            bool success = false;
-            do {
-                //var rfMessageDto = await RfCommunicator.SendMessage_ReceiveAnswer(basestationGuid, sensor, DataAccess.Communication.RfCommunicator.BuildActorMessage(basestationGuid, sensor, state));
-                //RfMessageDto rfMessageDto = null;
-                throw new NotImplementedException();
-
-                //if (rfMessageDto.Id == sensor && (rfMessageDto.Bytes.SequenceEqual(new byte[1] { RfCommunication_Codes.ACK }))) {
-                //    success = true;
-                //}
-                //else {
-                //    success = false;
-                //    attempts--;
-                //    if (attempts > 0)
-                //        Logger.Warn("[ChangeCorrespondingActorState]Valve state did not get verified. Retrying - " + (10 - attempts));
-                //}
-            } while (!success && attempts > 0);
-
-            LOCKER.Release();
-
-            return success;
+        public async Task<bool> CloseValve(Guid valveId) {
+            var moduleInfo = await GetModuleById(valveId);
+            return await RfCommunicator.CloseValve(moduleInfo);
         }
 
         /// <inheritdoc/>
-        public Task<bool> ChangeValveState(byte valveId, int state) {
-            throw new NotImplementedException();
+        public async Task<bool> OpenValve(Guid valveId, TimeSpan valveOpenTime) {
+            var moduleInfo = await GetModuleById(valveId);
+            return await RfCommunicator.OpenValve(moduleInfo, valveOpenTime);
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> OpenValve(byte externalValveId, TimeSpan valveOpenTime) {
+            var moduleInfo = getModule(externalValveId);
+            return await RfCommunicator.OpenValve(moduleInfo.ToDto(), valveOpenTime);
         }
 
         /// <inheritdoc/>
@@ -92,31 +76,19 @@ namespace GardeningSystem.BusinessLogic.Managers {
             var modules = getAllModules();
             foreach (var module in modules) {
                 if (module.ModuleType == Common.Models.Enums.ModuleType.Sensor) {
-                    RfMessageDto answer = null;
-                    int maxAttempts = 10;
-                    int attempts = maxAttempts;
-                    
-                    // communicate with current module, repeat if something went wrong 
-                    do {
-                        Logger.Trace($"[GetAllMeasurements]Getting measurements from sensor {module.Id}. Attempt: {Math.Abs(maxAttempts - attempts)}.");
-                        //byte[] msg = DataAccess.Communication.RfCommunicator.BuildSensorDataMessage(basestationGuid, module.Id);
-                        //answer = await RfCommunicator.SendMessage_ReceiveAnswer(basestationGuid, module.Id, msg);
-                        throw new NotImplementedException();
-                        attempts--;
-                    } while (answer.Id == Guid.Empty && attempts > 0);
+                    (double temp, double soilMoisture) = await RfCommunicator.GetTempAndSoilMoisture(module.ToDto());
 
-                    if (answer.Id == Guid.Empty) {
-                        // still no answer
-
+                    if (double.IsNaN(temp) || double.IsNaN(soilMoisture)) {
                         Logger.Error($"[GetAllMeasurements]Could not get measurement of module with id {module.Id.ToString()}.");
                         measurements.Add(new ModuleDataDto() {
                             Id = module.Id,
                             Data = double.NaN
                         });
-                    } else {
+                    }
+                    else {
                         measurements.Add(new ModuleDataDto() {
-                            Id = answer.Id,
-                            Data = BitConverter.ToDouble(answer.Bytes),
+                            Id = module.Id,
+                            Data = soilMoisture,
                             LastWaterings = module.LastWaterings
                         });
                     }
@@ -131,13 +103,6 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return measurements;
         }
 
-        ///// <inheritdoc/>
-        //private async Task AddModule(ModuleInfoDto module) {
-        //    await LOCKER.WaitAsync();
-        //    ModulesRepository.AddModule(module.ToDo(ModulesRepository));
-        //    LOCKER.Release();
-        //}
-
         /// <inheritdoc/>
         public async Task<ModuleInfoDto> DiscoverANewModule() {
             try {
@@ -146,7 +111,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 var module = await RfCommunicator.DiscoverNewModule();
                 if (module != null) {
                     // save new module
-                    ModulesRepository.AddModule(module.ToDo(ModulesRepository));
+                    ModulesRepository.AddModule(module);
                 }
 
                 return module;
@@ -157,18 +122,18 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<ModuleInfoDto>> GetAllModules() {
-            await LOCKER.WaitAsync();
-            var result = getAllModules().ToDtos();
-            LOCKER.Release();
+        public async Task<IEnumerable<ModuleInfo>> GetAllModules() {
+            //await LOCKER.WaitAsync();
+            var result = getAllModules();
+            //LOCKER.Release();
             return result;
         }
 
         /// <inheritdoc/>
         public async Task<ModuleInfoDto> GetModuleById(Guid id) {
-            await LOCKER.WaitAsync();
+            //await LOCKER.WaitAsync();
             var result = ModulesRepository.GetModuleById(id).ToDto();
-            LOCKER.Release();
+            //LOCKER.Release();
             return result;
         }
 
@@ -208,6 +173,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private IEnumerable<ModuleInfo> getAllModules() {
             return ModulesRepository.GetAllRegisteredModules();
+        }
+
+        private ModuleInfo getModule(byte Id) {
+            var internalStorageId = ModulesRepository.GetIdFromModuleId(Id);
+            if (internalStorageId != Guid.Empty) {
+                return ModulesRepository.GetModuleById(internalStorageId);
+            }
+            else {
+                return null;
+            }
         }
     }
 }

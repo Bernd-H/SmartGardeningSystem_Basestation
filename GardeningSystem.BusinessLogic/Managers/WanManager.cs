@@ -71,9 +71,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
         #region External server connection methods
 
         private void OnExternalServerConnectionCollapsedEvent(object sender, EventArgs e) {
-            // reconnect to the server
-            // connection collapse could be due to a internet outage or a public ip change
-            _ = connectToExternalServerLoop(_cancellationTokenSource.Token);
+            if (!_cancellationTokenSource.IsCancellationRequested) {
+                // reconnect to the server
+                // connection collapse could be due to a internet outage or a public ip change
+                _ = connectToExternalServerLoop(_cancellationTokenSource.Token);
+            }
         }
 
         private async Task connectToExternalServerLoop(CancellationToken cancellationToken) {

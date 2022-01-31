@@ -53,6 +53,97 @@
             when the computer is not connected to an wifi.
             </summary>
         </member>
+        <member name="T:GardeningSystem.Jobs.Base.IntervalHostedService">
+            <summary>
+            Service base class that starts a service in specific intervals.
+            </summary>
+        </member>
+        <member name="F:GardeningSystem.Jobs.Base.IntervalHostedService._waitTillDoWorkHasFinished">
+            <summary>
+            true, if the timer should wait till all work in the doWorkHandler has been done to start the new period
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.IntervalHostedService.SetStartEventHandler(System.EventHandler)">
+            <summary>
+            Sets the Start event handler.
+            </summary>
+            <param name="doWorkHandler">Eventhandler that gets invoked when the service should get started.</param>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.IntervalHostedService.SetStopEventHandler(System.EventHandler)">
+            <summary>
+            Sets the Stop event handler.
+            </summary>
+            <param name="stopHandler">Eventhandler that gets invoked when the service should get stopped.</param>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.IntervalHostedService.StartAsync(System.Threading.CancellationToken)">
+            <summary>
+            Activates the service and raises the doWork event periodically.
+            The interval got specified in the constructor.
+            </summary>
+            <param name="stoppingToken">Token to stop the start process. WARNING: Not implemented!</param>
+            <returns>A Task that reprecents an asynchronous operation.</returns>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.IntervalHostedService.StopAsync(System.Threading.CancellationToken)">
+            <summary>
+            Deactivates the service.
+            </summary>
+            <param name="stoppingToken">Token to stop the stop process. WARNING: Not implemented!</param>
+            <returns>A Task that reprecents an asynchronous operation.</returns>
+        </member>
+        <member name="T:GardeningSystem.Jobs.Base.TimedHostedService">
+            <summary>
+            Service base class that starts a service to specific times.
+            </summary>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.TimedHostedService.#ctor(GardeningSystem.Common.Specifications.ILoggerService,System.String,System.Collections.Generic.IEnumerable{System.DateTime},System.Boolean)">
+            <summary>
+            Sets important variables for the behavour of this class.
+            </summary>
+            <param name="logger">Class that provices a NLog logger.</param>
+            <param name="serviceName">Name of the service that inherited this class.</param>
+            <param name="startTimes">
+            Times where the inherited service should get started. The date will not be taken into account (only the time in the DateTime object).
+            </param>
+            <param name="startServiceAlsoOnStart">
+            True when the inherited service should also get started when StartAsync gets called (to enable the inherited service).
+            If this is true, then the second time the inherited service will get started is when one of the <paramref name="startTimes"/> is reached.
+            </param>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.TimedHostedService.SetStartEventHandler(GardeningSystem.Common.Events.AsyncEventHandler)">
+            <summary>
+            Sets the Start event handler.
+            </summary>
+            <param name="doWorkHandler">Eventhandler that gets invoked when the service should get started.</param>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.TimedHostedService.SetStopEventHandler(GardeningSystem.Common.Events.AsyncEventHandler)">
+            <summary>
+            Sets the Stop event handler.
+            </summary>
+            <param name="stopHandler">Eventhandler that gets invoked when the service should get stopped.</param>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.TimedHostedService.StartAsync(System.Threading.CancellationToken)">
+            <summary>
+            Activates the service and raises the doWork event on the day times specified in the constructor.
+            </summary>
+            <param name="stoppingToken">Token to stop the start process. WARNING: Not implemented!</param>
+            <returns>A Task that reprecents an asynchronous operation.</returns>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.TimedHostedService.StopAsync(System.Threading.CancellationToken)">
+            <summary>
+            Deactivates the service.
+            </summary>
+            <param name="stoppingToken">Token to stop the stop process. WARNING: Not implemented!</param>
+            <returns>A Task that reprecents an asynchronous operation.</returns>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.TimedHostedService.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.Jobs.Base.TimedHostedService.getTimeSpanToWait">
+            <summary>
+            Gets a time span to wait until the next time in the list _startTimes is reached.
+            </summary>
+            <returns>The time span to wait.</returns>
+        </member>
         <member name="T:GardeningSystem.Jobs.CommunicationJob">
             <summary>
             Service that starts and stops all communication managers.
@@ -66,36 +157,13 @@
         </member>
         <member name="T:GardeningSystem.Jobs.WateringJob">
             <summary>
-            Service that collects the soil moisture measurements frequently and instructs the irrigation with neccessary.
+            Service that collects the soil moisture measurements frequently and instructs the irrigation if neccessary.
             </summary>
         </member>
-        <member name="T:GardeningSystem.TimedHostedService">
+        <member name="F:GardeningSystem.Jobs.WateringJob.START_TIMES">
             <summary>
-            Service base class that starts a service in specific intervals.
+            Startimes for the WateringJob.
             </summary>
-        </member>
-        <member name="F:GardeningSystem.TimedHostedService._waitTillDoWorkHasFinished">
-            <summary>
-            true, if the timer should wait till all work in the doWorkHandler has been done to start the new period
-            </summary>
-        </member>
-        <member name="M:GardeningSystem.TimedHostedService.SetStartEventHandler(System.EventHandler)">
-            <summary>
-            Sets the Start event handler.
-            </summary>
-            <param name="doWorkHandler">Eventhandler that gets invoked when the service should get started.</param>
-        </member>
-        <member name="M:GardeningSystem.TimedHostedService.SetStopEventHandler(System.EventHandler)">
-            <summary>
-            Sets the Stop event handler.
-            </summary>
-            <param name="stopHandler">Eventhandler that gets invoked when the service should get stopped.</param>
-        </member>
-        <member name="M:GardeningSystem.TimedHostedService.StartAsync(System.Threading.CancellationToken)">
-            <inheritdoc/>
-        </member>
-        <member name="M:GardeningSystem.TimedHostedService.StopAsync(System.Threading.CancellationToken)">
-            <inheritdoc/>
         </member>
     </members>
 </doc>

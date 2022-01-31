@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
 
 namespace GardeningSystem.Common.Specifications.Repositories {
@@ -25,8 +26,9 @@ namespace GardeningSystem.Common.Specifications.Repositories {
         /// <summary>
         /// Saves a new module.
         /// </summary>
-        /// <param name="module">Module to save.</param>
-        void AddModule(ModuleInfo module);
+        /// <param name="module">ModuleInfo without a internal storage id (ModuleInfo.Id).</param>
+        /// <returns>ModuleInfo object containing the module information and the internal storage id (ModuleInfo.Id).</returns>
+        ModuleInfo AddModule(ModuleInfoDto module);
 
         /// <summary>
         /// Deletes an existing module.

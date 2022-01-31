@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Managers;
@@ -32,7 +33,7 @@ namespace GardeningSystem.RestAPI.Controllers {
         public IEnumerable<ModuleInfoDto> Get() {
             Logger.Info($"[Get]User {ControllerHelperClass.GetUserId(HttpContext)} requested all registered modules.");
             try {
-                return ModuleManager.GetAllModules().Result;
+                return ModuleManager.GetAllModules().Result.ToDtos();
             }
             catch (Exception ex) {
                 Logger.Error(ex, "[Get]Could not load all registered modules.");

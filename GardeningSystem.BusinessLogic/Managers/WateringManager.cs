@@ -67,7 +67,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         });
                     }
                     else {
-                        var algoResult = wateringAlgo(measurement.Data, measurement.LastWaterings?.Last() ?? null, weatherData);
+                        var algoResult = irrigationAlgo(measurement.Data, measurement.LastWaterings?.Last() ?? null, weatherData);
                         wateringInfo.Add(new WateringNeccessaryDto() {
                             Id = measurement.Id,
                             IsNeccessary = (algoResult != TimeSpan.Zero),
@@ -85,67 +85,50 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <inheritdoc/>
-        public Task StartWatering(WateringNeccessaryDto wateringInfo) {
+        public async Task StartWatering(WateringNeccessaryDto wateringInfo) {
             Logger.Info($"[StartWatering]Starting watering for sensor with id={wateringInfo.Id.ToString()} for {wateringInfo.ValveOpenTime.TotalHours} hours.");
 
-            return Task.Run(async () => {
-                try {
-                    await locker.WaitAsync();
+            try {
+                await locker.WaitAsync();
 
-                    // open associated valves
-                    var module = await ModuleManager.GetModuleById(wateringInfo.Id);
-                    foreach (var valve in module.AssociatedModules) {
-                        bool changeGotVerified = await ModuleManager.ChangeCorrespondingActorState(valve, 1); // open valve
+                // open associated valves
+                var module = await ModuleManager.GetModuleById(wateringInfo.Id);
+                foreach (var valve in module.AssociatedModules) {
+                    bool changeGotVerified = await ModuleManager.OpenValve(valve, wateringInfo.ValveOpenTime);
 
-                        if (!changeGotVerified) {
-                            Logger.Error($"[StartWatering]Failed to open valve with id={valve}.");
+                    if (!changeGotVerified) {
+                        Logger.Error($"[StartWatering]Failed to open valve with id={valve}.");
 
-                            // inform user
-                            throw new NotImplementedException();
-                        }
-                    }
-
-                    await Task.Delay(wateringInfo.ValveOpenTime);
-
-                    // close valves
-                    foreach (var valve in module.AssociatedModules) {
-                        Logger.Info($"[StartWatering]Trying to close valve with id {valve.ToString()}.");
-
-                        // retry 5 times if change did not get verified
-                        bool changeGotVerified = false;
-                        int attempts = 5;
-                        do {
-                            changeGotVerified = await ModuleManager.ChangeCorrespondingActorState(valve, 0);
-                            attempts--;
-                        } while (!changeGotVerified && attempts > 0);
-
-                        if (!changeGotVerified) {
-                            Logger.Error($"[StartWatering]Failed to close valve with id={valve}.");
-
-                            // inform user
-                            throw new NotImplementedException();
-                        }
+                        // inform user
+                        //throw new NotImplementedException();
                     }
                 }
-                finally {
-                    locker.Release();
-                }
-            });
+            }
+            finally {
+                locker.Release();
+            }
         }
 
         /// <inheritdoc/>
         public async Task<bool> ManualOverwrite(bool activateWatering, TimeSpan? irrigationTimeSpan = null) {
-            // TODO: send irrigationTimeSpan to the valves
             try {
                 await locker.WaitAsync();
                 bool success = false;
 
                 var modules = await ModuleManager.GetAllModules();
-                int valveState = activateWatering ? 1 : 0; // 0 = close valve, 1 = open valve
                 foreach (var module in modules) {
-                    if (module.ModuleType == Common.Models.Enums.ModuleType.Valve) {
-                        var successfullyChangedValveState = await ModuleManager.ChangeValveState(module.ModuleId, valveState);
-                        Logger.Info($"[ManualOverwrite]Opened/Closed valve with id {Utils.ConvertByteToHex(module.ModuleId)} successfully: {successfullyChangedValveState}");
+                    if (module.ModuleType == Common.Models.Enums.ModuleType.Valve && module.EnabledForManualIrrigation) {
+                        bool successfullyChangedValveState = false;
+
+                        if (activateWatering) {
+                            successfullyChangedValveState = await ModuleManager.OpenValve(module.Id, irrigationTimeSpan.Value);
+                            Logger.Info($"[ManualOverwrite]Opened valve with id {Utils.ConvertByteToHex(module.ModuleId)} for {irrigationTimeSpan.Value.TotalHours}h: {successfullyChangedValveState}");
+                        }
+                        else {
+                            successfullyChangedValveState = await ModuleManager.CloseValve(module.Id);
+                            Logger.Info($"[ManualOverwrite]Closed valve with id {Utils.ConvertByteToHex(module.ModuleId)} successfully: {successfullyChangedValveState}");
+                        }
+
                         success = success && successfullyChangedValveState;
                     }
                 }
@@ -157,13 +140,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
-        private TimeSpan wateringAlgo(double soilHumidity, DateTime? lastWateringTime, WeatherForecast weatherData) {
+        private TimeSpan irrigationAlgo(double soilHumidity, DateTime? lastWateringTime, WeatherForecast weatherData) {
             Logger.Trace($"[wateringAlgo]Checking if watering is neccessary.");
-            //if (soilHumidity < 0.5) {
-            //    if (lastWateringTime == null || (DateTime.Now - lastWateringTime.Value).TotalHours > 11) {
-            //        return TimeSpan.FromHours(4);
-            //    }
-            //}
 
             float c1 = 0.9f, c2 = -0.5f, c3 = 0.5f;
 

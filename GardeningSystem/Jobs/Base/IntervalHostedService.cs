@@ -5,12 +5,12 @@ using GardeningSystem.Common.Specifications;
 using Microsoft.Extensions.Hosting;
 using NLog;
 
-namespace GardeningSystem {
+namespace GardeningSystem.Jobs.Base {
 
     /// <summary>
     /// Service base class that starts a service in specific intervals.
     /// </summary>
-    public class TimedHostedService : IHostedService, IDisposable {
+    public abstract class IntervalHostedService : IHostedService, IDisposable {
 
         private int executionCount = 0;
         private ILogger _logger;
@@ -25,8 +25,8 @@ namespace GardeningSystem {
         /// </summary>
         private bool _waitTillDoWorkHasFinished;
 
-        public TimedHostedService(ILoggerService logger, string serviceName, TimeSpan period, bool waitTillDoWorkHasFinished) {
-            _logger = logger.GetLogger<TimedHostedService>();
+        public IntervalHostedService(ILoggerService logger, string serviceName, TimeSpan period, bool waitTillDoWorkHasFinished) {
+            _logger = logger.GetLogger<IntervalHostedService>();
             _serviceName = serviceName;
             _period = period;
             _waitTillDoWorkHasFinished = waitTillDoWorkHasFinished;
@@ -48,7 +48,12 @@ namespace GardeningSystem {
             _stopHandler = stopHandler;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Activates the service and raises the doWork event periodically.
+        /// The interval got specified in the constructor.
+        /// </summary>
+        /// <param name="stoppingToken">Token to stop the start process. WARNING: Not implemented!</param>
+        /// <returns>A Task that reprecents an asynchronous operation.</returns>
         public Task StartAsync(CancellationToken stoppingToken) {
             _logger.Trace($"[StartAsync]{_serviceName} is starting");
 
@@ -64,20 +69,11 @@ namespace GardeningSystem {
             return Task.CompletedTask;
         }
 
-        private void DoWork(object state) {
-            var count = Interlocked.Increment(ref executionCount);
-
-            _logger.Trace($"[DoWork]{_serviceName} started. (execution count: {count})");
-
-            _doWorkHandler.Invoke(null, null);
-
-            if (_waitTillDoWorkHasFinished) {
-                // set timer to run DoWork again after _period
-                _timer?.Change(Convert.ToInt32(_period.TotalMilliseconds), Timeout.Infinite);
-            }
-        }
-
-        /// <inheritdoc/>
+        /// <summary>
+        /// Deactivates the service.
+        /// </summary>
+        /// <param name="stoppingToken">Token to stop the stop process. WARNING: Not implemented!</param>
+        /// <returns>A Task that reprecents an asynchronous operation.</returns>
         public Task StopAsync(CancellationToken stoppingToken) {
             _logger.Warn($"[StopAsync]{_serviceName} is stopping.");
 
@@ -90,6 +86,19 @@ namespace GardeningSystem {
 
         public void Dispose() {
             _timer?.Dispose();
+        }
+
+        private void DoWork(object state) {
+            var count = Interlocked.Increment(ref executionCount);
+
+            _logger.Trace($"[DoWork]{_serviceName} started. (execution count: {count})");
+
+            _doWorkHandler.Invoke(null, null);
+
+            if (_waitTillDoWorkHasFinished) {
+                // set timer to run DoWork again after _period
+                _timer?.Change(Convert.ToInt32(_period.TotalMilliseconds), Timeout.Infinite);
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Jobs.Base;
 using NLog;
 
 namespace GardeningSystem.Jobs {
@@ -8,7 +9,7 @@ namespace GardeningSystem.Jobs {
     /// Service that checks the wifi connection state every minute and starts up an access point,
     /// when the computer is not connected to an wifi.
     /// </summary>
-    public class AccessPointJob : TimedHostedService {
+    public class AccessPointJob : IntervalHostedService {
 
         static readonly TimeSpan PERIOD = TimeSpan.FromMinutes(1);
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models;
+using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Enums;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
@@ -60,36 +61,34 @@ namespace GardeningSystem.BusinessLogic {
             Logger.Info($"[SetupTestEnvironment]Checking if there are some registered modules.");
             if (!ModulesRepository.GetAllRegisteredModules().Any()) {
                 Logger.Info($"[SetupTestEnvironment]Adding new modules to the system.");
-                var valve1Guid = Guid.NewGuid();
-                var valve2Guid = Guid.NewGuid();
+                Guid valve1Guid, valve2Guid;
                 var random = new Random((int)DateTime.Now.Ticks);
                 byte[] moduleIds = new byte[3];
                 random.NextBytes(moduleIds);
-                ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
-                    Id = valve1Guid,
+
+                valve1Guid = ModulesRepository.AddModule(new ModuleInfoDto() {
                     ModuleId = moduleIds[0],
                     ModuleType = ModuleType.Valve,
                     Name = "Valve1",
                     LastWaterings = null,
                     AssociatedModules = null,
                     EnabledForManualIrrigation = true
-                });
-                ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
-                    Id = valve2Guid,
+                }).Id;
+                valve2Guid = ModulesRepository.AddModule(new ModuleInfoDto() {
                     ModuleId = moduleIds[1],
                     ModuleType = ModuleType.Valve,
                     Name = "Valve2",
                     LastWaterings = null,
                     AssociatedModules = null,
                     EnabledForManualIrrigation = false
-                });
-                ModulesRepository.AddModule(new Common.Models.Entities.ModuleInfo() {
-                    Id = Guid.NewGuid(),
+                }).Id;
+                ModulesRepository.AddModule(new ModuleInfoDto() {
                     ModuleId = moduleIds[2],
                     ModuleType = ModuleType.Sensor,
                     Name = "Sensor1",
                     LastWaterings = null,
-                    AssociatedModules = new List<byte>() { moduleIds[0], moduleIds[1] }
+                    AssociatedModules = new byte[] { moduleIds[0], moduleIds[1] },
+                    EnabledForManualIrrigation = false
                 });
             }
         }
