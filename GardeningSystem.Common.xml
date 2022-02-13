@@ -157,22 +157,6 @@
             Stops a socket listener or closes a socket client.
             </summary>
         </member>
-        <member name="M:GardeningSystem.Common.Specifications.Communication.Base.INetworkBase.ReceiveAsync(System.IO.Stream)">
-            <summary>
-            Receives a package form the <paramref name="stream"/>.
-            </summary>
-            <param name="stream">Network stream, or Ssl stream</param>
-            <returns>A task that represents the asynchronous receive operation. The value of the TResult
-            parameter contains the byte array containing the received data.</returns>
-        </member>
-        <member name="M:GardeningSystem.Common.Specifications.Communication.Base.INetworkBase.SendAsync(System.Byte[],System.IO.Stream)">
-            <summary>
-            Writes the byte array to the <paramref name="stream"/> asynchron.
-            </summary>
-            <param name="data">Data to send.</param>
-            <param name="stream">Network stream, or Ssl stream</param>
-            <returns>A task that represents the asynchronous send operation.</returns>
-        </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.Base.ITcpClientBaseClass">
             <summary>
             Base class for all tcp clients.
@@ -225,6 +209,22 @@
             <summary>
             Local endpoint of the tcp listener.
             </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.Base.ITcpListenerBaseClass.ReceiveAsync(System.IO.Stream)">
+            <summary>
+            Receives a package form the <paramref name="stream"/>.
+            </summary>
+            <param name="stream">Network stream or Ssl stream</param>
+            <returns>A task that represents the asynchronous receive operation. The value of the TResult
+            parameter contains the byte array containing the received data.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.Base.ITcpListenerBaseClass.SendAsync(System.Byte[],System.IO.Stream)">
+            <summary>
+            Writes the byte array to the <paramref name="stream"/> asynchron.
+            </summary>
+            <param name="data">Data to send.</param>
+            <param name="stream">Network stream or Ssl stream</param>
+            <returns>A task that represents the asynchronous send operation.</returns>
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.IAesTcpClient">
             <summary>
@@ -763,7 +763,7 @@
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Managers.ILocalRelayManager">
             <summary>
-            Manager that forwards packages comming from the wan to the local services.
+            Manager that forwards packages comming from the WAN to the local services.
             Relays also the response back to the sender.
             </summary>
         </member>
@@ -930,7 +930,7 @@
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Managers.IWanManager">
             <summary>
-            Handles connection requests from the wan by keeping a connection to the external server alive.
+            Handles connection requests from the WAN by keeping a connection to the external server alive.
             </summary>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Managers.IWanManager.Start">

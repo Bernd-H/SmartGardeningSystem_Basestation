@@ -25,7 +25,7 @@ namespace GardeningSystem.DataAccess.Communication {
         public override async Task<byte[]> ReceiveAsync() {
             Logger.Trace($"[Receive]Receiveing from {RemoteEndPoint}.");
 
-            var packet = await base.ReceiveAsync();
+            var packet = await ReceiveAsyncWithoutLengthHeader();
 
             var answer = Encoding.UTF8.GetString(packet);
             if (answer.Contains($"Transfer-Encoding: chunked")) {
@@ -42,7 +42,7 @@ namespace GardeningSystem.DataAccess.Communication {
         public override async Task SendAsync(byte[] data) {
             Logger.Trace($"[Send]Sending {data.Length} bytes to {RemoteEndPoint}.");
 
-            await base.SendAsync(data);
+            await SendAsyncWithoutLengthHeader(data);
         }
     }
 }

@@ -61,19 +61,27 @@ namespace GardeningSystem.DataAccess {
             executeCommand($"sudo ./{changeWlanScriptName} \"{essid}\" \"{secret}\"");
 
             // check if connected
-            return loopFunction(IsConnectedToWlan, 2000, 30);
+            return loopFunction(IsConnectedToWlan, 500, 20);
+            //return true;
         }
 
         /// <inheritdoc/>
         public bool DisconnectFromWlan() {
-            Logger.Info($"[DisconnectFromWlan]Disconnecting from current wlan.");
-            setScriptExecutionRights(disconnectFromWlanScriptName);
+            if (!AccessPointStarted) {
+                Logger.Info($"[DisconnectFromWlan]Disconnecting from current wlan.");
+                //setScriptExecutionRights(disconnectFromWlanScriptName);
 
-            // disconnect from wlan
-            executeCommand($"sudo ./{disconnectFromWlanScriptName}");
+                // disconnect from wlan
+                //executeCommand($"sudo ./{disconnectFromWlanScriptName}");
 
-            // check if connected
-            return loopFunction(() => !IsConnectedToWlan(), 2000, 30);
+                // check if connected
+                //return loopFunction(() => !IsConnectedToWlan(), 2000, 30);
+                
+                return ChangeWlan("xfdh466533467d", "xfdh466533467d");
+            }
+            else {
+                return true;
+            }
         }
 
         /// <inheritdoc/>

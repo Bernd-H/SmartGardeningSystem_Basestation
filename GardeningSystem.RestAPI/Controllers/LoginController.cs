@@ -12,6 +12,7 @@ using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
+using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
 using GardeningSystem.Common.Utilities;
@@ -40,6 +41,8 @@ namespace GardeningSystem.RestAPI.Controllers {
 
         private IAPIManager APIManager;
 
+        private IAesEncrypterDecrypter AesEncrypterDecrypter;
+
         private ILogger Logger;
 
         public LoginController(ILoggerService logger, IConfiguration config, ISettingsManager settingsManager, IPasswordHasher passwordHasher,
@@ -51,6 +54,7 @@ namespace GardeningSystem.RestAPI.Controllers {
             AesDecrypter = aesEncrypterDecrypter;
             WifiConfigurator = wifiConfigurator;
             APIManager = _APIManager;
+            AesEncrypterDecrypter = aesEncrypterDecrypter;
         }
 
         [AllowAnonymous]
@@ -59,15 +63,14 @@ namespace GardeningSystem.RestAPI.Controllers {
             Logger.Info($"[Login]User trying to log in.");
             IActionResult response = Unauthorized();
 
-            //bool hasInternet = WifiConfigurator.HasInternet();
-            //// no login requierd if the basestation has no internet
-            //if (!hasInternet || AuthenticateUser(login)) {
-            //    response = GenerateJSONWebToken(login);
-            //}
-
             if (!string.IsNullOrEmpty(login.Password) && !string.IsNullOrEmpty(login.Username)) {
                 if (AuthenticateUser(login)) {
-                    response = GenerateJSONWebToken();
+                    if (ValidateAesKey(login.KeyValidationBytes)) {
+                        response = GenerateJSONWebToken();
+                    }
+                    else {
+                        response = Conflict();
+                    }
                 }
             }
 
@@ -150,6 +153,23 @@ namespace GardeningSystem.RestAPI.Controllers {
             }
 
             return verified;
+        }
+
+        private bool ValidateAesKey(byte[] keyValidationBytes) {
+            var decryptedBytes = AesEncrypterDecrypter.DecryptToByteArray(keyValidationBytes);
+
+            if (decryptedBytes.Length >= 2) {
+                // extract the message from the decrypted bytes
+                // (first two bytes are the code and the rest is a salt)
+                var receivedCode = new byte[2];
+                Array.Copy(decryptedBytes, 0, receivedCode, 0, receivedCode.Length);
+
+                if (receivedCode.SequenceEqual(CommunicationCodes.KeyValidationMessage)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         #region old user authentication (user login information was stored on the external server)

@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using GardeningSystem.Common.Events;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
@@ -19,7 +20,7 @@ namespace GardeningSystem.DataAccess.Communication {
     public class AesTcpListener : TcpListenerBaseClass, IAesTcpListener {
 
         /// <inheritdoc/>
-        public event EventHandler<TcpEventArgs> ClientConnectedEventHandler;
+        public event AsyncEventHandler<TcpEventArgs> ClientConnectedEventHandler;
 
         private IAesEncrypterDecrypter AesEncrypterDecrypter;
 
@@ -52,7 +53,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
         /// <inheritdoc/>
         protected override void ClientConnected(ClientConnectedArgs clientConnectedArgs) {
-            ClientConnectedEventHandler?.Invoke(this, new TcpEventArgs(clientConnectedArgs.TcpClient));
+            ClientConnectedEventHandler?.Invoke(this, new TcpEventArgs(clientConnectedArgs.TcpClient)).Wait();
         }
     }
 }

@@ -36,10 +36,21 @@ namespace GardeningSystem.DataAccess.Communication.Base {
             Cancellation = null;
         }
 
-        /// <inheritdoc/>
-        public virtual async Task<byte[]> ReceiveAsync(Stream stream) {
+        /// <summary>
+        /// Receives a package form the <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="stream">Network stream or Ssl stream</param>
+        /// <param name="receiveWithoutHeader">True to receive data without a length header at the beginning.</param>
+        /// <returns>A task that represents the asynchronous receive operation. The value of the TResult
+        /// parameter contains the byte array containing the received data.</returns>
+        protected virtual async Task<byte[]> ReceiveAsync(Stream stream, bool receiveWithoutHeader = false) {
             try {
-                return await receiveAsyncWithHeader(stream, cancellationToken: Cancellation.Token);
+                if (receiveWithoutHeader) {
+                    return await receiveAsyncWithoutHeader(stream, cancellationToken: Cancellation.Token);
+                }
+                else {
+                    return await receiveAsyncWithHeader(stream, cancellationToken: Cancellation.Token);
+                }
             }
             catch (IOException ioex) {
                 if (ioex.InnerException != null) {
@@ -59,9 +70,23 @@ namespace GardeningSystem.DataAccess.Communication.Base {
             }
         }
 
-        /// <inheritdoc/>
-        public virtual async Task SendAsync(byte[] data, Stream stream) {
-            await sendAsyncWithHeader(data, stream, Cancellation.Token);
+        /// <summary>
+        /// Writes the byte array to the <paramref name="stream"/> asynchron.
+        /// </summary>
+        /// <param name="data">Data to send.</param>
+        /// <param name="stream">Network stream or Ssl stream</param>
+        /// <param name="sendWithoutHeader">
+        /// True to send data without a length header at the beginning.
+        /// Not recommended when <paramref name="data"/> is large.
+        /// </param>
+        /// <returns>A task that represents the asynchronous send operation.</returns>
+        protected virtual async Task SendAsync(byte[] data, Stream stream, bool sendWithoutHeader = false) {
+            if (sendWithoutHeader) {
+                await sendAsyncWithoutHeader(data, stream, Cancellation.Token);
+            }
+            else {
+                await sendAsyncWithHeader(data, stream, Cancellation.Token);
+            }
         }
 
         #region Send/Receive Methods

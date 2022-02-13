@@ -124,7 +124,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
-        private async void onPeerToPeer_clientConnected(object sender, TcpEventArgs e) {
+        private async Task onPeerToPeer_clientConnected(object sender, TcpEventArgs e) {
             var networkStream = e.TcpClient.GetStream();
             var aesTcpListener = (IAesTcpListener)sender;
 

@@ -30,11 +30,24 @@ namespace GardeningSystem.DataAccess.Communication.Base {
         private ManualResetEvent allDone;
 
 
+        /// <summary>
+        /// NLog Logger.
+        /// </summary>
         protected readonly ILogger Logger;
 
         protected TcpListenerBaseClass(ILogger logger) {
             Logger = logger;
             allDone = new ManualResetEvent(false);
+        }
+
+        /// <inheritdoc/>
+        public virtual Task<byte[]> ReceiveAsync(Stream stream) {
+            return base.ReceiveAsync(stream, false);
+        }
+
+        /// <inheritdoc/>
+        public virtual Task SendAsync(byte[] data, Stream stream) {
+            return base.SendAsync(data, stream, false);
         }
 
         /// <inheritdoc/>

@@ -19,6 +19,10 @@
 
         public static byte[] DiscoverNewModuleCommand = new byte[] { 155 };
 
+        public static byte[] Test = new byte[] { 156 };
+
+        public static byte[] KeyValidationMessage = new byte[] { 0xAA, 0x55 };
+
         #endregion
     }
 }

@@ -109,6 +109,24 @@ namespace GardeningSystem.DataAccess.Communication.Base {
             catch (SocketException) { return false; }
         }
 
+        /// <summary>
+        /// Receives a byte array that has no length header at the beginning.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous receive operation. The value of the TResult
+        /// parameter contains the received data.</returns>
+        protected Task<byte[]> ReceiveAsyncWithoutLengthHeader() {
+            return base.ReceiveAsync(networkStream, true);
+        }
+
+        /// <summary>
+        /// Sends a byte array without adding a length header to it.
+        /// </summary>
+        /// <param name="data">Data to send.</param>
+        /// <returns>A task that represents the asynchronous send operation.</returns>
+        protected Task SendAsyncWithoutLengthHeader(byte[] data) {
+            return base.SendAsync(data, networkStream, true);
+        }
+
         private void StartConnectionCollapseDetectionProcess(int keepAliveInterval) {
             if (keepAliveInterval > 0) {
                 Task.Run(async () => {

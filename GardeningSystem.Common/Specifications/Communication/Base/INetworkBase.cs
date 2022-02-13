@@ -20,21 +20,5 @@ namespace GardeningSystem.Common.Specifications.Communication.Base {
         /// Stops a socket listener or closes a socket client.
         /// </summary>
         void Stop();
-
-        /// <summary>
-        /// Receives a package form the <paramref name="stream"/>.
-        /// </summary>
-        /// <param name="stream">Network stream, or Ssl stream</param>
-        /// <returns>A task that represents the asynchronous receive operation. The value of the TResult
-        /// parameter contains the byte array containing the received data.</returns>
-        Task<byte[]> ReceiveAsync(Stream stream);
-
-        /// <summary>
-        /// Writes the byte array to the <paramref name="stream"/> asynchron.
-        /// </summary>
-        /// <param name="data">Data to send.</param>
-        /// <param name="stream">Network stream, or Ssl stream</param>
-        /// <returns>A task that represents the asynchronous send operation.</returns>
-        Task SendAsync(byte[] data, Stream stream);
     }
 }

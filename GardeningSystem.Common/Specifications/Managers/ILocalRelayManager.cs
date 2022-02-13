@@ -3,7 +3,7 @@
 namespace GardeningSystem.Common.Specifications.Managers {
 
     /// <summary>
-    /// Manager that forwards packages comming from the wan to the local services.
+    /// Manager that forwards packages comming from the WAN to the local services.
     /// Relays also the response back to the sender.
     /// </summary>
     public interface ILocalRelayManager {

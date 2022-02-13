@@ -39,7 +39,7 @@ namespace GardeningSystem.RestAPI.Controllers {
 
         // GET api/Wlan/{isConnected}
         [HttpGet("{isConnected}")]
-        public ActionResult<IsConnectedToWlanDto> Get(string isConnected) {
+        public ActionResult<IsConnectedToWlanDto> IsConnected() {
             var userId = ControllerHelperClass.GetUserId(HttpContext);
             Logger.Info($"[GetIsConnected]User {userId} requested information if basestation is connected to a wlan.");
 

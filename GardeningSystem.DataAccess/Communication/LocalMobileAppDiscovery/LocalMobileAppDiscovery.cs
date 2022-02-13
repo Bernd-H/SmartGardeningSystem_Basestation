@@ -10,6 +10,7 @@ using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.DataObjects;
+using GardeningSystem.Common.Specifications.Managers;
 using NLog;
 
 namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
@@ -60,12 +61,15 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
 
         private ILogger Logger;
 
-        public LocalMobileAppDiscovery(ILoggerService loggerService) {
+        private ISettingsManager SettingsManager;
+
+        public LocalMobileAppDiscovery(ILoggerService loggerService, ISettingsManager settingsManager) {
             Logger = loggerService.GetLogger<LocalMobileAppDiscovery>();
+            SettingsManager = settingsManager;
             _cancellationTokenSource = new CancellationTokenSource();
 
             // BaseSearchString that we receive from an client:
-            // BaseSearchString = $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString}\r\nHost: {MulticastAddressV4.Address}:{MulticastAddressV4.Port}\r\nIP: {{0}}\r\nPort: {{1}}\r\n\r\n\r\n";
+            // BaseSearchString = $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString} {basestationGuid}\r\nHost: {MulticastAddressV4.Address}:{MulticastAddressV4.Port}\r\nIP: {{0}}\r\nPort: {{1}}\r\n\r\n\r\n";
         }
 
         private void ProcessReceivedMulticastMessage(byte[] buffer) {
@@ -79,7 +83,10 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
                 string ipString = receiveString.FirstOrDefault(t => t.StartsWith("IP: ", StringComparison.Ordinal));
 
                 // An invalid response was received if these are missing.
-                if (portString == null || ipString == null || systemString != $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString}")
+                var basestationGuid = SettingsManager.GetApplicationSettings().Id;
+                var searchStringWithGuid = $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString} {basestationGuid}";
+                var searchStringWithoutGuid = $"GS-SEARCH * HTTP/1.1 {GardeningSystemIdentificationString} {Guid.Empty}";
+                if (portString == null || ipString == null || (systemString != searchStringWithGuid && systemString != searchStringWithoutGuid))
                     return;
 
                 // If the port is invalid, ignore it!

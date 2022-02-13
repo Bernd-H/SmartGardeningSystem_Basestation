@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using GardeningSystem.Common.Events;
 using GardeningSystem.Common.Events.Communication;
 using GardeningSystem.Common.Specifications.Communication.Base;
 using GardeningSystem.Common.Specifications.Managers;
@@ -15,6 +18,6 @@ namespace GardeningSystem.Common.Specifications.Communication {
         /// <summary>
         /// Event raised when a new client has connected.
         /// </summary>
-        event EventHandler<TcpEventArgs> ClientConnectedEventHandler;
+        event AsyncEventHandler<TcpEventArgs> ClientConnectedEventHandler;
     }
 }

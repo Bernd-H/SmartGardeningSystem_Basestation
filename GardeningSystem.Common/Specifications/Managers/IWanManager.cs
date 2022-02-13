@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace GardeningSystem.Common.Specifications.Managers {
 
     /// <summary>
-    /// Handles connection requests from the wan by keeping a connection to the external server alive.
+    /// Handles connection requests from the WAN by keeping a connection to the external server alive.
     /// </summary>
     public interface IWanManager {
 

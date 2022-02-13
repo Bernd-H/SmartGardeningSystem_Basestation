@@ -68,7 +68,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
-        private async void OnCommandReceivedEvent(object sender, TcpEventArgs e) {
+        private async Task OnCommandReceivedEvent(object sender, TcpEventArgs e) {
             NetworkStream networkStream = null;
             try {
                 networkStream = e.TcpClient.GetStream();
@@ -119,6 +119,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         // send moduleInfo
                         await AesTcpListener.SendAsync(dataToSend, networkStream);
                     }
+                    else if (command.SequenceEqual(CommunicationCodes.Test)) {
+                        success = true;
+                    }
                     // process other commands here
                 }
                 catch (Exception ex) {
@@ -164,7 +167,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private bool processCommand_DisconnectFromWlan() {
             Logger.Info($"[processCommand_DisconnectFromWlan]Disconnecting from wlan.");
-            return WifiConfigurator.DisconnectFromWlan();
+            var disconnected = WifiConfigurator.DisconnectFromWlan();
+
+            WifiConfigurator.ReloadDaemon();
+
+            return disconnected;
         }
 
         #region irrigation commands
