@@ -59,12 +59,9 @@ namespace GardeningSystem.Common.Models.DTOs {
         public WateringStatus WateringStatus { get; set; }
 
         public static ApplicationSettingsDto GetStandardSettings() {
-            var sysId = new byte[1];
-            new Random((int)DateTime.Now.Ticks).NextBytes(sysId);
-
             return new ApplicationSettingsDto() {
                 Id = Guid.NewGuid(),
-                RfSystemId = sysId[0],
+                RfSystemId = Utils.GetRandomByte(),
                 CityName = string.Empty,
                 ConfigurationModeEnabled = true,
                 AesKey = null,

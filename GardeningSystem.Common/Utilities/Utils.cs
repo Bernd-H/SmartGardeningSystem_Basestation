@@ -52,5 +52,22 @@ namespace GardeningSystem.Common.Utilities {
 
         #endregion
 
+        public static byte GetRandomByte() {
+            var random = new Random((int)DateTime.Now.Ticks);
+            var buffer = new byte[1];
+
+            random.NextBytes(buffer);
+
+            return buffer[0];
+        }
+
+        public static byte[] GetRandomBytes(int amount) {
+            var random = new Random((int)DateTime.Now.Ticks);
+            var buffer = new byte[amount];
+
+            random.NextBytes(buffer);
+
+            return buffer;
+        }
     }
 }

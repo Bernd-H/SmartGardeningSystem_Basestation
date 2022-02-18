@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -20,8 +21,6 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private static SemaphoreSlim LOCKER = new SemaphoreSlim(1, 1);
 
-        private ProcessStartInfo _RfApplication;
-
         private Process _process;
 
         private StreamWriter _sw;
@@ -31,6 +30,7 @@ namespace GardeningSystem.DataAccess.Communication {
         private byte _systemRfId {
             get {
                 return SettingsManager.GetApplicationSettings().RfSystemId;
+                //return 0x0A;
             }
         }
 
@@ -54,17 +54,8 @@ namespace GardeningSystem.DataAccess.Communication {
                 Logger.Info($"[RfCommunicator]Starting c++ rf-communication application.");
                 checkForFails();
                 string filePath = ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.RFAPP_FILENAME]);
-                _RfApplication = new ProcessStartInfo(filePath) {
-                    UseShellExecute = true,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true
-                };
-
-                _process = new Process();
-                _process.StartInfo = _RfApplication;
-                _process.Start();
-                _sw = _process.StandardInput;
-                _sr = _process.StandardOutput;
+                Logger.Info($"[RfCommunicator]Filepath: {filePath}");
+                startProgram(filePath);
             }
         }
 
@@ -73,13 +64,7 @@ namespace GardeningSystem.DataAccess.Communication {
             try {
                 await LOCKER.WaitAsync();
 
-                var response = await sendCommandReceiveAnswer(new byte[] { 0x00 });
-                if (response.Length == 1 && response[0] == 0xFF) {
-                    Logger.Info($"[Start]Module successfully initialized.");
-                }
-                else {
-                    Logger.Fatal($"[Start]Error while inializing rf module.");
-                }
+                await sendCommand(new byte[] { 0x00 });
             }
             finally {
                 LOCKER.Release();
@@ -99,46 +84,53 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         /// <inheritdoc />
-        public async Task<ModuleInfoDto> DiscoverNewModule() {
+        public async Task<ModuleInfoDto> DiscoverNewModule(byte freeModuleId) {
             try {
                 await LOCKER.WaitAsync();
 
-                var response = await sendCommandReceiveAnswer(new byte[] { 0x01 });
+                //var response = await sendCommandReceiveAnswer(new byte[] { 0x01 });
+                var response = new byte[] { 0xFF, 0x0A, 0x5F };
 
                 if (response.Length >= 1 && response[0] == 0xFF) {
-                    bool isASensor = response[1] == 0x00;
-                    byte moduleId = response[2];
+                    byte tempId = response[1]; // temp Id because the rf app doesn't know all already used ids
+                    bool isASensor = response[2] == 0x0A;
 
-                    Logger.Info($"[DiscoverNewModule]Discovered a new module with id={Utils.ConvertByteToHex(moduleId)}.");
+                    // set the id of the new module
+                    if (await setModuleId(freeModuleId, tempId, _systemRfId)) {
+                        Logger.Info($"[DiscoverNewModule]Discovered a new module with id={Utils.ConvertByteToHex(freeModuleId)}.");
 
-                    return new ModuleInfoDto {
-                        ModuleId = moduleId,
-                        ModuleType = isASensor ? Common.Models.Enums.ModuleType.Sensor : Common.Models.Enums.ModuleType.Valve
-                    };
+                        return new ModuleInfoDto {
+                            ModuleId = freeModuleId,
+                            ModuleType = isASensor ? Common.Models.Enums.ModuleType.Sensor : Common.Models.Enums.ModuleType.Valve
+                        };
+                    }
                 }
                 else {
                     Logger.Info($"[DiscoverNewModule]Discoverd no new module.");
-                    return null;
                 }
             }
             finally {
                 LOCKER.Release();
             }
+
+            return null;
         }
 
         /// <inheritdoc />
-        public async Task<bool> PingModule(ModuleInfoDto module) {
+        public async Task<RfCommunicatorResult> PingModule(ModuleInfoDto module) {
             try {
                 await LOCKER.WaitAsync();
 
                 Logger.Info($"[PingModule]Sending ping to module with id={Utils.ConvertByteToHex(module.ModuleId)}.");
                 var response = await sendCommandReceiveAnswer(new byte[] { 0x03, module.ModuleId, _systemRfId });
 
-                if (response.Length >= 1 && response[0] == 0xFF) {
-                    return true;
+                if (response.Length >= 2 && response[0] == 0xFF) {
+                    // get rssi
+                    int rssi = response[1];
+                    return RfCommunicatorResult.SetSuccess(rssi * (-1));
                 }
                 else {
-                    return false;
+                    return RfCommunicatorResult.NoSuccess();
                 }
             }
             finally {
@@ -147,20 +139,26 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         /// <inheritdoc />
-        public async Task<(double, double)> GetTempAndSoilMoisture(ModuleInfoDto module) {
+        public async Task<RfCommunicatorResult> GetTempAndSoilMoisture(ModuleInfoDto module) {
             try {
                 await LOCKER.WaitAsync();
 
                 var response = await sendCommandReceiveAnswer(new byte[] { 0x06, module.ModuleId, _systemRfId });
 
-                if (response.Length >= 1 && response[0] == 0xFF) {
+                if (response.Length >= 3 && response[0] == 0xFF) {
                     Logger.Info($"[GetTempAndSoilMoisture]Received temperature and soil moisture of module with id={Utils.ConvertByteToHex(module.ModuleId)} successfully.");
-                    // calculate temp and soil moisture
-                    throw new NotImplementedException();
+                    
+                    // get the temperatur
+                    int temp = getIntFromByte(response[1]);
+
+                    // get soil moisture
+                    int soilMoisture = (int)response[2];
+
+                    return RfCommunicatorResult.SetSuccess((temp, soilMoisture));
                 }
                 else {
                     Logger.Error($"[GetTempAndSoilMoisture]Error while receiving temperature and soil moisture of module with id={Utils.ConvertByteToHex(module.ModuleId)}.");
-                    return (double.NaN, double.NaN);
+                    return RfCommunicatorResult.NoSuccess();
                 }
             }
             finally {
@@ -215,26 +213,66 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         /// <inheritdoc />
-        public async Task<float> GetBatteryLevel(ModuleInfoDto module) {
+        public async Task<RfCommunicatorResult> GetBatteryLevel(ModuleInfoDto module) {
             try {
                 await LOCKER.WaitAsync();
 
                 var response = await sendCommandReceiveAnswer(new byte[] { 0x09, module.ModuleId, _systemRfId });
 
-                if (response.Length >= 1 && response[0] == 0xFF) {
+                if (response.Length >= 2 && response[0] == 0xFF) {
                     Logger.Info($"[GetBatteryLevel]Battery level of module with id={Utils.ConvertByteToHex(module.ModuleId)} successfully requested.");
-                    // convert byte to float
-                    //BitConverter.ToUInt16()
-                    throw new NotImplementedException();
+
+                    int batteryLevel = (int)response[1];
+                    return RfCommunicatorResult.SetSuccess(batteryLevel);
                 }
                 else {
                     Logger.Error($"[GetBatteryLevel]Error while requesting battery level of module with id={Utils.ConvertByteToHex(module.ModuleId)}.");
-                    return float.NaN;
+                    return RfCommunicatorResult.NoSuccess();
                 }
             }
             finally {
                 LOCKER.Release();
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> TryRerouteModule(byte moduleId, List<byte> otherModules) {
+            Logger.Info($"[TryRerouteModule]Trying to reroute module with id={moduleId}.");
+
+            // build command
+            var command = new List<byte>();
+            command.Add(0x04);
+            command.Add(_systemRfId);
+            command.Add(convertIntToByte(otherModules.Count));
+            command.AddRange(otherModules);
+
+            var response = await sendCommandReceiveAnswer(command.ToArray());
+            if (response[0] == 0xFF) {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> RemoveModule(byte moduleId) {
+            Logger.Info($"[RemoveModule]Removing module with id={Utils.ConvertByteToHex(moduleId)}.");
+            var response = await sendCommandReceiveAnswer(new byte[] { 0x02, 0x00, moduleId, 0x00, 0x00, _systemRfId });
+            if (response[0] == 0xFF) {
+                return true;
+            }
+
+            return false;
+        }
+
+        private async Task<bool> setModuleId(byte id, byte tempId, byte systemId) {
+            Logger.Info($"[setModuleId]Setting the id of the new module to {Utils.ConvertByteToHex(id)}.");
+            var response = await sendCommandReceiveAnswer(new byte[] { 0x02, 0x00, tempId, id, 0x00, systemId });
+            if (response[0] == 0xFF) {
+                return true;
+            }
+
+            return false;
         }
 
         private void checkForFails() {
@@ -244,12 +282,82 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         private async Task<byte[]> sendCommandReceiveAnswer(byte[] command) {
-            await _sw.WriteLineAsync(Convert.ToBase64String(command));
-            return Convert.FromBase64String(await _sr.ReadToEndAsync());
+            //  wait 5s because the rf app needs 5s time between two commands
+            await Task.Delay(5000);
+
+            var commandString = Convert.ToBase64String(command);
+            Logger.Trace($"[sendCommandReceiveAnswer]Sending \"{commandString}\" to the rf module app.");
+
+            var readTask = _sr.ReadLineAsync();
+            await _sw.WriteLineAsync(commandString);
+            Logger.Trace($"[sendCommandReceiveAnswer]Sending \"{commandString}\" finished.");
+
+            var receivedString = await readTask;
+            Logger.Trace($"[sendCommandReceiveAnswer]Received \"{receivedString}\" from the rf module app.");
+
+            return Convert.FromBase64String(receivedString);
         }
 
         private async Task sendCommand(byte[] command) {
-            await _sw.WriteLineAsync(Convert.ToBase64String(command));
+            //  wait 5s because the rf app needs 5s time between two commands
+            await Task.Delay(5000);
+
+            var commandString = Convert.ToBase64String(command);
+            Logger.Trace($"[sendCommand]Sending \"{commandString}\" to the rf module app.");
+            await _sw.WriteLineAsync(commandString);
+        }
+
+        /// <summary>
+        /// Gets an integer from a byte.
+        /// The first bit of the byte must be 0 to represent a positive number and 1 to represent a negative one.
+        /// Example:
+        ///  - number 10: 0000 1010
+        ///  - number -10: 1000 1010
+        /// </summary>
+        /// <param name="b">Byte to convert.</param>
+        /// <returns>The integer.</returns>
+        private int getIntFromByte(byte b) {
+            // remove the sign bit (bit 0) from the byte
+            byte mask = 0x7F;
+            byte tempWithoutSignBit = b;
+            tempWithoutSignBit &= mask;
+
+            // convert the 7 bits to an integer
+            int integer = tempWithoutSignBit;
+
+            // check if sign bit got set (-> negative number)
+            byte tempSignBit = b;
+            tempSignBit &= 0x80;
+            if (tempSignBit == 0x80) {
+                // negative int
+                return integer * (-1);
+            }
+
+            return integer;
+        }
+
+        /// <summary>
+        /// Converts a positive integer to a byte.
+        /// </summary>
+        /// <param name="i">Integer to convert.</param>
+        /// <returns>Byte that has no sign bit.</returns>
+        private byte convertIntToByte(int i) { 
+            return (byte)i;
+        }
+
+        private void startProgram(string appFilePath) {
+            ProcessStartInfo startInfo = new ProcessStartInfo() {
+                FileName = "/bin/bash",
+                Arguments = $"-c \"sudo {appFilePath}\"",
+                UseShellExecute = false,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true
+            };
+            _process = new Process() { StartInfo = startInfo, };
+            _process.Start();
+
+            _sw = _process.StandardInput;
+            _sr = _process.StandardOutput;
         }
     }
 }

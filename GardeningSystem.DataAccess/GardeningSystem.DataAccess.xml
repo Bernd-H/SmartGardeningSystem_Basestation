@@ -214,7 +214,7 @@
         <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.Stop">
             <inheritdoc />
         </member>
-        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.DiscoverNewModule">
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.DiscoverNewModule(System.Byte)">
             <inheritdoc />
         </member>
         <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.PingModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
@@ -231,6 +231,17 @@
         </member>
         <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.GetBatteryLevel(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
             <inheritdoc />
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.getIntFromByte(System.Byte)">
+            <summary>
+            Gets an integer from a byte.
+            The first bit of the byte must be 0 to represent a positive number and 1 to represent a negative one.
+            Example:
+             - number 10: 0000 1010
+             - number -10: 1000 1010
+            </summary>
+            <param name="b">Byte to convert.</param>
+            <returns>The integer.</returns>
         </member>
         <member name="T:GardeningSystem.DataAccess.Communication.SslTcpClient">
             <inheritdoc/>

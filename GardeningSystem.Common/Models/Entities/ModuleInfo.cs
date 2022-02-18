@@ -20,5 +20,7 @@ namespace GardeningSystem.Common.Models.Entities {
         public IEnumerable<DateTime> LastWaterings { get; set; }
 
         public bool EnabledForManualIrrigation { get; set; }
+
+        public Rssi SignalStrength { get; set; }
     }
 }

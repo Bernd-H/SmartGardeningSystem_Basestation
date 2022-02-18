@@ -345,10 +345,11 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.DiscoverNewModule">
+        <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.DiscoverNewModule(System.Byte)">
             <summary>
             Sends a discover command to the c++ app to discover a new module.
             </summary>
+            <param name="freeModuleId">An Id for the new module.</param>
             <returns>Module info object containing data about the newly added module, such as module id or type (valve/sensor).</returns>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.PingModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Models.Entities;
 
 namespace GardeningSystem.Common.Specifications.Communication {
 
@@ -25,22 +28,23 @@ namespace GardeningSystem.Common.Specifications.Communication {
         /// <summary>
         /// Sends a discover command to the c++ app to discover a new module.
         /// </summary>
+        /// <param name="freeModuleId">An Id for the new module.</param>
         /// <returns>Module info object containing data about the newly added module, such as module id or type (valve/sensor).</returns>
-        Task<ModuleInfoDto> DiscoverNewModule();
+        Task<ModuleInfoDto> DiscoverNewModule(byte freeModuleId);
 
         /// <summary>
-        /// Pings a specific module.
+        /// Gets the RSSI of a specific module
         /// </summary>
         /// <param name="module">ModuleInfoDto object containing the module id.</param>
-        /// <returns>True when the module was reachable.</returns>
-        Task<bool> PingModule(ModuleInfoDto module);
+        /// <returns>The rssi to the module. Returns int.MaxValue when there was no repsone.</returns>
+        Task<RfCommunicatorResult> PingModule(ModuleInfoDto module);
 
         /// <summary>
         /// Gets the temperature and the soil moisture of a specific module.
         /// </summary>
         /// <param name="module">ModuleInfoDto object containing the module id.</param>
         /// <returns>Temperature in degree celcius, Soil moisture in percent.</returns>
-        Task<(double, double)> GetTempAndSoilMoisture(ModuleInfoDto module);
+        Task<RfCommunicatorResult> GetTempAndSoilMoisture(ModuleInfoDto module);
 
         /// <summary>
         /// Sends a command to a specific module, to open the valve for a specific period specified in <paramref name="timeSpan"/>.
@@ -65,6 +69,24 @@ namespace GardeningSystem.Common.Specifications.Communication {
         /// </summary>
         /// <param name="module">ModuleInfoDto object containing the module id.</param>
         /// <returns>Battery level in percent.</returns>
-        Task<float> GetBatteryLevel(ModuleInfoDto module);
+        Task<RfCommunicatorResult> GetBatteryLevel(ModuleInfoDto module);
+
+        /// <summary>
+        /// Trys to reach a module (<paramref name="moduleId"/>) over another one and stores the route on success. 
+        /// </summary>
+        /// <param name="moduleId">Module to change the route for.</param>
+        /// <param name="otherModules">List of modules that will be used to relay messages to the module.</param>
+        /// <returns>A task that reprecents an asynchronous operation. The value of the TResult
+        /// parameter contains a boolean that is true when the module got reached over another one and is available now.</returns>
+        Task<bool> TryRerouteModule(byte moduleId, List<byte> otherModules);
+
+
+        /// <summary>
+        /// Tells the module that it got removed.
+        /// </summary>
+        /// <param name="moduleId">Id of the module.</param>
+        /// <returns>A task that reprecents an asynchronous operation. The value of the TResult
+        /// parameter contains a boolean that is true when the module received the message successfully.</returns>
+        Task<bool> RemoveModule(byte moduleId);
     }
 }

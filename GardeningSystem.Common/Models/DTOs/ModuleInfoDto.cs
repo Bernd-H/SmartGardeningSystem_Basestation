@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Models.Enums;
 
 namespace GardeningSystem.Common.Models.DTOs {
@@ -17,5 +18,7 @@ namespace GardeningSystem.Common.Models.DTOs {
         public IEnumerable<DateTime> LastWaterings { get; set; }
 
         public bool EnabledForManualIrrigation { get; set; }
+
+        public Rssi SignalStrength { get; set; }
     }
 }

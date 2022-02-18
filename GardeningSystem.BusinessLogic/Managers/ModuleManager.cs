@@ -14,6 +14,7 @@ using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications.Repositories.DB;
 using GardeningSystem.Common.Specifications.Communication;
+using GardeningSystem.Common.Utilities;
 
 namespace GardeningSystem.BusinessLogic.Managers {
 
@@ -49,19 +50,22 @@ namespace GardeningSystem.BusinessLogic.Managers {
         /// <inheritdoc/>
         public async Task<bool> CloseValve(Guid valveId) {
             var moduleInfo = await GetModuleById(valveId);
-            return await RfCommunicator.CloseValve(moduleInfo);
+            //return await RfCommunicator.CloseValve(moduleInfo);
+            return await sendCommand_retryRetoute(moduleInfo, () => RfCommunicator.CloseValve(moduleInfo));
         }
 
         /// <inheritdoc/>
         public async Task<bool> OpenValve(Guid valveId, TimeSpan valveOpenTime) {
             var moduleInfo = await GetModuleById(valveId);
-            return await RfCommunicator.OpenValve(moduleInfo, valveOpenTime);
+            //return await RfCommunicator.OpenValve(moduleInfo, valveOpenTime);
+            return await sendCommand_retryRetoute(moduleInfo, () => RfCommunicator.OpenValve(moduleInfo, valveOpenTime));
         }
 
         /// <inheritdoc/>
         public async Task<bool> OpenValve(byte externalValveId, TimeSpan valveOpenTime) {
-            var moduleInfo = getModule(externalValveId);
-            return await RfCommunicator.OpenValve(moduleInfo.ToDto(), valveOpenTime);
+            var moduleInfo = getModule(externalValveId).ToDto();
+            //return await RfCommunicator.OpenValve(moduleInfo, valveOpenTime);
+            return await sendCommand_retryRetoute(moduleInfo, () => RfCommunicator.OpenValve(moduleInfo, valveOpenTime));
         }
 
         /// <inheritdoc/>
@@ -76,9 +80,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
             var modules = getAllModules();
             foreach (var module in modules) {
                 if (module.ModuleType == Common.Models.Enums.ModuleType.Sensor) {
-                    (double temp, double soilMoisture) = await RfCommunicator.GetTempAndSoilMoisture(module.ToDto());
+                    var measurementResult = await sendCommand_retryRetoute(module.ToDto(), () => RfCommunicator.GetTempAndSoilMoisture(module.ToDto()));
 
-                    if (double.IsNaN(temp) || double.IsNaN(soilMoisture)) {
+                    if (!measurementResult.Success) {
                         Logger.Error($"[GetAllMeasurements]Could not get measurement of module with id {module.Id.ToString()}.");
                         measurements.Add(new ModuleDataDto() {
                             Id = module.Id,
@@ -86,6 +90,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         });
                     }
                     else {
+                       (double temp, double soilMoisture) = measurementResult.Result as Tuple<double, double>;
                         measurements.Add(new ModuleDataDto() {
                             Id = module.Id,
                             Data = soilMoisture,
@@ -108,8 +113,14 @@ namespace GardeningSystem.BusinessLogic.Managers {
             try {
                 await LOCKER.WaitAsync();
 
-                var module = await RfCommunicator.DiscoverNewModule();
+                var module = await RfCommunicator.DiscoverNewModule(getFreeModuleId());
                 if (module != null) {
+                    // measure rssi
+                    var rfCommunicatorResult = await sendCommand_retryRetoute(module, () => RfCommunicator.PingModule(module));
+                    if (rfCommunicatorResult.Success) {
+                        module.SignalStrength = new Rssi((int)rfCommunicatorResult.Result);
+                    }
+
                     // save new module
                     ModulesRepository.AddModule(module);
                 }
@@ -122,27 +133,36 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<ModuleInfo>> GetAllModules() {
+        public Task<IEnumerable<ModuleInfo>> GetAllModules() {
             //await LOCKER.WaitAsync();
             var result = getAllModules();
             //LOCKER.Release();
-            return result;
+            return Task.FromResult(result);
         }
 
         /// <inheritdoc/>
-        public async Task<ModuleInfoDto> GetModuleById(Guid id) {
+        public Task<ModuleInfoDto> GetModuleById(Guid id) {
             //await LOCKER.WaitAsync();
             var result = ModulesRepository.GetModuleById(id).ToDto();
             //LOCKER.Release();
-            return result;
+            return Task.FromResult(result);
         }
 
         /// <inheritdoc/>
         public async Task<bool> RemoveModule(Guid moduleId) {
             await LOCKER.WaitAsync();
-            var result = ModulesRepository.RemoveModule(moduleId);
+
+            var module = ModulesRepository.GetModuleById(moduleId).ToDto();
+
+            // send remove command
+            var removedModule = await sendCommand_retryRetoute(module, () => RfCommunicator.RemoveModule(module.ModuleId));
+            if (removedModule) {
+                // remove module info
+                removedModule = ModulesRepository.RemoveModule(moduleId);
+            }
+
             LOCKER.Release();
-            return result;
+            return removedModule;
         }
 
         /// <inheritdoc/>
@@ -183,6 +203,110 @@ namespace GardeningSystem.BusinessLogic.Managers {
             else {
                 return null;
             }
+        }
+
+        private byte getFreeModuleId() {
+            // get the last added id and increment it till we get a free one
+            var modules = getAllModules();
+            var id = modules.Last().ModuleId;
+
+            while (id != 0xFF) {
+                id += 1;
+                if (getModule(id) == null) {
+                    // free id found
+                    return id;
+                }
+            }
+
+            throw new Exception("[getFreeModuleId]Couldn't get a free id!");
+        }
+
+        /// <summary>
+        /// Executes a command. Retrys it one time if failed and trys to reroute the module.
+        /// </summary>
+        /// <param name="module">Info of the module the command is for.</param>
+        /// <param name="sendCommandCallback">Callback where the command gets called.</param>
+        /// <param name="alreadyRerouted">True to not try to reroute the module.</param>
+        /// <returns>Result of the command.</returns>
+        private async Task<bool> sendCommand_retryRetoute(ModuleInfoDto module, Func<Task<bool>> sendCommandCallback, bool alreadyRerouted = false) {
+            int attempts = 0;
+            bool answer;
+            do {
+                attempts++;
+                answer = await sendCommandCallback();
+
+                // retry 1 time if failed
+            } while (!answer && attempts < 2);
+
+            if (!answer && !alreadyRerouted) {
+                // get id's of all modules
+                var modules = getAllModules();
+                List<byte> moduleIds = new List<byte>();
+                foreach (var m in modules) {
+                    moduleIds.Add(m.ModuleId);
+                }
+
+                // remove the module id of the not reachable module
+                moduleIds.Remove(module.ModuleId);
+
+                // try to reroute the module (reach the module over another one)
+                bool rerouted = await RfCommunicator.TryRerouteModule(module.ModuleId, moduleIds);
+                if (rerouted) {
+                    // delete rssi
+                    var moduleInfo = module.ToDo(ModulesRepository);
+                    moduleInfo.SignalStrength = null;
+                    ModulesRepository.UpdateModule(moduleInfo);
+
+                    // try sending the command again
+                    return await sendCommand_retryRetoute(module, sendCommandCallback, alreadyRerouted: true);
+                }
+            }
+
+            return answer;
+        }
+
+        /// <summary>
+        /// Executes a command. Retrys it one time if failed and trys to reroute the module.
+        /// </summary>
+        /// <param name="module">Info of the module the command is for.</param>
+        /// <param name="sendCommandCallback">Callback where the command gets called.</param>
+        /// <param name="alreadyRerouted">True to not try to reroute the module.</param>
+        /// <returns>Result of the command.</returns>
+        private async Task<RfCommunicatorResult> sendCommand_retryRetoute(ModuleInfoDto module, Func<Task<RfCommunicatorResult>> sendCommandCallback, bool alreadyRerouted = false) {
+            int attempts = 0;
+            RfCommunicatorResult answer;
+            do {
+                attempts++;
+                answer = await sendCommandCallback();
+
+                // retry 1 time if failed
+            } while (!answer.Success && attempts < 2);
+
+            if (!answer.Success && !alreadyRerouted) {
+                // get id's of all modules
+                var modules = getAllModules();
+                List<byte> moduleIds = new List<byte>();
+                foreach (var m in modules) {
+                    moduleIds.Add(m.ModuleId);
+                }
+
+                // remove the module id of the not reachable module
+                moduleIds.Remove(module.ModuleId);
+
+                // try to reroute the module (reach the module over another one)
+                var rerouted = await RfCommunicator.TryRerouteModule(module.ModuleId, moduleIds);
+                if (rerouted) {
+                    // delete rssi
+                    var moduleInfo = module.ToDo(ModulesRepository);
+                    moduleInfo.SignalStrength = null;
+                    ModulesRepository.UpdateModule(moduleInfo);
+
+                    // try sending the command again
+                    return await sendCommand_retryRetoute(module, sendCommandCallback, alreadyRerouted: true);
+                }
+            }
+
+            return answer;
         }
     }
 }

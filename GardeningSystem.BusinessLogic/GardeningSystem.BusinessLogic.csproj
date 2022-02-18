@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -10,7 +10,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>C:\Users\bernd\Documents\Schule\Diplomarbeit\GardeningSystem\GardeningSystem.BusinessLogic.xml</DocumentationFile>
+    <DocumentationFile>C:\Users\bernd\Documents\Schule\Diplomarbeit\GardeningSystem\GardeningSystem.BusinessLogic\GardeningSystem.BusinessLogic.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

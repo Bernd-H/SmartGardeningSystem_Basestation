@@ -62,5 +62,5 @@
   "accessPointJob_enabled": "true",
 
   ///////////////////////// Test Environment options
-  "isTestEnvironment": "true"
+  "isTestEnvironment": "false"
 }

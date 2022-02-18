@@ -10,7 +10,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>C:\Users\bernd\Documents\Schule\Diplomarbeit\GardeningSystem\GardeningSystem.Common.xml</DocumentationFile>
+    <DocumentationFile>C:\Users\bernd\Documents\Schule\Diplomarbeit\GardeningSystem\GardeningSystem.Common\GardeningSystem.Common.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

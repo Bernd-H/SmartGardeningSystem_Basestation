@@ -27,7 +27,8 @@ namespace GardeningSystem.Common.Models {
                 ModuleType = module.ModuleType,
                 Name = module.Name,
                 LastWaterings = module.LastWaterings,
-                EnabledForManualIrrigation = module.EnabledForManualIrrigation
+                EnabledForManualIrrigation = module.EnabledForManualIrrigation,
+                SignalStrength = module.SignalStrength
             };
         }
 
@@ -39,7 +40,8 @@ namespace GardeningSystem.Common.Models {
                 ModuleType = moduleDto.ModuleType,
                 Name = moduleDto.Name,
                 LastWaterings = moduleDto.LastWaterings,
-                EnabledForManualIrrigation = moduleDto.EnabledForManualIrrigation
+                EnabledForManualIrrigation = moduleDto.EnabledForManualIrrigation,
+                SignalStrength = moduleDto.SignalStrength
             };
         }
 
