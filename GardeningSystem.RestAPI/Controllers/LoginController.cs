@@ -25,6 +25,9 @@ using NLog;
 
 namespace GardeningSystem.RestAPI.Controllers {
 
+    /// <summary>
+    /// API controller to login (get a json web token) or to change the login information.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class LoginController : ControllerBase {

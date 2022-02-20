@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GardeningSystem.DataAccess.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20220104171830_SensorData")]
+    [Migration("20220220161856_SensorData")]
     partial class SensorData
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,11 +25,14 @@ namespace GardeningSystem.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<double>("Data")
-                        .HasColumnType("double");
-
                     b.Property<Guid>("Id")
                         .HasColumnType("char(36)");
+
+                    b.Property<double>("SoilMoisture")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Temperature")
+                        .HasColumnType("double");
 
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("Date");

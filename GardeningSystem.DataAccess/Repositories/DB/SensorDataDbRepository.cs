@@ -18,7 +18,7 @@ namespace GardeningSystem.DataAccess.Repositories {
 
         private ILogger Logger;
 
-        public SensorDataDbRepository(ILoggerService loggerService) : base(loggerService) {
+        public SensorDataDbRepository(ILoggerService loggerService, IDatabaseContext databaseContext) : base(loggerService, databaseContext) {
             Logger = loggerService.GetLogger<SensorDataDbRepository>();
         }
 

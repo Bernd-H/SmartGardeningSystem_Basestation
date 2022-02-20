@@ -232,6 +232,12 @@
         <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.GetBatteryLevel(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
             <inheritdoc />
         </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.TryRerouteModule(System.Byte,System.Collections.Generic.List{System.Byte})">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.RemoveModule(System.Byte)">
+            <inheritdoc/>
+        </member>
         <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.getIntFromByte(System.Byte)">
             <summary>
             Gets an integer from a byte.
@@ -242,6 +248,13 @@
             </summary>
             <param name="b">Byte to convert.</param>
             <returns>The integer.</returns>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Communication.RfCommunicator.convertIntToByte(System.Int32)">
+            <summary>
+            Converts a positive integer to a byte.
+            </summary>
+            <param name="i">Integer to convert.</param>
+            <returns>Byte that has no sign bit.</returns>
         </member>
         <member name="T:GardeningSystem.DataAccess.Communication.SslTcpClient">
             <inheritdoc/>
@@ -268,15 +281,13 @@
             <inheritdoc/>
         </member>
         <member name="T:GardeningSystem.DataAccess.Database.DatabaseContext">
-            <summary>
-            Inherits from DbContext.
-            Class that contains the connection string for the mysql database and multiple tabels as DbSet instance.
-            </summary>
+            <inheritdoc/>
         </member>
         <member name="P:GardeningSystem.DataAccess.Database.DatabaseContext.sensordata">
-            <summary>
-            Table where the sensor measurements get stored.
-            </summary>
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.DataAccess.Database.DatabaseContext.OnConfiguring(Microsoft.EntityFrameworkCore.DbContextOptionsBuilder)">
+            <inheritdoc/>
         </member>
         <member name="T:GardeningSystem.DataAccess.Database.DbBaseRepository`1">
             <summary>

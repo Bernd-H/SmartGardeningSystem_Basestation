@@ -16,7 +16,8 @@ namespace GardeningSystem.DataAccess.Migrations
                 {
                     uniqueDataPointId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Data = table.Column<double>(type: "double", nullable: false),
+                    SoilMoisture = table.Column<double>(type: "double", nullable: false),
+                    Temperature = table.Column<double>(type: "double", nullable: false),
                     TimeStamp = table.Column<DateTime>(type: "Date", nullable: false)
                 },
                 constraints: table =>

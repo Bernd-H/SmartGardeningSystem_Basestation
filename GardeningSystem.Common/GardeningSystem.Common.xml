@@ -70,6 +70,41 @@
             Public IP addres of basestation
             </summary>
         </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.SignalStrength">
+            <summary>
+            Last measured signal strength to the module.
+            RSSI...Received Signal Strength Indicator
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.TemperatureMeasurements">
+            <summary>
+            List of temperature measurements of the module.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.AssociatedModules">
+            <summary>
+            Property for valves.
+            Sensors that are associated to this valve.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.LastWaterings">
+            <summary>
+            Property for valves.
+            List of irrigation DateTimes with the time the valve was open in minutes.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.EnabledForManualIrrigation">
+            <summary>
+            Property for valves.
+            True to open or close this valve when the system gets controlled manually.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.SoilMoistureMeasurements">
+            <summary>
+            Property for sensors.
+            List of soil moisture measurements.
+            </summary>
+        </member>
         <member name="P:GardeningSystem.Common.Models.Entities.ApplicationSettings.CityName">
             <summary>
             Name of a near by city.
@@ -113,6 +148,11 @@
             Will be used to compare the login data entered on the mobile app.
             </summary>
         </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.IrrigationInfo.IrrigationTime">
+            <summary>
+            Time the valves associated with the sensor should stay open.
+            </summary>
+        </member>
         <member name="P:GardeningSystem.Common.Models.Entities.ModuleData.Id">
             <summary>
             Sensor ID
@@ -121,6 +161,61 @@
         <member name="P:GardeningSystem.Common.Models.Entities.ModuleData.TimeStamp">
             <summary>
             UTC Time
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.Id">
+            <summary>
+            Storage Id of the module.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.ModuleId">
+            <summary>
+            Id of the module (Id to send commands to).
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.Name">
+            <summary>
+            Name of the module.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.ModuleType">
+            <summary>
+            Type of the module (sensor / valve).
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.SignalStrength">
+            <summary>
+            Last measured signal strength to the module.
+            RSSI...Received Signal Strength Indicator
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.TemperatureMeasurements">
+            <summary>
+            List of temperature measurements of the module.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.AssociatedModules">
+            <summary>
+            Property for valves.
+            Sensors that are associated to this valve.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.LastWaterings">
+            <summary>
+            Property for valves.
+            List of irrigation DateTimes with the time the valve was open in minutes.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.EnabledForManualIrrigation">
+            <summary>
+            Property for valves.
+            True to open or close this valve when the system gets controlled manually.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.SoilMoistureMeasurements">
+            <summary>
+            Property for sensors.
+            List of soil moisture measurements.
             </summary>
         </member>
         <member name="P:GardeningSystem.Common.Models.Entities.SslClientSettings.TargetHost">
@@ -354,10 +449,10 @@
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.PingModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
             <summary>
-            Pings a specific module.
+            Gets the RSSI of a specific module
             </summary>
             <param name="module">ModuleInfoDto object containing the module id.</param>
-            <returns>True when the module was reachable.</returns>
+            <returns>The rssi to the module. Returns int.MaxValue when there was no repsone.</returns>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.GetTempAndSoilMoisture(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
             <summary>
@@ -390,6 +485,23 @@
             </summary>
             <param name="module">ModuleInfoDto object containing the module id.</param>
             <returns>Battery level in percent.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.TryRerouteModule(System.Byte,System.Collections.Generic.List{System.Byte})">
+            <summary>
+            Trys to reach a module (<paramref name="moduleId"/>) over another one and stores the route on success. 
+            </summary>
+            <param name="moduleId">Module to change the route for.</param>
+            <param name="otherModules">List of modules that will be used to relay messages to the module.</param>
+            <returns>A task that reprecents an asynchronous operation. The value of the TResult
+            parameter contains a boolean that is true when the module got reached over another one and is available now.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.RemoveModule(System.Byte)">
+            <summary>
+            Tells the module that it got removed.
+            </summary>
+            <param name="moduleId">Id of the module.</param>
+            <returns>A task that reprecents an asynchronous operation. The value of the TResult
+            parameter contains a boolean that is true when the module received the message successfully.</returns>
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.ISslTcpClient">
             <summary>
@@ -578,6 +690,17 @@
             <summary>
             Contains information of what currently active connection should be used in LocalRelayManager to forward Data.
             Used by MakeAesTcpRequest()
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.Common.Specifications.IDatabaseContext">
+            <summary>
+            Inherits from DbContext.
+            Class that contains the connection string for the mysql database and multiple tabels as DbSet instance.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Specifications.IDatabaseContext.sensordata">
+            <summary>
+            Table where the sensor measurements get stored.
             </summary>
         </member>
         <member name="T:GardeningSystem.Common.Specifications.IDependencyResolver">
@@ -801,10 +924,9 @@
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.GetAllMeasurements">
             <summary>
-            Gets measurements for the irrigation algorithm from all sensor modules.
+            Measures the soil moisture and temperature of each sensor and stores the data in a database and in the module information object.
             </summary>
-            <returns>A task that represents an asynchronous operation. The value of the TResult
-            parameter contains a list of all collected measurements.</returns>
+            <returns>A task that represents an asynchronous operation.</returns>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.CloseValve(System.Guid)">
             <summary>
@@ -856,6 +978,13 @@
             <param name="id">Internal id of the module. (This id gets only used in this application)</param>
             <returns>A task that represents an asynchronous operation. The value of the TResult
             parameter contains a ModuleInfoDto object.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.GetModule(System.Byte)">
+            <summary>
+            Gets more information about a specific module.
+            </summary>
+            <param name="moduleId">Internal id of the module. (This id gets only used in this application)</param>
+            <returns>A ModuleInfo object.</returns>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.RemoveModule(System.Guid)">
             <summary>
@@ -957,11 +1086,11 @@
             <returns>A task that represents an asynchronous operation. The value of the TResult
             parameter contains a list with irrigation information.</returns>
         </member>
-        <member name="M:GardeningSystem.Common.Specifications.Managers.IWateringManager.StartWatering(GardeningSystem.Common.Models.DTOs.WateringNeccessaryDto)">
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IWateringManager.StartWatering(GardeningSystem.Common.Models.Entities.IrrigationInfo)">
             <summary>
-            Starts irrigating by opening the valve specified in <paramref name="wateringInfo"/> for a specific time.
+            Starts irrigating by opening the valve specified in <paramref name="irrigationInfo"/> for a specific time.
             </summary>
-            <param name="wateringInfo">Irrigation information got from IsWateringNeccessary().</param>
+            <param name="irrigationInfo">Irrigation information got from IsWateringNeccessary().</param>
             <returns>A task that represents an asynchronous operation.</returns>
             <seealso cref="M:GardeningSystem.Common.Specifications.Managers.IWateringManager.IsWateringNeccessary"/>
         </member>
@@ -1190,6 +1319,17 @@
             <summary>
             Gets set in Program.cs, when the application gets started.
             </summary>
+        </member>
+        <member name="M:GardeningSystem.Common.Utilities.TimeUtils.GetSeason">
+            <summary>
+            Gets the seasons of the year.
+            </summary>
+            <returns>
+            0 = spring,
+            1 = summer,
+            2 = fall,
+            3 = winter
+            </returns>
         </member>
     </members>
 </doc>

@@ -155,6 +155,16 @@
         <member name="M:GardeningSystem.Jobs.CommunicationJob.StopAsync(System.Threading.CancellationToken)">
             <inheritdoc/>
         </member>
+        <member name="T:GardeningSystem.Jobs.MeasureJob">
+            <summary>
+            Service that collects the soil moisture and temperature measurements frequently.
+            </summary>
+        </member>
+        <member name="F:GardeningSystem.Jobs.MeasureJob.START_TIMES">
+            <summary>
+            Startimes for the MeasureJob.
+            </summary>
+        </member>
         <member name="T:GardeningSystem.Jobs.WateringJob">
             <summary>
             Service that collects the soil moisture measurements frequently and instructs the irrigation if neccessary.

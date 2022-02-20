@@ -86,16 +86,22 @@ namespace GardeningSystem {
                     });
                 })
                 .ConfigureServices((hostContext, services) => {
-                    // timed jobs
+                    // timed services
                     if (Convert.ToBoolean(configuration[ConfigurationVars.WATERINGJOB_ENABLED])) {
                         services.AddHostedService<WateringJob>();
                     }
+                    if (Convert.ToBoolean(configuration[ConfigurationVars.MEASUREJOB_ENABLED])) {
+                        services.AddHostedService<MeasureJob>();
+                    }
+
+                    // interval services
+                    if (Convert.ToBoolean(configuration[ConfigurationVars.ACCESSPOINTJOB_ENABLED])) {
+                        services.AddHostedService<AccessPointJob>();
+                    }
+
                     // other services
                     if (Convert.ToBoolean(configuration[ConfigurationVars.COMMUNICATIONJOB_ENABLED])) {
                         services.AddHostedService<CommunicationJob>();
-                    }
-                    if (Convert.ToBoolean(configuration[ConfigurationVars.ACCESSPOINTJOB_ENABLED])) {
-                        services.AddHostedService<AccessPointJob>();
                     }
                 }).UseConsoleLifetime();
     }

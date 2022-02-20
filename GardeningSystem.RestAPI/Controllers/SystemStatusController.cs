@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 
 namespace GardeningSystem.RestAPI.Controllers {
+
+    /// <summary>
+    /// API controller to get the status of the basestation / irrigation system.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class SystemStatusController : ControllerBase {

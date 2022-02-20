@@ -9,9 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 
 namespace GardeningSystem.RestAPI.Controllers {
+
+    /// <summary>
+    /// Obsolete API controller. Was used to register a new user.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
+    [Obsolete]
     public class RegisterController : ControllerBase {
 
         private IAesEncrypterDecrypter AesDecrypter;

@@ -17,6 +17,7 @@ using GardeningSystem.Common.Specifications.Repositories.DB;
 using GardeningSystem.DataAccess;
 using GardeningSystem.DataAccess.Communication;
 using GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery;
+using GardeningSystem.DataAccess.Database;
 using GardeningSystem.DataAccess.Repositories;
 using GardeningSystem.Jobs;
 using Microsoft.Extensions.Configuration;
@@ -62,6 +63,8 @@ namespace GardeningSystem {
             /// jobs
             containerBuilder.RegisterType<WateringJob>().AsSelf().SingleInstance();
             containerBuilder.RegisterType<CommunicationJob>().AsSelf();
+            containerBuilder.RegisterType<MeasureJob>().AsSelf();
+            containerBuilder.RegisterType<AccessPointJob>().AsSelf();
 
             /// business logic
             // managers
@@ -82,6 +85,8 @@ namespace GardeningSystem {
             containerBuilder.RegisterType<CertificateHandler>().As<ICertificateHandler>();
 
             /// data access
+            containerBuilder.RegisterType<DatabaseContext>().As<IDatabaseContext>().SingleInstance();
+
             // repositories
             containerBuilder.RegisterType<FileRepository>().As<IFileRepository>();
             containerBuilder.RegisterGeneric(typeof(SerializedFileRepository<>)).As(typeof(ISerializedFileRepository<>)).InstancePerDependency();

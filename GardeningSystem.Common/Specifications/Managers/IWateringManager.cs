@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Models.Entities;
 
 namespace GardeningSystem.Common.Specifications.Managers {
 
@@ -14,15 +15,15 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// </summary>
         /// <returns>A task that represents an asynchronous operation. The value of the TResult
         /// parameter contains a list with irrigation information.</returns>
-        Task<IEnumerable<WateringNeccessaryDto>> IsWateringNeccessary();
+        Task<IEnumerable<IrrigationInfo>> IsWateringNeccessary();
 
         /// <summary>
-        /// Starts irrigating by opening the valve specified in <paramref name="wateringInfo"/> for a specific time.
+        /// Starts irrigating by opening the valve specified in <paramref name="irrigationInfo"/> for a specific time.
         /// </summary>
-        /// <param name="wateringInfo">Irrigation information got from IsWateringNeccessary().</param>
+        /// <param name="irrigationInfo">Irrigation information got from IsWateringNeccessary().</param>
         /// <returns>A task that represents an asynchronous operation.</returns>
         /// <seealso cref="IsWateringNeccessary"/>
-        Task StartWatering(WateringNeccessaryDto wateringInfo);
+        Task StartWatering(IrrigationInfo irrigationInfo);
 
         /// <summary>
         /// Stops current watering tasks and overrides them with a specific setting.

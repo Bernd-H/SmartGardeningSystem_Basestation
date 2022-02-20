@@ -12,11 +12,10 @@ namespace GardeningSystem.Common.Specifications.Managers {
     public interface IModuleManager {
 
         /// <summary>
-        /// Gets measurements for the irrigation algorithm from all sensor modules.
+        /// Measures the soil moisture and temperature of each sensor and stores the data in a database and in the module information object.
         /// </summary>
-        /// <returns>A task that represents an asynchronous operation. The value of the TResult
-        /// parameter contains a list of all collected measurements.</returns>
-        Task<IEnumerable<ModuleDataDto>> GetAllMeasurements();
+        /// <returns>A task that represents an asynchronous operation.</returns>
+        Task GetAllMeasurements();
 
         /// <summary>
         /// Closes a specific valve.
@@ -68,6 +67,13 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <returns>A task that represents an asynchronous operation. The value of the TResult
         /// parameter contains a ModuleInfoDto object.</returns>
         Task<ModuleInfoDto> GetModuleById(Guid id);
+
+        /// <summary>
+        /// Gets more information about a specific module.
+        /// </summary>
+        /// <param name="moduleId">Internal id of the module. (This id gets only used in this application)</param>
+        /// <returns>A ModuleInfo object.</returns>
+        ModuleInfo GetModule(byte moduleId);
 
         /// <summary>
         /// Deletes a module form the local storage.

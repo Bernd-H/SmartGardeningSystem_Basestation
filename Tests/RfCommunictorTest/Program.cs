@@ -16,7 +16,9 @@ namespace RfCommunictorTest
             var rfCommunicator = IoC.Get<IRfCommunicator>();
             var logger = IoC.Get<ILoggerService>().GetLogger<Program>();
 
-            await Task.Delay(5000);
+            // Give the user time to be able to attach a debugger for example.
+            Console.WriteLine("Press enter to start the test...");
+            Console.ReadLine();
 
             logger.Info($"Starting app.");
             await rfCommunicator.Start();
@@ -25,19 +27,18 @@ namespace RfCommunictorTest
                 ModuleId = 0x02
             };
 
-            await Task.Delay(5000);
-
             logger.Info($"Ping: {await rfCommunicator.PingModule(moduleInfo)}");
-
-            await Task.Delay(5000);
 
             logger.Info($"Battery Level: {await rfCommunicator.GetBatteryLevel(moduleInfo)}");
 
-            await Task.Delay(5000);
-
-            (double temp, double hum) = await rfCommunicator.GetTempAndSoilMoisture(moduleInfo);
-
-            logger.Info($"Temp: {temp}; SoilMumid: {hum}");
+            var rfCommunicatorResult = await rfCommunicator.GetTempAndSoilMoisture(moduleInfo);
+            if (rfCommunicatorResult.Success) {
+                (double temp, double hum) = rfCommunicatorResult.Result as Tuple<double, double>;
+                logger.Info($"Temp: {temp}; SoilMumid: {hum}");
+            }
+            else {
+                logger.Error($"Failed to get the temperature and the soil moisture!");
+            }
 
             logger.Info("Finished.");
 

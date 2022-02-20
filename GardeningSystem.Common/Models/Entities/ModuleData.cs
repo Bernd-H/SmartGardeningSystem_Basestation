@@ -18,17 +18,28 @@ namespace GardeningSystem.Common.Models.Entities {
         public Guid Id { get; set; }
 
         [Column(TypeName = "double")]
-        public double Data { get; set; }
+        public double SoilMoisture { get; set; }
+
+        [Column(TypeName = "double")]
+        public double Temperature { get; set; }
 
         /// <summary>
         /// UTC Time
         /// </summary>
-        [Column(TypeName = "Date")]
+        [Column(TypeName = "Timestamp")]
         public DateTime TimeStamp { get; set; }
 
         public ModuleData() {
             uniqueDataPointId = Guid.NewGuid();
             TimeStamp = TimeUtils.GetCurrentTime();
+        }
+
+        public static ModuleData NoMeasurement(Guid moduleId) {
+            return new ModuleData {
+                Id = moduleId,
+                SoilMoisture = -1,
+                Temperature = -1
+            };
         }
     }
 }

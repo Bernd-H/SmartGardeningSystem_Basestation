@@ -151,6 +151,27 @@
         <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.UpdateModule(GardeningSystem.Common.Models.DTOs.ModuleInfoDto)">
             <inheritdoc/>
         </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.GetModule(System.Byte)">
+            <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.sendCommand_retryRetoute(GardeningSystem.Common.Models.DTOs.ModuleInfoDto,System.Func{System.Threading.Tasks.Task{System.Boolean}},System.Boolean)">
+            <summary>
+            Executes a command. Retrys it one time if failed and trys to reroute the module.
+            </summary>
+            <param name="module">Info of the module the command is for.</param>
+            <param name="sendCommandCallback">Callback where the command gets called.</param>
+            <param name="alreadyRerouted">True to not try to reroute the module.</param>
+            <returns>Result of the command.</returns>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.sendCommand_retryRetoute(GardeningSystem.Common.Models.DTOs.ModuleInfoDto,System.Func{System.Threading.Tasks.Task{GardeningSystem.Common.Models.Entities.RfCommunicatorResult}},System.Boolean)">
+            <summary>
+            Executes a command. Retrys it one time if failed and trys to reroute the module.
+            </summary>
+            <param name="module">Info of the module the command is for.</param>
+            <param name="sendCommandCallback">Callback where the command gets called.</param>
+            <param name="alreadyRerouted">True to not try to reroute the module.</param>
+            <returns>Result of the command.</returns>
+        </member>
         <member name="T:GardeningSystem.BusinessLogic.Managers.SettingsManager">
             <inheritdoc/>
         </member>
@@ -187,17 +208,31 @@
         <member name="T:GardeningSystem.BusinessLogic.Managers.WateringManager">
             <inheritdoc/>
         </member>
+        <member name="F:GardeningSystem.BusinessLogic.Managers.WateringManager.MinTimeDistanceBetweenTwoIrrigations">
+            <summary>
+            Key = season of the year
+            Value = MinTimeDistanceBetweenTwoIrrigations
+            </summary>
+        </member>
         <member name="P:GardeningSystem.BusinessLogic.Managers.WateringManager.AutomaticIrrigationEnabled">
             <inheritdoc/>
         </member>
         <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.IsWateringNeccessary">
             <inheritdoc/>
         </member>
-        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.StartWatering(GardeningSystem.Common.Models.DTOs.WateringNeccessaryDto)">
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.StartWatering(GardeningSystem.Common.Models.Entities.IrrigationInfo)">
             <inheritdoc/>
         </member>
         <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.ManualOverwrite(System.Boolean,System.Nullable{System.TimeSpan})">
             <inheritdoc/>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.irrigationAlgo(GardeningSystem.Common.Models.Entities.ModuleInfo,GardeningSystem.Common.Models.Entities.WeatherForecast)">
+            <summary>
+            Determines if plants near a sensor needs to be irrigated.
+            </summary>
+            <param name="moduleData">Sensor module data.</param>
+            <param name="weatherData">Weather forecast for the next day.</param>
+            <returns>The timespan the valves associated to this sensor should stay open.</returns>
         </member>
     </members>
 </doc>

@@ -22,9 +22,9 @@ namespace GardeningSystem.DataAccess.Database {
 
         private ILogger Logger;
 
-        public DbBaseRepository(ILoggerService loggerService) {
+        public DbBaseRepository(ILoggerService loggerService, IDatabaseContext databaseContext) {
             Logger = loggerService.GetLogger<DbBaseRepository<T>>();
-            context = new DatabaseContext();
+            context = databaseContext as DatabaseContext;
         }
 
         /// <summary>

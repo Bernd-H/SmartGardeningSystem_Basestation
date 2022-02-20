@@ -4,5 +4,47 @@
         <name>GardeningSystem.RestAPI</name>
     </assembly>
     <members>
+        <member name="T:GardeningSystem.RestAPI.Controllers.ControllerHelperClass">
+            <summary>
+            Obsolete class. Was used to get the id of a user from the http context.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.RestAPI.Controllers.LoginController">
+            <summary>
+            API controller to login (get a json web token) or to change the login information.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.RestAPI.Controllers.ModulesController">
+            <summary>
+            API controller to detele, change and get connected modules (valves and sensors).
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.RestAPI.Controllers.RegisterController">
+            <summary>
+            Obsolete API controller. Was used to register a new user.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.RestAPI.Controllers.SystemStatusController">
+            <summary>
+            API controller to get the status of the basestation / irrigation system.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.RestAPI.Controllers.WlanController">
+            <summary>
+            API controller to get all reachable wifis and information wether the basestation is connected
+            to a wifi or not.
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.RestAPI.Program">
+            <summary>
+            This is not the starting point of the REST API.
+            This class only exists to satisfy the error CS5001 ("There is no starting point for this program").
+            </summary>
+        </member>
+        <member name="T:GardeningSystem.RestAPI.StartupRestAPI">
+            <summary>
+            Class to startup the RESTful API.
+            </summary>
+        </member>
     </members>
 </doc>

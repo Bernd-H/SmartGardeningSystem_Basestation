@@ -282,29 +282,36 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         private async Task<byte[]> sendCommandReceiveAnswer(byte[] command) {
-            //  wait 5s because the rf app needs 5s time between two commands
-            await Task.Delay(5000);
+            if (_process != null) {
+                //  wait 5s because the rf app needs 5s time between two commands
+                await Task.Delay(5000);
 
-            var commandString = Convert.ToBase64String(command);
-            Logger.Trace($"[sendCommandReceiveAnswer]Sending \"{commandString}\" to the rf module app.");
+                var commandString = Convert.ToBase64String(command);
+                Logger.Trace($"[sendCommandReceiveAnswer]Sending \"{commandString}\" to the rf module app.");
 
-            var readTask = _sr.ReadLineAsync();
-            await _sw.WriteLineAsync(commandString);
-            Logger.Trace($"[sendCommandReceiveAnswer]Sending \"{commandString}\" finished.");
+                var readTask = _sr.ReadLineAsync();
+                await _sw.WriteLineAsync(commandString);
 
-            var receivedString = await readTask;
-            Logger.Trace($"[sendCommandReceiveAnswer]Received \"{receivedString}\" from the rf module app.");
+                var receivedString = await readTask;
+                Logger.Trace($"[sendCommandReceiveAnswer]Received \"{receivedString}\" from the rf module app.");
 
-            return Convert.FromBase64String(receivedString);
+                return Convert.FromBase64String(receivedString);
+            }
+            else {
+                // when ConfigurationVars.IS_TEST_ENVIRONMENT = true
+                return new byte[] { 0x00 };
+            }
         }
 
         private async Task sendCommand(byte[] command) {
-            //  wait 5s because the rf app needs 5s time between two commands
-            await Task.Delay(5000);
+            if (_process != null) {
+                //  wait 5s because the rf app needs 5s time between two commands
+                await Task.Delay(5000);
 
-            var commandString = Convert.ToBase64String(command);
-            Logger.Trace($"[sendCommand]Sending \"{commandString}\" to the rf module app.");
-            await _sw.WriteLineAsync(commandString);
+                var commandString = Convert.ToBase64String(command);
+                Logger.Trace($"[sendCommand]Sending \"{commandString}\" to the rf module app.");
+                await _sw.WriteLineAsync(commandString);
+            }
         }
 
         /// <summary>

@@ -11,6 +11,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GardeningSystem.RestAPI {
+
+    /// <summary>
+    /// Class to startup the RESTful API.
+    /// </summary>
     public class StartupRestAPI {
 
         private IConfiguration _configuration;

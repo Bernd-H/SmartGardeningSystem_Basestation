@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GardeningSystem.Common.Events;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Managers;
+using GardeningSystem.Common.Utilities;
 using GardeningSystem.Jobs.Base;
 using NLog;
 
@@ -19,13 +20,13 @@ namespace GardeningSystem.Jobs {
         /// Startimes for the WateringJob.
         /// </summary>
         static readonly DateTime[] START_TIMES = new DateTime[] {
-                new DateTime(1, 1, 1, hour: 6, minute: 0, second: 0),
+                new DateTime(1, 1, 1, hour: 6, minute: 0, second: 0)
 
-                new DateTime(1, 1, 1, hour: 12, minute: 0, second: 0),
+                //new DateTime(1, 1, 1, hour: 12, minute: 0, second: 0),
 
-                new DateTime(1, 1, 1, hour: 15, minute: 0, second: 0),
+                //new DateTime(1, 1, 1, hour: 15, minute: 0, second: 0),
 
-                new DateTime(1, 1, 1, hour: 20, minute: 0, second: 0),
+                //new DateTime(1, 1, 1, hour: 20, minute: 0, second: 0),
             };
 
         private IWateringManager WateringManager;
@@ -46,22 +47,14 @@ namespace GardeningSystem.Jobs {
             // if automatic irrigation is enabled
             if (WateringManager.AutomaticIrrigationEnabled) {
                 Logger.Info($"[Start]Starting Watering-Check routine.");
-                var wateringInfos = (await WateringManager.IsWateringNeccessary()).ToList();
+                var irrigationInfos = (await WateringManager.IsWateringNeccessary()).ToList();
 
                 var wateringTasks = new List<Task>();
 
-                // process watering info
-                foreach (var sensor in wateringInfos) {
-                    if (!sensor.IsNeccessary.HasValue) {
-                        Logger.Warn($"[Start]Failed to get measurements of sensor with id {sensor.Id.ToString()}. Notifying user.");
-
-                        // notify user
-                        //throw new NotImplementedException();
-                    }
-                    else if (sensor.IsNeccessary.Value) {
-                        Logger.Info($"[Start]Starting watering for {sensor.ValveOpenTime.ToString()} on sensor {sensor.Id}.");
-                        wateringTasks.Add(WateringManager.StartWatering(sensor));
-                    }
+                foreach (var irrigationInfo in irrigationInfos) {
+                    // start irrigating all valves that are linked to the sensor the irrigationInfo is for
+                    Logger.Info($"[Start]Starting to irrigate for {irrigationInfo.IrrigationTime} minutes on sensor {Utils.ConvertByteToHex(irrigationInfo.SensorId)}.");
+                    wateringTasks.Add(WateringManager.StartWatering(irrigationInfo));
                 }
 
                 // wait for all the end of all watering tasks

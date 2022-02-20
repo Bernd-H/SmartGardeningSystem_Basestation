@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 
 namespace GardeningSystem.RestAPI.Controllers {
+
+    /// <summary>
+    /// API controller to detele, change and get connected modules (valves and sensors).
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]

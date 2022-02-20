@@ -28,7 +28,9 @@ namespace GardeningSystem.Common.Models {
                 Name = module.Name,
                 LastWaterings = module.LastWaterings,
                 EnabledForManualIrrigation = module.EnabledForManualIrrigation,
-                SignalStrength = module.SignalStrength
+                SignalStrength = module.SignalStrength,
+                SoilMoistureMeasurements = module.SoilMoistureMeasurements,
+                TemperatureMeasurements = module.TemperatureMeasurements
             };
         }
 
@@ -41,7 +43,9 @@ namespace GardeningSystem.Common.Models {
                 Name = moduleDto.Name,
                 LastWaterings = moduleDto.LastWaterings,
                 EnabledForManualIrrigation = moduleDto.EnabledForManualIrrigation,
-                SignalStrength = moduleDto.SignalStrength
+                SignalStrength = moduleDto.SignalStrength,
+                TemperatureMeasurements = moduleDto.TemperatureMeasurements,
+                SoilMoistureMeasurements = moduleDto.SoilMoistureMeasurements
             };
         }
 
@@ -85,19 +89,6 @@ namespace GardeningSystem.Common.Models {
             }
 
             return appSettings;
-        }
-
-        public static ModuleData FromDto(this ModuleDataDto moduleDataDto) {
-            double data = -1;
-            if (!double.IsNaN(moduleDataDto.Data)) {
-                // double mysql data type does not know double.NaN
-                data = moduleDataDto.Data;
-            }
-
-            return new ModuleData {
-                Id = moduleDataDto.Id,
-                Data = data
-            };
         }
     }
 }

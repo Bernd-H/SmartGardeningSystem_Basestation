@@ -67,6 +67,7 @@
         public static string WATERINGJOB_ENABLED = "wateringJob_enabled";
         public static string COMMUNICATIONJOB_ENABLED = "communicationJob_enabled";
         public static string ACCESSPOINTJOB_ENABLED = "accessPointJob_enabled";
+        public static string MEASUREJOB_ENABLED = "measureJob_enabled";
 
         // Test Environment
         public static string IS_TEST_ENVIRONMENT = "isTestEnvironment";

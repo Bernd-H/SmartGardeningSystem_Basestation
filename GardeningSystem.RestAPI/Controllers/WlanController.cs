@@ -8,6 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 
 namespace GardeningSystem.RestAPI.Controllers {
+
+    /// <summary>
+    /// API controller to get all reachable wifis and information wether the basestation is connected
+    /// to a wifi or not.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]

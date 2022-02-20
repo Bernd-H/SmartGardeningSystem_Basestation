@@ -60,7 +60,8 @@
   "wateringJob_enabled": "false",
   "communicationJob_enabled": "true",
   "accessPointJob_enabled": "true",
+  "measureJob_enabled": "false",
 
   ///////////////////////// Test Environment options
-  "isTestEnvironment": "false"
+  "isTestEnvironment": "true"
 }

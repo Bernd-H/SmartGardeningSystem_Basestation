@@ -16,6 +16,19 @@ namespace GardeningSystem.BusinessLogic.Managers {
     /// <inheritdoc/>
     public class WateringManager : IWateringManager {
 
+        /// <summary>
+        /// Key = season of the year
+        /// Value = MinTimeDistanceBetweenTwoIrrigations
+        /// </summary>
+        static Dictionary<int, int> MinTimeDistanceBetweenTwoIrrigations = new Dictionary<int, int>(4) {
+            {0, 71}, // Spring: 3 days - 1hour
+            {1, 47}, // Summer: 2 days - 1hour
+            {2, 71}, // Autumn: 3 days - 1hour
+            {3, int.MaxValue } // Winter: no irrigation
+        };
+
+        static int StandardIrrigationTime_Hours = 2;
+
         /// <inheritdoc/>
         public bool AutomaticIrrigationEnabled {
             get {
@@ -41,13 +54,13 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<WateringNeccessaryDto>> IsWateringNeccessary() {
+        public async Task<IEnumerable<IrrigationInfo>> IsWateringNeccessary() {
             try {
                 await locker.WaitAsync();
-                var wateringInfo = new List<WateringNeccessaryDto>();
+                var irrigationInfos = new List<IrrigationInfo>();
 
                 // get measurements
-                var measurements = (await ModuleManager.GetAllMeasurements()).ToList();
+                await ModuleManager.GetAllMeasurements();
 
                 // get current weather data
                 WeatherForecast weatherData = null;
@@ -55,29 +68,23 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     weatherData = await APIManager.GetWeatherForecast(SettingsManager.GetApplicationSettings().CityName);
                 }
 
-                foreach (var measurement in measurements) { // foreach sensor
-                    if (double.IsNaN(measurement.Data)) {
-                        Logger.Info($"[IsWateringNeccessary]Could not get measurments from sensor {measurement.Id}.");
-                        // couldn't get measurement because of communication errors
-                        wateringInfo.Add(new WateringNeccessaryDto() {
-                            Id = measurement.Id,
-                            IsNeccessary = null,
-                            Time = TimeUtils.GetCurrentTime(),
-                            ValveOpenTime = TimeSpan.Zero
-                        });
-                    }
-                    else {
-                        var algoResult = irrigationAlgo(measurement.Data, measurement.LastWaterings?.Last() ?? null, weatherData);
-                        wateringInfo.Add(new WateringNeccessaryDto() {
-                            Id = measurement.Id,
-                            IsNeccessary = (algoResult != TimeSpan.Zero),
-                            Time = TimeUtils.GetCurrentTime(),
-                            ValveOpenTime = algoResult
-                        });
+                var modules = await ModuleManager.GetAllModules();
+
+                // calculate a irrigation time foreach sensor
+                foreach (var module in modules) {
+                    if (module.ModuleType == Common.Models.Enums.ModuleType.Sensor) {
+                        var irrigationTime = irrigationAlgo(module, weatherData);
+                        if (irrigationTime != TimeSpan.Zero) {
+                            // add sensor to the irrigation list
+                            irrigationInfos.Add(new IrrigationInfo {
+                                SensorId = module.ModuleId,
+                                IrrigationTime = irrigationTime
+                            });
+                        }
                     }
                 }
 
-                return wateringInfo;
+                return irrigationInfos;
             }
             finally {
                 locker.Release();
@@ -85,16 +92,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <inheritdoc/>
-        public async Task StartWatering(WateringNeccessaryDto wateringInfo) {
-            Logger.Info($"[StartWatering]Starting watering for sensor with id={wateringInfo.Id.ToString()} for {wateringInfo.ValveOpenTime.TotalHours} hours.");
+        public async Task StartWatering(IrrigationInfo irrigationInfo) {
+            Logger.Info($"[StartWatering]Starting watering for sensor with id={Utils.ConvertByteToHex(irrigationInfo.SensorId)} for {irrigationInfo.IrrigationTime.TotalMinutes} minutes.");
 
             try {
                 await locker.WaitAsync();
 
                 // open associated valves
-                var module = await ModuleManager.GetModuleById(wateringInfo.Id);
+                var module = ModuleManager.GetModule(irrigationInfo.SensorId);
                 foreach (var valve in module.AssociatedModules) {
-                    bool changeGotVerified = await ModuleManager.OpenValve(valve, wateringInfo.ValveOpenTime);
+                    bool changeGotVerified = await ModuleManager.OpenValve(valve, irrigationInfo.IrrigationTime);
 
                     if (!changeGotVerified) {
                         Logger.Error($"[StartWatering]Failed to open valve with id={valve}.");
@@ -140,27 +147,47 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
         }
 
-        private TimeSpan irrigationAlgo(double soilHumidity, DateTime? lastWateringTime, WeatherForecast weatherData) {
-            Logger.Trace($"[wateringAlgo]Checking if watering is neccessary.");
-
-            float c1 = 0.9f, c2 = -0.5f, c3 = 0.5f;
-
-            double spanBetweenLastWatering = 0;
-            if (lastWateringTime != null) {
-                spanBetweenLastWatering = (TimeUtils.GetCurrentTime() - lastWateringTime.Value).TotalHours;
+        /// <summary>
+        /// Determines if plants near a sensor needs to be irrigated.
+        /// </summary>
+        /// <param name="moduleData">Sensor module data.</param>
+        /// <param name="weatherData">Weather forecast for the next day.</param>
+        /// <returns>The timespan the valves associated to this sensor should stay open.</returns>
+        private TimeSpan irrigationAlgo(ModuleInfo moduleData, WeatherForecast weatherData) {
+            Logger.Trace($"[wateringAlgo]Checking if watering is neccessary for sensor with id={Utils.ConvertByteToHex(moduleData.ModuleId)}.");
+            if (moduleData.ModuleType != Common.Models.Enums.ModuleType.Sensor) {
+                throw new Exception();
             }
 
-            double rainInMilimeterOnTheSameDay = double.NaN;
+            // get last measured soil moisture and temperature from sensor
+            float soilMoisture = getLastMeasurement(moduleData.SoilMoistureMeasurements, -1);
+            float temperature = getLastMeasurement(moduleData.TemperatureMeasurements, -1);
 
-            var w = soilHumidity * c1 + spanBetweenLastWatering * c2 + rainInMilimeterOnTheSameDay * c3;
+            if ((TimeUtils.GetCurrentTime() - moduleData.LastWaterings.Last().Timestamp).TotalHours >= MinTimeDistanceBetweenTwoIrrigations[TimeUtils.GetSeason()]) {
+                // time between last irrigation is long enough
 
-            double treshhold = double.NaN;
+                // check soil moisture
 
-            if (w < treshhold) {
-                return TimeSpan.FromHours(4);
+                int irrigationTime = StandardIrrigationTime_Hours;
+
+                // check weather -> adjust the irrigation time
+
+                TimeSpan.FromHours(irrigationTime);
             }
 
             return TimeSpan.Zero;
+        }
+
+        private T getLastMeasurement<T>(IList<ValueTimePair<T>> measurements, T defaultValue) {
+            if (measurements.Count > 0) {
+                var measurement_timePair = measurements.Last();
+                if ((TimeUtils.GetCurrentTime() - measurement_timePair.Timestamp).TotalHours < 1) {
+                    // measurement is not outdated
+                    return measurement_timePair.Value;
+                }
+            }
+
+            return defaultValue;
         }
     }
 }

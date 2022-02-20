@@ -21,6 +21,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
     /// <inheritdoc/>
     public class ModuleManager : IModuleManager {
 
+        private static SemaphoreSlim LOCKER = new SemaphoreSlim(1, 1);
+
+        private DateTime _timeOfLastMeasurements = DateTime.MinValue;
+
+
         private ILogger Logger;
 
         private IModulesRepository ModulesRepository;
@@ -29,22 +34,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private IRfCommunicator RfCommunicator;
 
-        private readonly IConfiguration Configuration;
-
-        private Guid basestationGuid;
-
-        //private static readonly object LOCK_OBJEJCT = new object();
-        private static SemaphoreSlim LOCKER = new SemaphoreSlim(1, 1);
-
-        public ModuleManager(ILoggerService logger, IConfiguration configuration, IModulesRepository modulesRepository,
+        public ModuleManager(ILoggerService logger, IModulesRepository modulesRepository,
             IRfCommunicator rfCommunicator, ISensorDataDbRepository sensorDataDbRepository) {
             Logger = logger.GetLogger<ModuleManager>();
-            Configuration = configuration;
             ModulesRepository = modulesRepository;
             SensorDataDbRepository = sensorDataDbRepository;
             RfCommunicator = rfCommunicator;
-
-            basestationGuid = Guid.Parse(Configuration[ConfigurationVars.BASESTATION_GUID]);
         }
 
         /// <inheritdoc/>
@@ -63,18 +58,24 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         /// <inheritdoc/>
         public async Task<bool> OpenValve(byte externalValveId, TimeSpan valveOpenTime) {
-            var moduleInfo = getModule(externalValveId).ToDto();
+            var moduleInfo = GetModule(externalValveId).ToDto();
             //return await RfCommunicator.OpenValve(moduleInfo, valveOpenTime);
             return await sendCommand_retryRetoute(moduleInfo, () => RfCommunicator.OpenValve(moduleInfo, valveOpenTime));
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<ModuleDataDto>> GetAllMeasurements() {
+        public async Task GetAllMeasurements() {
             await LOCKER.WaitAsync();
+
+            if ((TimeUtils.GetCurrentTime() - _timeOfLastMeasurements).TotalMinutes < 10) {
+                // don't request measurements from the sensors
+                // last measurements are less than 10 minutes old
+                return;
+            }
 
             Logger.Info($"[GetAllMeasurements]Requesting measuremnts from all sensors.");
 
-            var measurements = new List<ModuleDataDto>();
+            var measurements = new List<ModuleData>();
 
             // get guids and send out requests to all sensors
             var modules = getAllModules();
@@ -84,41 +85,50 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                     if (!measurementResult.Success) {
                         Logger.Error($"[GetAllMeasurements]Could not get measurement of module with id {module.Id.ToString()}.");
-                        measurements.Add(new ModuleDataDto() {
-                            Id = module.Id,
-                            Data = double.NaN
-                        });
+                        measurements.Add(ModuleData.NoMeasurement(module.Id));
                     }
                     else {
-                       (double temp, double soilMoisture) = measurementResult.Result as Tuple<double, double>;
-                        measurements.Add(new ModuleDataDto() {
+                       (float temp, float soilMoisture) = measurementResult.Result as Tuple<float, float>;
+
+                        // add measurement to list
+                        measurements.Add(new ModuleData() {
                             Id = module.Id,
-                            Data = soilMoisture,
-                            LastWaterings = module.LastWaterings
+                            SoilMoisture = soilMoisture,
+                            Temperature = temp
                         });
+
+                        // store measurement in the module info
+                        module.TemperatureMeasurements.Add(ValueTimePair<float>.FromValue(temp));
+                        module.SoilMoistureMeasurements.Add(ValueTimePair<float>.FromValue(soilMoisture));
+                        if (updateModule(module)) {
+                            Logger.Info($"[GetAllMeasurements]Stored measurements of module with id={Utils.ConvertByteToHex(module.ModuleId)}.");
+                        }
+                        else {
+                            Logger.Error($"[GetAllMeasurements]Couldn't store measurement of module with id={Utils.ConvertByteToHex(module.ModuleId)}.");
+                        }
                     }
                 }
             }
 
-            LOCKER.Release();
-
             // store datapoints in local database
             await storeSensorData(measurements);
 
-            return measurements;
+            _timeOfLastMeasurements = TimeUtils.GetCurrentTime();
+
+            LOCKER.Release();
         }
 
         /// <inheritdoc/>
         public async Task<ModuleInfoDto> DiscoverANewModule() {
             try {
-                await LOCKER.WaitAsync();
+                //await LOCKER.WaitAsync();
 
                 var module = await RfCommunicator.DiscoverNewModule(getFreeModuleId());
                 if (module != null) {
                     // measure rssi
                     var rfCommunicatorResult = await sendCommand_retryRetoute(module, () => RfCommunicator.PingModule(module));
                     if (rfCommunicatorResult.Success) {
-                        module.SignalStrength = new Rssi((int)rfCommunicatorResult.Result);
+                        module.SignalStrength = ValueTimePair<int>.FromValue((int)rfCommunicatorResult.Result);
                     }
 
                     // save new module
@@ -128,7 +138,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 return module;
             }
             finally {
-                LOCKER.Release();
+                //LOCKER.Release();
             }
         }
 
@@ -150,7 +160,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         /// <inheritdoc/>
         public async Task<bool> RemoveModule(Guid moduleId) {
-            await LOCKER.WaitAsync();
+            //await LOCKER.WaitAsync();
 
             var module = ModulesRepository.GetModuleById(moduleId).ToDto();
 
@@ -161,28 +171,44 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 removedModule = ModulesRepository.RemoveModule(moduleId);
             }
 
-            LOCKER.Release();
+            //LOCKER.Release();
+            await Task.CompletedTask;
             return removedModule;
         }
 
         /// <inheritdoc/>
         public async Task<bool> UpdateModule(ModuleInfoDto module) {
-            await LOCKER.WaitAsync();
+            //await LOCKER.WaitAsync();
             var result = ModulesRepository.UpdateModule(module.ToDo(ModulesRepository));
-            LOCKER.Release();
+            //LOCKER.Release();
+            await Task.CompletedTask;
             return result;
         }
 
-        private async Task storeSensorData(List<ModuleDataDto> moduleDataDtos) {
+        /// <inheritdoc/>
+        public ModuleInfo GetModule(byte moduleId) {
+            var internalStorageId = ModulesRepository.GetIdFromModuleId(moduleId);
+            if (internalStorageId != Guid.Empty) {
+                return ModulesRepository.GetModuleById(internalStorageId);
+            }
+            else {
+                return null;
+            }
+        }
+
+        private bool updateModule(ModuleInfo module) {
+            return ModulesRepository.UpdateModule(module);
+        }
+
+        private async Task storeSensorData(List<ModuleData> moduleDataDtos) {
             foreach (var dataPoint in moduleDataDtos) {
                 try {
-                    var d = dataPoint.FromDto();
-                    bool success = await SensorDataDbRepository.AddDataPoint(d);
+                    bool success = await SensorDataDbRepository.AddDataPoint(dataPoint);
                     if (success) {
-                        Logger.Info($"[storeSensorData]Stored sensor measurement of sensor {d.Id} in database. (dataPointId={d.uniqueDataPointId})");
+                        Logger.Info($"[storeSensorData]Stored sensor measurement of sensor {dataPoint.Id} in database. (dataPointId={dataPoint.uniqueDataPointId})");
                     }
                     else {
-                        Logger.Error($"[storeSensorData]Unable to store datapoint from sensor {d.Id} with uid={d.uniqueDataPointId} in database.");
+                        Logger.Error($"[storeSensorData]Unable to store datapoint from sensor {dataPoint.Id} with uid={dataPoint.uniqueDataPointId} in database.");
                     }
                 }
                 catch (Exception ex) {
@@ -195,16 +221,6 @@ namespace GardeningSystem.BusinessLogic.Managers {
             return ModulesRepository.GetAllRegisteredModules();
         }
 
-        private ModuleInfo getModule(byte Id) {
-            var internalStorageId = ModulesRepository.GetIdFromModuleId(Id);
-            if (internalStorageId != Guid.Empty) {
-                return ModulesRepository.GetModuleById(internalStorageId);
-            }
-            else {
-                return null;
-            }
-        }
-
         private byte getFreeModuleId() {
             // get the last added id and increment it till we get a free one
             var modules = getAllModules();
@@ -212,7 +228,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
             while (id != 0xFF) {
                 id += 1;
-                if (getModule(id) == null) {
+                if (GetModule(id) == null) {
                     // free id found
                     return id;
                 }

@@ -1,24 +1,49 @@
-﻿using GardeningSystem.Common.Models.Entities;
+﻿using System;
+using System.Collections.Generic;
+using GardeningSystem.Common.Configuration;
+using GardeningSystem.Common.Models.Entities;
+using GardeningSystem.Common.Specifications;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 namespace GardeningSystem.DataAccess.Database {
 
-    /// <summary>
-    /// Inherits from DbContext.
-    /// Class that contains the connection string for the mysql database and multiple tabels as DbSet instance.
-    /// </summary>
-    public class DatabaseContext : DbContext {
+    /// <inheritdoc/>
+    public class DatabaseContext : DbContext, IDatabaseContext {
 
         // DbSet names must be lower case. Else there are problems on linux
 
-        /// <summary>
-        /// Table where the sensor measurements get stored.
-        /// </summary>
+        /// <inheritdoc/>
         public DbSet<ModuleData> sensordata { get; set; }
 
+
+        private IConfiguration Configuration;
+
+        public DatabaseContext() {
+            // Mock IConfiguration
+            var configBuilder = new ConfigurationBuilder();
+            var configList = new List<KeyValuePair<string, string>>();
+            configList.Add(new KeyValuePair<string, string>(ConfigurationVars.IS_TEST_ENVIRONMENT, "true"));
+            configBuilder.AddInMemoryCollection(configList);
+
+            Configuration = configBuilder.Build();
+        }
+
+        public DatabaseContext(IConfiguration configuration) {
+            Configuration = configuration;
+        }
+
+        /// <inheritdoc/>
         protected override void OnConfiguring(DbContextOptionsBuilder dbContextOptionsBuilder) {
-            //string connectionString = "Data Source=localhost;Initial Catalog=smartgardening_basestation;User ID=root;Password=";
-            string connectionString = "Data Source=localhost;Initial Catalog=smartgardening_basestation;User ID=root;Password=hmufckmlmycj";
+            string connectionString;
+            if (Convert.ToBoolean(Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
+                connectionString = "Data Source=localhost;Initial Catalog=smartgardening_basestation;User ID=root;Password=";
+            }
+            else {
+                connectionString = "Data Source=localhost;Initial Catalog=smartgardening_basestation;User ID=root;Password=hmufckmlmycj";
+            }
+
             dbContextOptionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
         }
     }
