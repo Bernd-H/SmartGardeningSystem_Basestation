@@ -252,7 +252,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 answer = await sendCommandCallback();
 
                 // retry 1 time if failed
-            } while (!answer && attempts < 2);
+            } while (!answer && attempts < 3);
 
             if (!answer && !alreadyRerouted) {
                 // get id's of all modules
@@ -296,7 +296,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 answer = await sendCommandCallback();
 
                 // retry 1 time if failed
-            } while (!answer.Success && attempts < 2);
+            } while (!answer.Success && attempts < 3);
 
             if (!answer.Success && !alreadyRerouted) {
                 // get id's of all modules

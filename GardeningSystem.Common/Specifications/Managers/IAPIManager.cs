@@ -39,7 +39,7 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <param name="location">Location of a near city.</param>
         /// <returns>A task that represents a asynchronous operation. The value of the TResult
         /// parameter contains a WeatherForecast object.</returns>
-        /// <seealso cref="WeatherForecast"/>
-        Task<WeatherForecast> GetWeatherForecast(string location);
+        /// <seealso cref="WeatherData"/>
+        Task<WeatherData> GetWeatherForecast(string location);
     }
 }

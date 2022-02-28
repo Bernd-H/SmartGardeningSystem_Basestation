@@ -63,7 +63,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 await ModuleManager.GetAllMeasurements();
 
                 // get current weather data
-                WeatherForecast weatherData = null;
+                WeatherData weatherData = null;
                 if (!string.IsNullOrEmpty(SettingsManager.GetApplicationSettings().CityName)) {
                     weatherData = await APIManager.GetWeatherForecast(SettingsManager.GetApplicationSettings().CityName);
                 }
@@ -151,28 +151,34 @@ namespace GardeningSystem.BusinessLogic.Managers {
         /// Determines if plants near a sensor needs to be irrigated.
         /// </summary>
         /// <param name="moduleData">Sensor module data.</param>
-        /// <param name="weatherData">Weather forecast for the next day.</param>
+        /// <param name="weatherData">Weather forecast for the next day and weather data of the previous day.</param>
         /// <returns>The timespan the valves associated to this sensor should stay open.</returns>
-        private TimeSpan irrigationAlgo(ModuleInfo moduleData, WeatherForecast weatherData) {
+        private TimeSpan irrigationAlgo(ModuleInfo moduleData, WeatherData weatherData) {
             Logger.Trace($"[wateringAlgo]Checking if watering is neccessary for sensor with id={Utils.ConvertByteToHex(moduleData.ModuleId)}.");
             if (moduleData.ModuleType != Common.Models.Enums.ModuleType.Sensor) {
                 throw new Exception();
             }
 
-            // get last measured soil moisture and temperature from sensor
+            // get last measured soil moisture
             float soilMoisture = getLastMeasurement(moduleData.SoilMoistureMeasurements, -1);
-            float temperature = getLastMeasurement(moduleData.TemperatureMeasurements, -1);
 
-            if ((TimeUtils.GetCurrentTime() - moduleData.LastWaterings.Last().Timestamp).TotalHours >= MinTimeDistanceBetweenTwoIrrigations[TimeUtils.GetSeason()]) {
+            if ((TimeUtils.GetCurrentTime() - moduleData.LastWaterings.Last().Timestamp).TotalHours >= MinTimeDistanceBetweenTwoIrrigations[TimeUtils.GetSeason()]
+                && (soilMoisture < 50)) {
                 // time between last irrigation is long enough
+                // soil moisture is below 50%
 
-                // check soil moisture
-
-                int irrigationTime = StandardIrrigationTime_Hours;
-
-                // check weather -> adjust the irrigation time
+                // adjust the irrigation time with the weather forecast of the next day
+                int irrigationTime = adjustIrrigationTime(StandardIrrigationTime_Hours, moduleData, weatherData);
 
                 TimeSpan.FromHours(irrigationTime);
+            }
+            else if (soilMoisture <= 20) {
+                // irrigate because the soil moisture is very low
+
+                // adjust the irrigation time with the weather forecast of the next day
+                int irrigationTime = adjustIrrigationTime(StandardIrrigationTime_Hours, moduleData, weatherData);
+
+                return TimeSpan.FromHours(irrigationTime);
             }
 
             return TimeSpan.Zero;
@@ -188,6 +194,62 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
 
             return defaultValue;
+        }
+
+        /// <summary>
+        /// Calculates the average of <paramref name="measurementsPerDay"/> values from the end of a list.
+        /// </summary>
+        /// <typeparam name="T">A primitive data type.</typeparam>
+        /// <param name="data"></param>
+        /// <param name="day">0 for the average of measurements from the last day, 1 for measurements the day before the last day and so on...</param>
+        /// <param name="measurementsPerDay">Number of measurements per day.</param>
+        /// <returns>Average</returns>
+        private float getAverageMeasurmentsFromDay<T>(IEnumerable<ValueTimePair<T>> data, int day, int measurementsPerDay) {
+            // calculate average temp and soil moisture
+            float average = 0;
+            int startPoint = data.Count() - (measurementsPerDay * day) - 1;
+            for (int i = startPoint; i >= startPoint - measurementsPerDay; i--) {
+                average += (float)Convert.ChangeType(data.ElementAt(i).Value, typeof(float));
+            }
+
+            return average / measurementsPerDay;
+        }
+
+        private int adjustIrrigationTime(int currentIrrigationTime, ModuleInfo moduleData, WeatherData weatherData) {
+            int measurementsPerDay = 6;
+
+            // calculate average temp and soil moisture
+            float averageTemp = getAverageMeasurmentsFromDay(moduleData.TemperatureMeasurements, 0, measurementsPerDay);
+            //float averageSoilMoisture = getAverageMeasurmentsFromDay(moduleData.SoilMoistureMeasurements, 0, measurementsPerDay);
+
+            return adjustIrrigationTime(currentIrrigationTime, averageTemp, weatherData);
+        }
+
+        private int adjustIrrigationTime(int currentIrrigationTime, float averageTemp_previousDay, WeatherData weatherData) {
+            // Takes into account:
+            // - Average humidity for the previous day.
+            // - Average temperature for the previous day.
+            // - Average soil moisture of the previous day.
+            // - Total precipitation for the current day.
+
+            float humid_factor = (30 - weatherData?.Humidity ?? 0);
+            float temp_factor = (averageTemp_previousDay - 21) * 4;
+            float rain_factor = (weatherData?.AmountOfRainInMm ?? 0 + weatherData?.PrecipitationVolume_mm ?? 0) * -2;
+
+            //float adj = spi_min(spi_max(0, 100 + humid_factor + temp_factor + rain_factor), 200) / 2;
+            float adj = spi_max(-100, humid_factor + temp_factor + rain_factor + 10);
+            
+            // weather adjustment is in range 0 to 100%.
+            // adjust the irrigation time
+            return Convert.ToInt32(currentIrrigationTime * (1 + (adj / 100)));
+        }
+
+        private float spi_max(float a, float b) {
+            return a > b ? a : b;
+        }
+
+        private float spi_min(float a, float b) {
+            return a < b ? a : b;
         }
     }
 }

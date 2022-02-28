@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Models;
 using GardeningSystem.Common.Models.DTOs;
+using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Models.Enums;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
@@ -37,26 +38,6 @@ namespace GardeningSystem.BusinessLogic {
         public void SetupTestEnvironment() {
             Logger.Info($"[SetupTestEnvironment]Setting up test/development environment.");
 
-            //// add rest api authentication password
-            //string email = "bernd.hatzinger@gmail.com";
-            //// check if user already exists
-            //Logger.Info($"[SetupTestEnvironment]Checking if user is already registered.");
-            //if ((SettingsManager.GetApplicationSettings().RegisteredUsers?.ToList().Find(u => u.Email == email) ?? null) == null) {
-            //    // add user to settings
-            //    Logger.Info($"[SetupTestEnvironment]Adding a new user to the system.");
-            //    SettingsManager.UpdateCurrentSettings((s) => {
-            //        var registeredUsers = s.RegisteredUsers.ToList();
-            //        registeredUsers.Add(new Common.Models.Entities.User() {
-            //            Id = Guid.NewGuid(),
-            //            Email = email,
-            //            HashedPassword = PasswordHasher.HashPassword("123")
-            //        });
-
-            //        s.RegisteredUsers = registeredUsers;
-            //        return s;
-            //    });
-            //}
-
             // register some modules
             Logger.Info($"[SetupTestEnvironment]Checking if there are some registered modules.");
             if (!ModulesRepository.GetAllRegisteredModules().Any()) {
@@ -66,13 +47,24 @@ namespace GardeningSystem.BusinessLogic {
                 byte[] moduleIds = new byte[3];
                 random.NextBytes(moduleIds);
 
+                var lastWaterings = new List<ValueTimePair<int>>();
+                lastWaterings.Add(ValueTimePair<int>.FromValue(30));
+                lastWaterings.Add(ValueTimePair<int>.FromValue(70));
+                var tempMeasurements = new List<ValueTimePair<float>>();
+                tempMeasurements.Add(ValueTimePair<float>.FromValue(19));
+                var soilMoistureMeasurements = new List<ValueTimePair<float>>();
+                soilMoistureMeasurements.Add(ValueTimePair<float>.FromValue(67));
+
                 valve1Guid = ModulesRepository.AddModule(new ModuleInfoDto() {
                     ModuleId = moduleIds[0],
                     ModuleType = ModuleType.Valve,
                     Name = "Valve1",
-                    LastWaterings = null,
+                    LastWaterings = lastWaterings,
                     AssociatedModules = null,
-                    EnabledForManualIrrigation = true
+                    EnabledForManualIrrigation = true,
+                    SignalStrength = ValueTimePair<int>.FromValue(-40),
+                    TemperatureMeasurements = tempMeasurements,
+                    SoilMoistureMeasurements = soilMoistureMeasurements
                 }).Id;
                 valve2Guid = ModulesRepository.AddModule(new ModuleInfoDto() {
                     ModuleId = moduleIds[1],

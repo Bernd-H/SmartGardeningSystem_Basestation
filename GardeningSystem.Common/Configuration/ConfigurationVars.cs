@@ -6,8 +6,6 @@
 
         public static string RFAPP_FILENAME = "rfapp_fileName";
 
-        public static string BASESTATION_GUID = "basestation_guid";
-
         public static string APPLICATIONSETTINGS_FILENAME = "applicationSettings_fileName";
 
         public static string WLANINTERFACE_NAME = "wlanInterface_name";

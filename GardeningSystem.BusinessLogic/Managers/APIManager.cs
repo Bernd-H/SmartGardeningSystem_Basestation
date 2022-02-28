@@ -78,7 +78,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <inheritdoc/>
-        public async Task<WeatherForecast> GetWeatherForecast(string location) {
+        public async Task<WeatherData> GetWeatherForecast(string location) {
             Logger.Trace($"[GetWeather]Trying to get a weather forecast.");
             string url = "";
 
@@ -92,7 +92,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                 if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized) {
                     string result = await response.Content.ReadAsStringAsync();
-                    var weatherForecast = JsonConvert.DeserializeObject<WeatherForecast>(result);
+                    var weatherForecast = JsonConvert.DeserializeObject<WeatherData>(result);
 
                     return weatherForecast;
                 } 
