@@ -16,7 +16,7 @@ using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IAesTcpListener"/>
     public class AesTcpListener : TcpListenerBaseClass, IAesTcpListener {
 
         /// <inheritdoc/>

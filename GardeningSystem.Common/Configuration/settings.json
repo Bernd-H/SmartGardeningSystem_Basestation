@@ -5,7 +5,7 @@
 
   "applicationSettings_fileName": "userSettings.json",
 
-  "wlanInterface_name": "wlan0", // standard interface name
+  "wlanInterface_name": "wlan0",
 
   "ap_ssid": "SmartGardeningSystem",
 
@@ -61,5 +61,5 @@
   "measureJob_enabled": "false",
 
   ///////////////////////// Test Environment options
-  "isTestEnvironment": "true"
+  "isTestEnvironment": "false"
 }

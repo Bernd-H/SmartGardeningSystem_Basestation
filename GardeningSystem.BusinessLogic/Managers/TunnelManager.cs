@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GardeningSystem.Common.Configuration;
 using GardeningSystem.Common.Events.Communication;
+using GardeningSystem.Common.Exceptions;
 using GardeningSystem.Common.Models.Entities;
 using GardeningSystem.Common.Specifications;
 using GardeningSystem.Common.Specifications.Communication;
@@ -137,6 +138,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
             catch (ObjectDisposedException) {
                 // conneciton got closed
+            }
+            catch (ConnectionClosedException) {
+                // conneciton got closed
+            }
+            catch (Exception ex) {
+                Logger.Error(ex, "[onPeerToPeer_clientConnected]An error occured.");
             }
         }
         

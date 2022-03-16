@@ -4,7 +4,7 @@ using GardeningSystem.Common.Specifications.Communication.Base;
 namespace GardeningSystem.Common.Specifications.Communication {
 
     /// <summary>
-    /// Tcp client that sends all packages aes encrypted and decryptes all received ones.
+    /// A TCP client that sends all packages AES encrypted and decryptes all received ones.
     /// </summary>
     public interface IAesTcpClient : ITcpClientBaseClass {
 

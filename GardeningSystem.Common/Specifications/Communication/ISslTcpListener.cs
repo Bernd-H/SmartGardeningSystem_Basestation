@@ -8,7 +8,7 @@ using GardeningSystem.Common.Specifications.Communication.Base;
 namespace GardeningSystem.Common.Specifications.Communication {
 
     /// <summary>
-    /// A Tcp listener that sends and receives all packages over a ssl stream.
+    /// A TCP listener that sends and receives all packages over a SSL stream.
     /// </summary>
     public interface ISslTcpListener : ITcpListenerBaseClass {
 

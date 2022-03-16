@@ -224,14 +224,19 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private byte getFreeModuleId() {
             // get the last added id and increment it till we get a free one
             var modules = getAllModules();
-            var id = modules.Last().ModuleId;
+            if ((modules?.Count() ?? -1) > 0) {
+                var id = modules.Last().ModuleId;
 
-            while (id != 0xFF) {
-                id += 1;
-                if (GetModule(id) == null) {
-                    // free id found
-                    return id;
+                while (id != 0xFF) {
+                    id += 1;
+                    if (GetModule(id) == null) {
+                        // free id found
+                        return id;
+                    }
                 }
+            }
+            else {
+                return Utils.GetRandomByte();
             }
 
             throw new Exception("[getFreeModuleId]Couldn't get a free id!");

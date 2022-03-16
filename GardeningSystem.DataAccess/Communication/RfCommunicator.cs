@@ -30,9 +30,12 @@ namespace GardeningSystem.DataAccess.Communication {
         private byte _systemRfId {
             get {
                 return SettingsManager.GetApplicationSettings().RfSystemId;
+                //Logger.Warn($"[_systemRfId]SystemRfID set to 0x0A.");
                 //return 0x0A;
             }
         }
+
+        private string _filePath;
 
 
         private ILogger Logger;
@@ -53,9 +56,9 @@ namespace GardeningSystem.DataAccess.Communication {
             else {
                 Logger.Info($"[RfCommunicator]Starting c++ rf-communication application.");
                 checkForFails();
-                string filePath = ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.RFAPP_FILENAME]);
-                Logger.Info($"[RfCommunicator]Filepath: {filePath}");
-                startProgram(filePath);
+                _filePath = ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.RFAPP_FILENAME]);
+                Logger.Info($"[RfCommunicator]Filepath: {_filePath}");
+                startProgram(_filePath);
             }
         }
 
@@ -77,6 +80,8 @@ namespace GardeningSystem.DataAccess.Communication {
                 await LOCKER.WaitAsync();
 
                 await sendCommand(new byte[] { 0x0A });
+
+                _process?.Close();
             }
             finally {
                 LOCKER.Release();
@@ -88,8 +93,8 @@ namespace GardeningSystem.DataAccess.Communication {
             try {
                 await LOCKER.WaitAsync();
 
-                //var response = await sendCommandReceiveAnswer(new byte[] { 0x01 });
-                var response = new byte[] { 0xFF, 0x0A, 0x5F };
+                var response = await sendCommandReceiveAnswer(new byte[] { 0x01 });
+                //var response = new byte[] { 0xFF, 0x0A, 0x5F };
 
                 if (response.Length >= 1 && response[0] == 0xFF) {
                     byte tempId = response[1]; // temp Id because the rf app doesn't know all already used ids
@@ -266,8 +271,8 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         private async Task<bool> setModuleId(byte id, byte tempId, byte systemId) {
-            Logger.Info($"[setModuleId]Setting the id of the new module to {Utils.ConvertByteToHex(id)}.");
-            var response = await sendCommandReceiveAnswer(new byte[] { 0x02, 0x00, tempId, id, 0x00, systemId });
+            Logger.Info($"[setModuleId]Setting the id of the new module to \"{Utils.ConvertByteToHex(id)}\".");
+            var response = await sendCommandReceiveAnswer(new byte[] { 0x02, 0x00, tempId, id, systemId });
             if (response[0] == 0xFF) {
                 return true;
             }
@@ -283,34 +288,51 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private async Task<byte[]> sendCommandReceiveAnswer(byte[] command) {
             if (_process != null) {
-                //  wait 5s because the rf app needs 5s time between two commands
-                await Task.Delay(5000);
+                try {
+                    //  wait 5s because the rf app needs 5s time between two commands
+                    //await Task.Delay(5000); // not needed anymore
 
-                var commandString = Convert.ToBase64String(command);
-                Logger.Trace($"[sendCommandReceiveAnswer]Sending \"{commandString}\" to the rf module app.");
+                    var commandString = Convert.ToBase64String(command);
+                    Logger.Trace($"[sendCommandReceiveAnswer]Sending \"{commandString}\" to the rf module app.");
 
-                var readTask = _sr.ReadLineAsync();
-                await _sw.WriteLineAsync(commandString);
+                    var readTask = _sr.ReadLineAsync();
+                    await _sw.WriteLineAsync(commandString);
 
-                var receivedString = await readTask;
-                Logger.Trace($"[sendCommandReceiveAnswer]Received \"{receivedString}\" from the rf module app.");
+                    var receivedString = await readTask;
+                    Logger.Trace($"[sendCommandReceiveAnswer]Received \"{receivedString}\" from the rf module app.");
 
-                return Convert.FromBase64String(receivedString);
+                    return Convert.FromBase64String(receivedString);
+                }
+                catch (IOException ioex) {
+                    Logger.Error(ioex, "[sendCommandReceiveAnswer]An error occured. Restarting the rf-app.");
+                    // process failed...
+                    // try restarting the rf module app
+                    startProgram(_filePath);
+                    return new byte[] { 0x00 };
+                }
             }
             else {
-                // when ConfigurationVars.IS_TEST_ENVIRONMENT = true
+                // ConfigurationVars.IS_TEST_ENVIRONMENT is true
                 return new byte[] { 0x00 };
             }
         }
 
         private async Task sendCommand(byte[] command) {
-            if (_process != null) {
-                //  wait 5s because the rf app needs 5s time between two commands
-                await Task.Delay(5000);
+            try {
+                if (_process != null) {
+                    //  wait 5s because the rf app needs 5s time between two commands
+                    //await Task.Delay(5000); // not needed anymore
 
-                var commandString = Convert.ToBase64String(command);
-                Logger.Trace($"[sendCommand]Sending \"{commandString}\" to the rf module app.");
-                await _sw.WriteLineAsync(commandString);
+                    var commandString = Convert.ToBase64String(command);
+                    Logger.Trace($"[sendCommand]Sending \"{commandString}\" to the rf module app.");
+                    await _sw.WriteLineAsync(commandString);
+                }
+            }
+            catch (IOException ioex) {
+                Logger.Error(ioex, "[sendCommand]An error occured. Restarting the rf-app.");
+                // process failed...
+                // try restarting the rf module app
+                startProgram(_filePath);
             }
         }
 
@@ -353,6 +375,8 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         private void startProgram(string appFilePath) {
+            _process?.Close();
+
             ProcessStartInfo startInfo = new ProcessStartInfo() {
                 FileName = "/bin/bash",
                 Arguments = $"-c \"sudo {appFilePath}\"",

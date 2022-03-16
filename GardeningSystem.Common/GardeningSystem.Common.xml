@@ -323,7 +323,7 @@
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.IAesTcpClient">
             <summary>
-            Tcp client that sends all packages aes encrypted and decryptes all received ones.
+            A TCP client that sends all packages AES encrypted and decryptes all received ones.
             </summary>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Communication.IAesTcpClient.ReceiveEncryptedData">
@@ -342,8 +342,8 @@
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.IAesTcpListener">
             <summary>
-            A Tcp listener that encrypts all it's traffic via Aes.
-            The used Aes key is stored in the application settings.
+            A TCP listener that sends all packages AES encrypted and decryptes all received ones.
+            The used AES key is stored in the application settings.
             </summary>
             <seealso cref="T:GardeningSystem.Common.Specifications.Managers.ISettingsManager">Manager that administrates the application settings.</seealso>
         </member>
@@ -354,7 +354,7 @@
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.IHttpForwarder">
             <summary>
-            A Tcp client that can send and receive http api requests/responses.
+            A TCP client that can send and receive HTTP API requests/responses.
             </summary>
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.ILocalMobileAppDiscovery">
@@ -385,7 +385,7 @@
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.INatController">
             <summary>
-            A controller to open and close a port on all found NATs via Upnp or Pmp.
+            A controller to open and close a port on all found NATs via UPnP or PMP.
             </summary>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Communication.INatController.StartSearchingForNatDevices">
@@ -425,7 +425,7 @@
         <member name="T:GardeningSystem.Common.Specifications.Communication.IRfCommunicator">
             <summary>
             Sends commands to an c++ application that processes these commands
-            and communicates with the RF Module.
+            and communicates with the RF module.
             </summary>
         </member>
         <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.Start">
@@ -505,12 +505,12 @@
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.ISslTcpClient">
             <summary>
-            A Tcp client that sends and receives all packages over a Ssl stream.
+            A TCP client that sends and receives all packages over a SSL stream.
             </summary>
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Communication.ISslTcpListener">
             <summary>
-            A Tcp listener that sends and receives all packages over a ssl stream.
+            A TCP listener that sends and receives all packages over a SSL stream.
             </summary>
         </member>
         <member name="E:GardeningSystem.Common.Specifications.Communication.ISslTcpListener.ClientConnectedEventHandler">
@@ -856,7 +856,7 @@
             <param name="location">Location of a near city.</param>
             <returns>A task that represents a asynchronous operation. The value of the TResult
             parameter contains a WeatherForecast object.</returns>
-            <seealso cref="T:GardeningSystem.Common.Models.Entities.WeatherForecast"/>
+            <seealso cref="T:GardeningSystem.Common.Models.Entities.WeatherData"/>
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Managers.ICommandManager">
             <summary>

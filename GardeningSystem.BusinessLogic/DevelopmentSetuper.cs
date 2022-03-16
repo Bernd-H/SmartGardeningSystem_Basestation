@@ -67,7 +67,7 @@ namespace GardeningSystem.BusinessLogic {
                     SoilMoistureMeasurements = soilMoistureMeasurements
                 }).Id;
                 valve2Guid = ModulesRepository.AddModule(new ModuleInfoDto() {
-                    ModuleId = moduleIds[1],
+                    ModuleId = 0x02,
                     ModuleType = ModuleType.Valve,
                     Name = "Valve2",
                     LastWaterings = null,
@@ -75,11 +75,11 @@ namespace GardeningSystem.BusinessLogic {
                     EnabledForManualIrrigation = false
                 }).Id;
                 ModulesRepository.AddModule(new ModuleInfoDto() {
-                    ModuleId = moduleIds[2],
+                    ModuleId = 0x03,
                     ModuleType = ModuleType.Sensor,
                     Name = "Sensor1",
                     LastWaterings = null,
-                    AssociatedModules = new byte[] { moduleIds[0], moduleIds[1] },
+                    AssociatedModules = new byte[] { moduleIds[0], 0x02 },
                     EnabledForManualIrrigation = false
                 });
             }

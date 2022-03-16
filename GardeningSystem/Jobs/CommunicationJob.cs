@@ -28,11 +28,13 @@ namespace GardeningSystem.Jobs {
 
         private INatController NatController;
 
+        private IRfCommunicator RfCommunicator;
+
         private ILogger Logger;
 
         public CommunicationJob(ILoggerService logger, ISettingsManager settingsManager, ILocalMobileAppDiscoveryManager localMobileAppDiscoveryManager,
             IAesKeyExchangeManager aesKeyExchangeManager, ICommandManager commandManager, IAPIManager _APIManager, IWanManager wanManager,
-            INatController natController) {
+            INatController natController, IRfCommunicator rfCommunicator) {
             Logger = logger.GetLogger<CommunicationJob>();
             SettingsManager = settingsManager;
             LocalMobileAppDiscoveryManager = localMobileAppDiscoveryManager;
@@ -41,6 +43,7 @@ namespace GardeningSystem.Jobs {
             APIManager = _APIManager;
             WanManager = wanManager;
             NatController = natController;
+            RfCommunicator = rfCommunicator;
         }
 
         /// <inheritdoc/>
@@ -51,9 +54,10 @@ namespace GardeningSystem.Jobs {
 
                     NatController.StartSearchingForNatDevices();
 
+                    Task apiTokenTask = Task.CompletedTask;
                     if (string.IsNullOrEmpty(SettingsManager.GetApplicationSettings().APIToken)) {
                         // get api token from local server if system got started in the production network, from where the token server is reachable
-                        await APIManager.GetToken();
+                        apiTokenTask = APIManager.GetToken();
                     }
 
                     LocalMobileAppDiscoveryManager.Start();
@@ -62,9 +66,13 @@ namespace GardeningSystem.Jobs {
                         await AesKeyExchangeManager.StartListener();
                     }
 
+                    await RfCommunicator.Start();
+
                     await CommandManager.Start();
 
                     WanManager.Start();
+
+                    await apiTokenTask;
                 } catch (Exception ex) {
                     Logger.Fatal(ex, "[StartAsync]An exception occured.");
                 }
@@ -80,6 +88,7 @@ namespace GardeningSystem.Jobs {
                 LocalMobileAppDiscoveryManager.Stop();
                 AesKeyExchangeManager.Stop();
                 CommandManager.Stop();
+                await RfCommunicator.Stop();
 
                 Logger.Trace($"[StopAsync]All communication connections closed.");
             }

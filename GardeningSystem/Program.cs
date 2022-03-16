@@ -3,6 +3,7 @@ using System.Threading;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using GardeningSystem.Common.Configuration;
+using GardeningSystem.Common.Specifications.Communication;
 using GardeningSystem.Common.Specifications.Configuration_Logging;
 using GardeningSystem.Common.Specifications.Cryptography;
 using GardeningSystem.Common.Specifications.Managers;
@@ -27,6 +28,8 @@ namespace GardeningSystem {
             
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
 
+            //Thread.Sleep(5000); // time to attach the debugger
+
             try {
                 TimeUtils.ApplicationStartTime = TimeUtils.GetCurrentTime();
 
@@ -36,6 +39,10 @@ namespace GardeningSystem {
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
                     logger.Info("[Main]Setting up test development/test enviroment.");
                     IoC.Get<IDevelopmentSetuper>().SetupTestEnvironment();
+                }
+                else {
+                    // init RfApp
+                    //IoC.Get<IRfCommunicator>().Start().Wait();
                 }
 
                 // create server certificate and aes key if not exists

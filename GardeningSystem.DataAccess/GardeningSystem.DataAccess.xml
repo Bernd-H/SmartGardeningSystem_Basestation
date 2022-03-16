@@ -5,7 +5,7 @@
     </assembly>
     <members>
         <member name="T:GardeningSystem.DataAccess.Communication.AesTcpClient">
-            <inheritdoc />
+            <inheritdoc cref="T:GardeningSystem.Common.Specifications.Communication.IAesTcpClient"/>
         </member>
         <member name="M:GardeningSystem.DataAccess.Communication.AesTcpClient.ReceiveAsync">
             <inheritdoc />
@@ -20,7 +20,7 @@
             <inheritdoc />
         </member>
         <member name="T:GardeningSystem.DataAccess.Communication.AesTcpListener">
-            <inheritdoc/>
+            <inheritdoc cref="T:GardeningSystem.Common.Specifications.Communication.IAesTcpListener"/>
         </member>
         <member name="E:GardeningSystem.DataAccess.Communication.AesTcpListener.ClientConnectedEventHandler">
             <inheritdoc/>
@@ -68,7 +68,7 @@
             <returns>A task that represents the asynchronous send operation.</returns>
         </member>
         <member name="T:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass">
-            <inheritdoc/>
+            <inheritdoc cref="T:GardeningSystem.Common.Specifications.Communication.Base.ITcpClientBaseClass"/>
         </member>
         <member name="P:GardeningSystem.DataAccess.Communication.Base.TcpClientBaseClass.RemoteEndPoint">
             <inheritdoc/>
@@ -117,7 +117,7 @@
             </summary>
         </member>
         <member name="T:GardeningSystem.DataAccess.Communication.Base.TcpListenerBaseClass">
-            <inheritdoc/>
+            <inheritdoc cref="T:GardeningSystem.Common.Specifications.Communication.Base.ITcpClientBaseClass"/>
         </member>
         <member name="P:GardeningSystem.DataAccess.Communication.Base.TcpListenerBaseClass.EndPoint">
             <inheritdoc/>
@@ -140,7 +140,7 @@
             <inheritdoc/>
         </member>
         <member name="T:GardeningSystem.DataAccess.Communication.HttpForwarder">
-            <inheritdoc/>
+            <inheritdoc cref="T:GardeningSystem.Common.Specifications.Communication.IHttpForwarder"/>
         </member>
         <member name="M:GardeningSystem.DataAccess.Communication.HttpForwarder.ReceiveAsync">
             <inheritdoc/>
@@ -257,7 +257,7 @@
             <returns>Byte that has no sign bit.</returns>
         </member>
         <member name="T:GardeningSystem.DataAccess.Communication.SslTcpClient">
-            <inheritdoc/>
+            <inheritdoc cref="T:GardeningSystem.Common.Specifications.Communication.ISslTcpClient"/>
         </member>
         <member name="M:GardeningSystem.DataAccess.Communication.SslTcpClient.Start(System.Threading.CancellationToken,System.Object)">
             <inheritdoc/>
@@ -269,7 +269,7 @@
             <inheritdoc/>
         </member>
         <member name="T:GardeningSystem.DataAccess.Communication.SslTcpListener">
-            <inheritdoc/>
+            <inheritdoc cref="T:GardeningSystem.Common.Specifications.Communication.ISslTcpListener"/>
         </member>
         <member name="E:GardeningSystem.DataAccess.Communication.SslTcpListener.ClientConnectedEventHandler">
             <inheritdoc/>

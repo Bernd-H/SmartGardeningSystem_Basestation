@@ -19,7 +19,7 @@ namespace GardeningSystem.DataAccess.Communication.Base {
         public CancellationToken Token { get; set; }
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="ITcpClientBaseClass"/>
     public abstract class TcpListenerBaseClass : NetworkBase, ITcpListenerBaseClass {
 
         /// <inheritdoc/>

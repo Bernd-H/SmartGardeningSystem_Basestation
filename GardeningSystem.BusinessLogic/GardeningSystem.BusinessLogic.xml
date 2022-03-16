@@ -226,13 +226,23 @@
         <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.ManualOverwrite(System.Boolean,System.Nullable{System.TimeSpan})">
             <inheritdoc/>
         </member>
-        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.irrigationAlgo(GardeningSystem.Common.Models.Entities.ModuleInfo,GardeningSystem.Common.Models.Entities.WeatherForecast)">
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.irrigationAlgo(GardeningSystem.Common.Models.Entities.ModuleInfo,GardeningSystem.Common.Models.Entities.WeatherData)">
             <summary>
             Determines if plants near a sensor needs to be irrigated.
             </summary>
             <param name="moduleData">Sensor module data.</param>
-            <param name="weatherData">Weather forecast for the next day.</param>
+            <param name="weatherData">Weather forecast for the next day and weather data of the previous day.</param>
             <returns>The timespan the valves associated to this sensor should stay open.</returns>
+        </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.getAverageMeasurmentsFromDay``1(System.Collections.Generic.IEnumerable{GardeningSystem.Common.Models.Entities.ValueTimePair{``0}},System.Int32,System.Int32)">
+            <summary>
+            Calculates the average of <paramref name="measurementsPerDay"/> values from the end of a list.
+            </summary>
+            <typeparam name="T">A primitive data type.</typeparam>
+            <param name="data"></param>
+            <param name="day">0 for the average of measurements from the last day, 1 for measurements the day before the last day and so on...</param>
+            <param name="measurementsPerDay">Number of measurements per day.</param>
+            <returns>Average</returns>
         </member>
     </members>
 </doc>

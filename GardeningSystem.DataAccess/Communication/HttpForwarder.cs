@@ -14,7 +14,7 @@ using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="IHttpForwarder"/>
     public class HttpForwarder : TcpClientBaseClass, IHttpForwarder {
 
         public HttpForwarder(ILoggerService loggerService) : base(loggerService.GetLogger<HttpForwarder>()) {

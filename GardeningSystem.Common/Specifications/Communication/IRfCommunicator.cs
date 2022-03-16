@@ -9,7 +9,7 @@ namespace GardeningSystem.Common.Specifications.Communication {
 
     /// <summary>
     /// Sends commands to an c++ application that processes these commands
-    /// and communicates with the RF Module.
+    /// and communicates with the RF module.
     /// </summary>
     public interface IRfCommunicator {
 

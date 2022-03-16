@@ -87,12 +87,12 @@ namespace GardeningSystem.DataAccess.Communication {
                         try {
                             // add new mapping
                             actualMapping = await device.CreatePortMapAsync(mapping);
-                            Logger.Info("[OpenPublicPort]Create mapping: protocol={0}, public={1}, private={2}", mapping.Protocol, mapping.PublicPort, mapping.PrivatePort);
+                            Logger.Trace($"[OpenPublicPort]Create mapping - {externalIP}: protocol={mapping.Protocol}, public={mapping.PublicPort}, private={mapping.PrivatePort}");
 
                             // confirm mapping
                             //try {
                             Mapping m = await device.GetSpecificMappingAsync(Protocol.Tcp, actualMapping.PublicPort);
-                            Logger.Info("[OpenPublicPort]Confirmed mapping: protocol={0}, public={1}, private={2}", m.Protocol, m.PublicPort, m.PrivatePort);
+                            Logger.Info($"[OpenPublicPort]Confirmed mapping - {externalIP}: protocol={m.Protocol}, public={m.PublicPort}, private={m.PrivatePort}");
                             devicesWithNewMapping.Add(externalIP, device);
                         }
                         catch {

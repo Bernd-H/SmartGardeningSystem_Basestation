@@ -3,7 +3,7 @@
 namespace GardeningSystem.Common.Specifications.Communication {
 
     /// <summary>
-    /// A controller to open and close a port on all found NATs via Upnp or Pmp.
+    /// A controller to open and close a port on all found NATs via UPnP or PMP.
     /// </summary>
     public interface INatController {
 

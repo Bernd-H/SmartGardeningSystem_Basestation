@@ -11,7 +11,7 @@ using GardeningSystem.DataAccess.Communication.Base;
 
 namespace GardeningSystem.DataAccess.Communication {
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="ISslTcpClient"/>
     public class SslTcpClient : TcpClientBaseClass, ISslTcpClient {
 
         private SslStream _sslStream;

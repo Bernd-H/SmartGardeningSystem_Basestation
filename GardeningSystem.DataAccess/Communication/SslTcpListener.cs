@@ -18,7 +18,7 @@ using NLog;
 
 namespace GardeningSystem.DataAccess.Communication {
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="ISslTcpListener"/>
     public class SslTcpListener : TcpListenerBaseClass, ISslTcpListener {
 
         /// <inheritdoc/>

@@ -3,7 +3,7 @@
 namespace GardeningSystem.Common.Specifications.Communication {
 
     /// <summary>
-    /// A Tcp client that can send and receive http api requests/responses.
+    /// A TCP client that can send and receive HTTP API requests/responses.
     /// </summary>
     public interface IHttpForwarder : ITcpClientBaseClass {
 

@@ -14,7 +14,7 @@ using NLog;
 
 namespace GardeningSystem.DataAccess.Communication.Base {
 
-    /// <inheritdoc/>
+    /// <inheritdoc cref="ITcpClientBaseClass"/>
     public abstract class TcpClientBaseClass : NetworkBase, ITcpClientBaseClass {
 
         /// <inheritdoc/>

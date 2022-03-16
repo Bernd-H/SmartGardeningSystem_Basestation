@@ -159,7 +159,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             string decryptedSecret = Encoding.UTF8.GetString(AesEncrypterDecrypter.DecryptToByteArray(connectInfo.EncryptedPassword));
             var connectToWlan = WifiConfigurator.ManagedConnectToWlan(connectInfo.Ssid, decryptedSecret);
             if (connectToWlan) {
-                WifiConfigurator.ReloadDaemon();
+                //WifiConfigurator.ReloadDaemon();
             }
 
             return connectToWlan;
@@ -169,7 +169,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             Logger.Info($"[processCommand_DisconnectFromWlan]Disconnecting from wlan.");
             var disconnected = WifiConfigurator.DisconnectFromWlan();
 
-            WifiConfigurator.ReloadDaemon();
+            //WifiConfigurator.ReloadDaemon();
 
             return disconnected;
         }

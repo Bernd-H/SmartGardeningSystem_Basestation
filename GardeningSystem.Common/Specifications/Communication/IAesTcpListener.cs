@@ -9,8 +9,8 @@ using GardeningSystem.Common.Specifications.Managers;
 namespace GardeningSystem.Common.Specifications.Communication {
 
     /// <summary>
-    /// A Tcp listener that encrypts all it's traffic via Aes.
-    /// The used Aes key is stored in the application settings.
+    /// A TCP listener that sends all packages AES encrypted and decryptes all received ones.
+    /// The used AES key is stored in the application settings.
     /// </summary>
     /// <seealso cref="ISettingsManager">Manager that administrates the application settings.</seealso>
     public interface IAesTcpListener : ITcpListenerBaseClass {

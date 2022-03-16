@@ -10,7 +10,7 @@ using GardeningSystem.DataAccess.Communication.Base;
 
 namespace GardeningSystem.DataAccess.Communication {
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IAesTcpClient"/>
     public class AesTcpClient : TcpClientBaseClass, IAesTcpClient {
 
         private IAesEncrypterDecrypter AesEncrypterDecrypter;

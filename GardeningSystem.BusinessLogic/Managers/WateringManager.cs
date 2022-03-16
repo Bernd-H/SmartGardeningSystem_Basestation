@@ -160,20 +160,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
             }
 
             // get last measured soil moisture
-            float soilMoisture = getLastMeasurement(moduleData.SoilMoistureMeasurements, -1);
+            float soilMoisture = getLastMeasurement(moduleData.SoilMoistureMeasurements ?? new List<ValueTimePair<float>>(), -1);
 
-            if ((TimeUtils.GetCurrentTime() - moduleData.LastWaterings.Last().Timestamp).TotalHours >= MinTimeDistanceBetweenTwoIrrigations[TimeUtils.GetSeason()]
-                && (soilMoisture < 50)) {
-                // time between last irrigation is long enough
-                // soil moisture is below 50%
-
-                // adjust the irrigation time with the weather forecast of the next day
-                int irrigationTime = adjustIrrigationTime(StandardIrrigationTime_Hours, moduleData, weatherData);
-
-                TimeSpan.FromHours(irrigationTime);
-            }
-            else if (soilMoisture <= 20) {
-                // irrigate because the soil moisture is very low
+            if (((TimeUtils.GetCurrentTime() - (moduleData.LastWaterings?.Last()?.Timestamp ?? DateTime.MinValue)).TotalHours >= MinTimeDistanceBetweenTwoIrrigations[TimeUtils.GetSeason()]
+                && (soilMoisture < 60)) || (soilMoisture <= 20)) {
+                // time between last irrigation is long enough and soil moisture is below 60%
+                // or soil moisture is below 20% -> time till last irrigation event doesn't matter
 
                 // adjust the irrigation time with the weather forecast of the next day
                 int irrigationTime = adjustIrrigationTime(StandardIrrigationTime_Hours, moduleData, weatherData);
@@ -208,8 +200,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
             // calculate average temp and soil moisture
             float average = 0;
             int startPoint = data.Count() - (measurementsPerDay * day) - 1;
-            for (int i = startPoint; i >= startPoint - measurementsPerDay; i--) {
-                average += (float)Convert.ChangeType(data.ElementAt(i).Value, typeof(float));
+            if (startPoint > 0) {
+                for (int i = startPoint; i >= startPoint - measurementsPerDay; i--) {
+                    average += (float)Convert.ChangeType(data.ElementAt(i).Value, typeof(float));
+                }
             }
 
             return average / measurementsPerDay;
@@ -219,7 +213,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             int measurementsPerDay = 6;
 
             // calculate average temp and soil moisture
-            float averageTemp = getAverageMeasurmentsFromDay(moduleData.TemperatureMeasurements, 0, measurementsPerDay);
+            float averageTemp = getAverageMeasurmentsFromDay(moduleData?.TemperatureMeasurements ?? new List<ValueTimePair<float>>(), 0, measurementsPerDay);
             //float averageSoilMoisture = getAverageMeasurmentsFromDay(moduleData.SoilMoistureMeasurements, 0, measurementsPerDay);
 
             return adjustIrrigationTime(currentIrrigationTime, averageTemp, weatherData);
