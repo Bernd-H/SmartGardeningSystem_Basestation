@@ -60,6 +60,7 @@ namespace GardeningSystem.Common.Models {
             appSettingsDto.APIToken = applicationSettings.APIToken;
             appSettingsDto.LoginSecrets = applicationSettings.LoginSecrets;
             appSettingsDto.AutomaticIrrigationEnabled = applicationSettings.AutomaticIrrigationEnabled;
+            appSettingsDto.WateringStatus = applicationSettings.WateringStatus;
             
             if (applicationSettings.AesKey != null && applicationSettings.AesIV != null && certificateHandler != null) {
                 // decrypt aes key/iv
@@ -81,6 +82,7 @@ namespace GardeningSystem.Common.Models {
             appSettings.APIToken = applicationSettingsDto.APIToken;
             appSettings.LoginSecrets = applicationSettingsDto.LoginSecrets;
             appSettings.AutomaticIrrigationEnabled = applicationSettingsDto.AutomaticIrrigationEnabled;
+            appSettings.WateringStatus = applicationSettingsDto.WateringStatus;
 
             if (applicationSettingsDto.AesKey != null && applicationSettingsDto.AesIV != null && certificateHandler != null) {
                 // encrypt aes key/iv

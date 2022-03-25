@@ -53,7 +53,7 @@ namespace GardeningSystem.Jobs {
 
                 foreach (var irrigationInfo in irrigationInfos) {
                     // start irrigating all valves that are linked to the sensor the irrigationInfo is for
-                    Logger.Info($"[Start]Starting to irrigate for {irrigationInfo.IrrigationTime} minutes on sensor {Utils.ConvertByteToHex(irrigationInfo.SensorId)}.");
+                    Logger.Info($"[Start]Starting to irrigate for {irrigationInfo.IrrigationTime.TotalMinutes} minutes on sensor {Utils.ConvertByteToHex(irrigationInfo.SensorId)}.");
                     wateringTasks.Add(WateringManager.StartWatering(irrigationInfo));
                 }
 

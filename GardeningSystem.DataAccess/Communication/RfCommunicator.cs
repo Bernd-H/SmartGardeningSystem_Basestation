@@ -37,6 +37,8 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private string _filePath;
 
+        private bool _startCommandSent = false;
+
 
         private ILogger Logger;
 
@@ -63,14 +65,14 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         /// <inheritdoc />
-        public async Task Start() {
+        private async Task Start() {
             try {
-                await LOCKER.WaitAsync();
+                //await LOCKER.WaitAsync();
 
                 await sendCommand(new byte[] { 0x00 });
             }
             finally {
-                LOCKER.Release();
+                //LOCKER.Release();
             }
         }
 
@@ -79,9 +81,13 @@ namespace GardeningSystem.DataAccess.Communication {
             try {
                 await LOCKER.WaitAsync();
 
+                Logger.Info($"[Stop]Stopping the RF module application.");
                 await sendCommand(new byte[] { 0x0A });
 
+                await Task.Delay(500);
+                _process?.Kill(true);
                 _process?.Close();
+                _process = null;
             }
             finally {
                 LOCKER.Release();
@@ -159,7 +165,7 @@ namespace GardeningSystem.DataAccess.Communication {
                     // get soil moisture
                     int soilMoisture = (int)response[2];
 
-                    return RfCommunicatorResult.SetSuccess((temp, soilMoisture));
+                    return RfCommunicatorResult.SetSuccess(((float)temp, (float)soilMoisture));
                 }
                 else {
                     Logger.Error($"[GetTempAndSoilMoisture]Error while receiving temperature and soil moisture of module with id={Utils.ConvertByteToHex(module.ModuleId)}.");
@@ -180,7 +186,8 @@ namespace GardeningSystem.DataAccess.Communication {
                 ushort minutes = Convert.ToUInt16(timeSpan.TotalMinutes);
                 var minuteBytes = BitConverter.GetBytes(minutes);
 
-                var response = await sendCommandReceiveAnswer(new byte[] { 0x07, module.ModuleId, _systemRfId, minuteBytes[0], minuteBytes[1] });
+                // send first the 2. minuteByte and then the first
+                var response = await sendCommandReceiveAnswer(new byte[] { 0x07, module.ModuleId, _systemRfId, minuteBytes[1], minuteBytes[0] });
 
                 if (response.Length == 1 && response[0] == 0xFF) {
                     Logger.Info($"[OpenValve]Opended valve with id={Utils.ConvertByteToHex(module.ModuleId)}.");
@@ -272,7 +279,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private async Task<bool> setModuleId(byte id, byte tempId, byte systemId) {
             Logger.Info($"[setModuleId]Setting the id of the new module to \"{Utils.ConvertByteToHex(id)}\".");
-            var response = await sendCommandReceiveAnswer(new byte[] { 0x02, 0x00, tempId, id, systemId });
+            var response = await sendCommandReceiveAnswer(new byte[] { 0x02, 0xFF, tempId, id, systemId });
             if (response[0] == 0xFF) {
                 return true;
             }
@@ -287,10 +294,16 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         private async Task<byte[]> sendCommandReceiveAnswer(byte[] command) {
+            if (!_startCommandSent) {
+                // bool must be set before Start(), else: infinity loop
+                _startCommandSent = true;
+                await Start();
+            }
+
             if (_process != null) {
                 try {
                     //  wait 5s because the rf app needs 5s time between two commands
-                    //await Task.Delay(5000); // not needed anymore
+                    await Task.Delay(2000); 
 
                     var commandString = Convert.ToBase64String(command);
                     Logger.Trace($"[sendCommandReceiveAnswer]Sending \"{commandString}\" to the rf module app.");
@@ -303,8 +316,8 @@ namespace GardeningSystem.DataAccess.Communication {
 
                     return Convert.FromBase64String(receivedString);
                 }
-                catch (IOException ioex) {
-                    Logger.Error(ioex, "[sendCommandReceiveAnswer]An error occured. Restarting the rf-app.");
+                catch (Exception ex) {
+                    Logger.Error(ex, "[sendCommandReceiveAnswer]An error occured. Restarting the rf-app.");
                     // process failed...
                     // try restarting the rf module app
                     startProgram(_filePath);
@@ -318,10 +331,16 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         private async Task sendCommand(byte[] command) {
+            if (!_startCommandSent) {
+                // bool must be set before Start(), else: infinity loop
+                _startCommandSent = true;
+                await Start();
+            }
+
             try {
                 if (_process != null) {
                     //  wait 5s because the rf app needs 5s time between two commands
-                    //await Task.Delay(5000); // not needed anymore
+                    //await Task.Delay(2000);
 
                     var commandString = Convert.ToBase64String(command);
                     Logger.Trace($"[sendCommand]Sending \"{commandString}\" to the rf module app.");
@@ -375,7 +394,10 @@ namespace GardeningSystem.DataAccess.Communication {
         }
 
         private void startProgram(string appFilePath) {
-            _process?.Close();
+            if (_process != null) {
+                _process?.Kill(true);
+                _process?.Close();
+            }
 
             ProcessStartInfo startInfo = new ProcessStartInfo() {
                 FileName = "/bin/bash",
@@ -384,11 +406,23 @@ namespace GardeningSystem.DataAccess.Communication {
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true
             };
+            //ProcessStartInfo startInfo = new ProcessStartInfo() {
+            //    FileName = "/bin/bash",
+            //    Arguments = $"-c \"sudo {appFilePath}\"",
+            //    UseShellExecute = false,
+            //    RedirectStandardInput = true,
+            //    RedirectStandardOutput = true,
+            //    StandardInputEncoding = System.Text.Encoding.ASCII,
+            //    StandardOutputEncoding = System.Text.Encoding.ASCII,
+            //    CreateNoWindow = true
+            //};
             _process = new Process() { StartInfo = startInfo, };
             _process.Start();
 
             _sw = _process.StandardInput;
             _sr = _process.StandardOutput;
+
+            _startCommandSent = false;
         }
     }
 }

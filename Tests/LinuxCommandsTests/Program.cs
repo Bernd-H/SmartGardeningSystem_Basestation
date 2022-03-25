@@ -2,15 +2,11 @@
 using System.Threading;
 using GardeningSystem;
 using GardeningSystem.Common.Specifications;
-using GardeningSystem.DataAccess;
 using NLog;
 
-namespace LinuxCommandsTests
-{
-    public class Program
-    {
-        static void Main(string[] args)
-        {
+namespace LinuxCommandsTests {
+    public class Program {
+        static void Main(string[] args) {
             IoC.Init();
             var wifiConfigurator = IoC.Get<IWifiConfigurator>();
             var logger = IoC.Get<ILoggerService>().GetLogger<Program>();

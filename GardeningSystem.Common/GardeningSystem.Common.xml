@@ -428,12 +428,6 @@
             and communicates with the RF module.
             </summary>
         </member>
-        <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.Start">
-            <summary>
-            Initializes the RF Module.
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:GardeningSystem.Common.Specifications.Communication.IRfCommunicator.Stop">
             <summary>
             Shuts down the RF Module.

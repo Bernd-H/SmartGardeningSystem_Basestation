@@ -120,7 +120,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         public async Task<bool> ManualOverwrite(bool activateWatering, TimeSpan? irrigationTimeSpan = null) {
             try {
                 await locker.WaitAsync();
-                bool success = false;
+                bool success = true;
 
                 var modules = await ModuleManager.GetAllModules();
                 foreach (var module in modules) {

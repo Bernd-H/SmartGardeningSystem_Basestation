@@ -88,7 +88,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         measurements.Add(ModuleData.NoMeasurement(module.Id));
                     }
                     else {
-                       (float temp, float soilMoisture) = measurementResult.Result as Tuple<float, float>;
+                       (float temp, float soilMoisture) = (ValueTuple<float, float>) measurementResult.Result;
 
                         // add measurement to list
                         measurements.Add(new ModuleData() {

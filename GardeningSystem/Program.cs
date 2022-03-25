@@ -19,6 +19,10 @@ using NLog;
 using NLog.Web;
 
 namespace GardeningSystem {
+
+    /// <summary>
+    /// Class containing the starting point of the application.
+    /// </summary>
     public class Program {
 
         public static void Main(string[] args) {
@@ -39,10 +43,6 @@ namespace GardeningSystem {
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
                     logger.Info("[Main]Setting up test development/test enviroment.");
                     IoC.Get<IDevelopmentSetuper>().SetupTestEnvironment();
-                }
-                else {
-                    // init RfApp
-                    //IoC.Get<IRfCommunicator>().Start().Wait();
                 }
 
                 // create server certificate and aes key if not exists

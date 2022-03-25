@@ -93,7 +93,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     }
                     else if (command.SequenceEqual(CommunicationCodes.StartManualWateringCommand)) {
                         // receive irrigation timespan
-                        var minutes = Convert.ToDouble(await AesTcpListener.ReceiveAsync(networkStream));
+                        var minutes = BitConverter.ToDouble(await AesTcpListener.ReceiveAsync(networkStream));
                         var timeSpan = TimeSpan.FromMinutes(minutes);
 
                         success = await processCommand_StartManualIrrigation(timeSpan);
@@ -118,6 +118,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                         // send moduleInfo
                         await AesTcpListener.SendAsync(dataToSend, networkStream);
+
+                        var ack = await AesTcpListener.ReceiveAsync(networkStream);
+                        if (!ack.SequenceEqual(CommunicationCodes.ACK)) {
+                            Logger.Error($"[OnCommandReceivedEvent]Received no ACK! ({Utils.ConvertByteArrayToHex(ack)})");
+                        }
                     }
                     else if (command.SequenceEqual(CommunicationCodes.Test)) {
                         success = true;

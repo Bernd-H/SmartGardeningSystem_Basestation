@@ -17,7 +17,7 @@ namespace GardeningSystem.Common.Specifications.Communication {
         /// Initializes the RF Module.
         /// </summary>
         /// <returns></returns>
-        Task Start();
+        //Task Start();
 
         /// <summary>
         /// Shuts down the RF Module.

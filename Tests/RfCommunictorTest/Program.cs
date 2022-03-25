@@ -16,28 +16,38 @@ namespace RfCommunictorTest
             var rfCommunicator = IoC.Get<IRfCommunicator>();
             var logger = IoC.Get<ILoggerService>().GetLogger<Program>();
 
+            Console.WriteLine("IsTestEnviroment (in Configuration/settings.json) must be set to false!");
+
             // Give the user time to be able to attach a debugger for example.
             Console.WriteLine("Press enter to start the test...");
             Console.ReadLine();
 
-            logger.Info($"Starting app.");
-            await rfCommunicator.Start();
+            //logger.Info($"Starting app.");
+            //await rfCommunicator.Start();
 
-            var moduleInfo = new ModuleInfoDto {
-                ModuleId = 0x02
-            };
+            var moduleInfo = await rfCommunicator.DiscoverNewModule(0x02);
+            logger.Info($"Discover: {moduleInfo != null}");
+            if (moduleInfo != null) {
+                logger.Info($"Module is sensor: {moduleInfo.ModuleType == GardeningSystem.Common.Models.Enums.ModuleType.Sensor}");
+            }
+            else {
+                // set it to an not existing module
+                moduleInfo = new ModuleInfoDto {
+                    ModuleId = 0x02
+                };
+            }
 
-            logger.Info($"Ping: {await rfCommunicator.PingModule(moduleInfo)}");
+            logger.Info($"Ping: {(await rfCommunicator.PingModule(moduleInfo))?.Success ?? false}");
 
-            logger.Info($"Battery Level: {await rfCommunicator.GetBatteryLevel(moduleInfo)}");
+            var batLevel = await rfCommunicator.GetBatteryLevel(moduleInfo);
+            if (batLevel.Success) {
+                logger.Info($"Battery level: {Convert.ToSingle(batLevel.Result)}");
+            }
 
             var rfCommunicatorResult = await rfCommunicator.GetTempAndSoilMoisture(moduleInfo);
             if (rfCommunicatorResult.Success) {
-                (double temp, double hum) = rfCommunicatorResult.Result as Tuple<double, double>;
+                (float temp, float hum) = (ValueTuple<float, float>) rfCommunicatorResult.Result;
                 logger.Info($"Temp: {temp}; SoilMumid: {hum}");
-            }
-            else {
-                logger.Error($"Failed to get the temperature and the soil moisture!");
             }
 
             logger.Info("Finished.");

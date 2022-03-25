@@ -85,7 +85,10 @@ namespace GardeningSystem.Jobs.Base {
             _serviceStarterTask = Task.Run(async () => {
                 while (true) {
                     // wait till the next time in the list _startTimes is reached
-                    await Task.Delay(getTimeSpanToWait());
+                    await Task.Delay(getTimeSpanToWait(), _serviceStarterTaskCTS.Token);
+                    if (_serviceStarterTaskCTS.IsCancellationRequested) {
+                        break;
+                    }
 
                     var count = Interlocked.Increment(ref _executionCount);
                     Logger.Trace($"[_serviceStarterTask]{_serviceName} started. (execution count: {count})");

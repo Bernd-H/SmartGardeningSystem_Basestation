@@ -28,9 +28,9 @@ namespace GardeningSystem.Jobs {
 
         private INatController NatController;
 
-        private IRfCommunicator RfCommunicator;
-
         private ILogger Logger;
+
+        private IRfCommunicator RfCommunicator;
 
         public CommunicationJob(ILoggerService logger, ISettingsManager settingsManager, ILocalMobileAppDiscoveryManager localMobileAppDiscoveryManager,
             IAesKeyExchangeManager aesKeyExchangeManager, ICommandManager commandManager, IAPIManager _APIManager, IWanManager wanManager,
@@ -65,8 +65,6 @@ namespace GardeningSystem.Jobs {
                     if (SettingsManager.GetApplicationSettings().ConfigurationModeEnabled) {
                         await AesKeyExchangeManager.StartListener();
                     }
-
-                    await RfCommunicator.Start();
 
                     await CommandManager.Start();
 

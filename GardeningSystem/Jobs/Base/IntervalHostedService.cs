@@ -75,7 +75,7 @@ namespace GardeningSystem.Jobs.Base {
         /// <param name="stoppingToken">Token to stop the stop process. WARNING: Not implemented!</param>
         /// <returns>A Task that reprecents an asynchronous operation.</returns>
         public Task StopAsync(CancellationToken stoppingToken) {
-            _logger.Warn($"[StopAsync]{_serviceName} is stopping.");
+            _logger.Info($"[StopAsync]{_serviceName} is stopping.");
 
             _timer?.Change(Timeout.Infinite, 0);
 

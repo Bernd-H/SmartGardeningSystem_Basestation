@@ -175,5 +175,10 @@
             Startimes for the WateringJob.
             </summary>
         </member>
+        <member name="T:GardeningSystem.Program">
+            <summary>
+            Class containing the starting point of the application.
+            </summary>
+        </member>
     </members>
 </doc>
