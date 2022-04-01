@@ -120,13 +120,14 @@ namespace GardeningSystem.RestAPI.Controllers {
 
         // DELETE api/Modules/{id}
         [HttpDelete("{id}")]
-        public IActionResult Delete(Guid id) {
+        public IActionResult Delete(string id) {
             var userId = ControllerHelperClass.GetUserId(HttpContext);
             Logger.Info($"[Delete]User {userId} requested to delete module with id={id}.");
 
             bool deleted = false;
             try {
-                deleted = ModuleManager.RemoveModule(id).Result;
+                var internalModuleId = ModuleManager.GetModule(Utils.ConvertHexToByte(id)).Id;
+                deleted = ModuleManager.RemoveModule(internalModuleId).Result;
             }
             catch (Exception ex) {
                 Logger.Error(ex, $"[Delete]Could not delete module with id={id}.");

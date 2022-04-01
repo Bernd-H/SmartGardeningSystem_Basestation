@@ -61,6 +61,9 @@ namespace GardeningSystem.Jobs {
                 await Task.WhenAll(wateringTasks);
                 Logger.Trace($"[Start]Watering job finished.");
             }
+            else {
+                Logger.Info($"[Start]Automatic irrigation is disabled.");
+            }
         }
     }
 }

@@ -53,7 +53,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         /// <inheritdoc/>
         public void Start() {
-            Logger.Info($"[Start]Starting a connection to the external server.");
+            Logger.Info($"[Start]Connecting to the external server.");
 
             _ = connectToExternalServerLoop(_cancellationTokenSource.Token);
         }

@@ -90,5 +90,13 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <returns>A task that represents an asynchronous operation. The value of the TResult
         /// parameter contains a boolean that is true when the module got successfully updated.</returns>
         Task<bool> UpdateModule(ModuleInfoDto module);
+
+        /// <summary>
+        /// Pings a module and updates the rssi property of the module.
+        /// </summary>
+        /// <param name="moduleId">Id of the module.</param>
+        /// <returns>A task that represents an asynchronous operation. The value of the TResult
+        /// parameter contains a boolean that is true when the module responded.</returns>
+        Task<bool> PingModule(byte moduleId);
     }
 }

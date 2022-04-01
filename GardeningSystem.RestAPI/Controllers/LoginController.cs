@@ -118,7 +118,7 @@ namespace GardeningSystem.RestAPI.Controllers {
                 var token = new JwtSecurityToken(Configuration[ConfigurationVars.ISSUER],
                         Configuration[ConfigurationVars.ISSUER],
                         claims,
-                        expires: DateTime.Now.AddMinutes(120),
+                        expires: DateTime.Now.AddMonths(1),
                         signingCredentials: credentials);
 
                 string tokenString = new JwtSecurityTokenHandler().WriteToken(token);

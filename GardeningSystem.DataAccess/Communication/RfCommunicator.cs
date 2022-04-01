@@ -39,6 +39,8 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private bool _startCommandSent = false;
 
+        private DateTime _lastCommandTime = DateTime.MinValue;
+
 
         private ILogger Logger;
 
@@ -82,9 +84,9 @@ namespace GardeningSystem.DataAccess.Communication {
                 await LOCKER.WaitAsync();
 
                 Logger.Info($"[Stop]Stopping the RF module application.");
-                await sendCommand(new byte[] { 0x0A });
+                //await sendCommand(new byte[] { 0x0A });
 
-                await Task.Delay(500);
+                //await Task.Delay(500);
                 _process?.Kill(true);
                 _process?.Close();
                 _process = null;
@@ -110,10 +112,23 @@ namespace GardeningSystem.DataAccess.Communication {
                     if (await setModuleId(freeModuleId, tempId, _systemRfId)) {
                         Logger.Info($"[DiscoverNewModule]Discovered a new module with id={Utils.ConvertByteToHex(freeModuleId)}.");
 
-                        return new ModuleInfoDto {
-                            ModuleId = freeModuleId,
-                            ModuleType = isASensor ? Common.Models.Enums.ModuleType.Sensor : Common.Models.Enums.ModuleType.Valve
-                        };
+                        if (isASensor) {
+                            return new ModuleInfoDto {
+                                ModuleId = freeModuleId,
+                                ModuleType = Common.Models.Enums.ModuleType.Sensor,
+                                SoilMoistureMeasurements = new List<ValueTimePair<float>>(),
+                                TemperatureMeasurements = new List<ValueTimePair<float>>(),
+                                AssociatedModules = new List<byte>()
+                            };
+                        }
+                        else {
+                            return new ModuleInfoDto {
+                                ModuleId = freeModuleId,
+                                ModuleType = Common.Models.Enums.ModuleType.Valve,
+                                LastWaterings = new List<ValueTimePair<int>>(),
+                                EnabledForManualIrrigation = true
+                            };
+                        }
                     }
                 }
                 else {
@@ -289,6 +304,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
         private void checkForFails() {
             if (!File.Exists(ConfigurationContainer.GetFullPath(Configuration[ConfigurationVars.RFAPP_FILENAME]))) {
+                Logger.Error($"[checkForFails]RF-application not found!");
                 throw new FileNotFoundException();
             }
         }
@@ -302,8 +318,10 @@ namespace GardeningSystem.DataAccess.Communication {
 
             if (_process != null) {
                 try {
-                    //  wait 5s because the rf app needs 5s time between two commands
-                    await Task.Delay(2000); 
+                    if ((TimeUtils.GetCurrentTime() - _lastCommandTime).TotalSeconds < 2) {
+                        // wait as long so that there are 2 seconds time between two commands
+                        await Task.Delay(2000 - Convert.ToInt32((TimeUtils.GetCurrentTime() - _lastCommandTime).TotalMilliseconds), CancellationToken.None);
+                    }
 
                     var commandString = Convert.ToBase64String(command);
                     Logger.Trace($"[sendCommandReceiveAnswer]Sending \"{commandString}\" to the rf module app.");
@@ -314,10 +332,13 @@ namespace GardeningSystem.DataAccess.Communication {
                     var receivedString = await readTask;
                     Logger.Trace($"[sendCommandReceiveAnswer]Received \"{receivedString}\" from the rf module app.");
 
+                    _lastCommandTime = TimeUtils.GetCurrentTime();
                     return Convert.FromBase64String(receivedString);
                 }
                 catch (Exception ex) {
                     Logger.Error(ex, "[sendCommandReceiveAnswer]An error occured. Restarting the rf-app.");
+                    _lastCommandTime = TimeUtils.GetCurrentTime();
+
                     // process failed...
                     // try restarting the rf module app
                     startProgram(_filePath);
@@ -339,16 +360,22 @@ namespace GardeningSystem.DataAccess.Communication {
 
             try {
                 if (_process != null) {
-                    //  wait 5s because the rf app needs 5s time between two commands
-                    //await Task.Delay(2000);
+                    // wait as long so that there are 2 seconds time between two commands
+                    if ((TimeUtils.GetCurrentTime() - _lastCommandTime).TotalSeconds < 2) {
+                        await Task.Delay(2000 - Convert.ToInt32((TimeUtils.GetCurrentTime() - _lastCommandTime).TotalMilliseconds), CancellationToken.None);
+                    }
 
                     var commandString = Convert.ToBase64String(command);
                     Logger.Trace($"[sendCommand]Sending \"{commandString}\" to the rf module app.");
                     await _sw.WriteLineAsync(commandString);
+
+                    _lastCommandTime = TimeUtils.GetCurrentTime();
                 }
             }
             catch (IOException ioex) {
                 Logger.Error(ioex, "[sendCommand]An error occured. Restarting the rf-app.");
+                _lastCommandTime = TimeUtils.GetCurrentTime();
+
                 // process failed...
                 // try restarting the rf module app
                 startProgram(_filePath);

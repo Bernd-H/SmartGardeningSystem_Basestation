@@ -20,9 +20,9 @@ namespace GardeningSystem.Common.Models.DTOs {
         public ValueTimePair<int> SignalStrength { get; set; }
 
         /// <summary>
-        /// List of temperature measurements of the module.
+        /// Last measured battery level of the module.
         /// </summary>
-        public IList<ValueTimePair<float>> TemperatureMeasurements { get; set; }
+        public ValueTimePair<float> BatteryLevel { get; set; }
 
         #region Valve properties
 
@@ -53,6 +53,11 @@ namespace GardeningSystem.Common.Models.DTOs {
         /// List of soil moisture measurements.
         /// </summary>
         public IList<ValueTimePair<float>> SoilMoistureMeasurements { get; set; }
+
+        /// <summary>
+        /// List of temperature measurements of the module.
+        /// </summary>
+        public IList<ValueTimePair<float>> TemperatureMeasurements { get; set; }
 
         #endregion
     }

@@ -124,6 +124,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
                             Logger.Error($"[OnCommandReceivedEvent]Received no ACK! ({Utils.ConvertByteArrayToHex(ack)})");
                         }
                     }
+                    else if (command.SequenceEqual(CommunicationCodes.PingModuleCommand)) {
+                        var moduleId = await AesTcpListener.ReceiveAsync(networkStream);
+                        success = await processCommand_PingModule(moduleId[0]);
+                    }
                     else if (command.SequenceEqual(CommunicationCodes.Test)) {
                         success = true;
                     }
@@ -164,17 +168,27 @@ namespace GardeningSystem.BusinessLogic.Managers {
             string decryptedSecret = Encoding.UTF8.GetString(AesEncrypterDecrypter.DecryptToByteArray(connectInfo.EncryptedPassword));
             var connectToWlan = WifiConfigurator.ManagedConnectToWlan(connectInfo.Ssid, decryptedSecret);
             if (connectToWlan) {
-                //WifiConfigurator.ReloadDaemon();
+                WifiConfigurator.RebootSystem();
             }
 
             return connectToWlan;
         }
 
         private bool processCommand_DisconnectFromWlan() {
-            Logger.Info($"[processCommand_DisconnectFromWlan]Disconnecting from wlan.");
-            var disconnected = WifiConfigurator.DisconnectFromWlan();
+            bool disconnected = true;
 
-            //WifiConfigurator.ReloadDaemon();
+            if (WifiConfigurator.IsConnectedToWlan() && !WifiConfigurator.AccessPointStarted) {
+                Logger.Info($"[processCommand_DisconnectFromWlan]Disconnecting from wlan.");
+                disconnected = WifiConfigurator.DisconnectFromWlan();
+
+                var accessPointStarted = WifiConfigurator.CreateAP();
+                if (accessPointStarted) {
+                    WifiConfigurator.RebootSystem();
+                }
+            }
+            else {
+                Logger.Info($"[processCommand_DisconnectFromWlan]Skipping the disconnect-from-wlan-command. Already disconnected.");
+            }
 
             return disconnected;
         }
@@ -269,6 +283,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private async Task<ModuleInfoDto> processCommand_DiscoverNewModule() {
             Logger.Info($"[processCommand_DiscoverNewModule]Executing discover-new-module-command.");
             return await ModuleManager.DiscoverANewModule();
+        }
+
+        private async Task<bool> processCommand_PingModule(byte moduleId) {
+            Logger.Info($"[processCommand_PingModule]Pinging module with id {moduleId}.");
+            return await ModuleManager.PingModule(moduleId);
         }
     }
 }

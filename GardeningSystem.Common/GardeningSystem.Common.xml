@@ -76,9 +76,9 @@
             RSSI...Received Signal Strength Indicator
             </summary>
         </member>
-        <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.TemperatureMeasurements">
+        <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.BatteryLevel">
             <summary>
-            List of temperature measurements of the module.
+            Last measured battery level of the module.
             </summary>
         </member>
         <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.AssociatedModules">
@@ -103,6 +103,11 @@
             <summary>
             Property for sensors.
             List of soil moisture measurements.
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.DTOs.ModuleInfoDto.TemperatureMeasurements">
+            <summary>
+            List of temperature measurements of the module.
             </summary>
         </member>
         <member name="P:GardeningSystem.Common.Models.Entities.ApplicationSettings.CityName">
@@ -187,6 +192,11 @@
             <summary>
             Last measured signal strength to the module.
             RSSI...Received Signal Strength Indicator
+            </summary>
+        </member>
+        <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.BatteryLevel">
+            <summary>
+            Last measured battery level of the module.
             </summary>
         </member>
         <member name="P:GardeningSystem.Common.Models.Entities.ModuleInfo.TemperatureMeasurements">
@@ -804,6 +814,11 @@
             <seealso cref="M:GardeningSystem.Common.Specifications.IWifiConfigurator.ChangeWlan(System.String,System.String)"/>
             <seealso cref="M:GardeningSystem.Common.Specifications.IWifiConfigurator.ManagedConnectToWlan(System.String,System.String)"/>
         </member>
+        <member name="M:GardeningSystem.Common.Specifications.IWifiConfigurator.RebootSystem">
+            <summary>
+            Sends a reboot command to the system.
+            </summary>
+        </member>
         <member name="T:GardeningSystem.Common.Specifications.Managers.IAesKeyExchangeManager">
             <summary>
             Class responsible for providing the key exchange service.
@@ -995,6 +1010,14 @@
             <param name="module">A ModuleInfoDto object.</param>
             <returns>A task that represents an asynchronous operation. The value of the TResult
             parameter contains a boolean that is true when the module got successfully updated.</returns>
+        </member>
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IModuleManager.PingModule(System.Byte)">
+            <summary>
+            Pings a module and updates the rssi property of the module.
+            </summary>
+            <param name="moduleId">Id of the module.</param>
+            <returns>A task that represents an asynchronous operation. The value of the TResult
+            parameter contains a boolean that is true when the module responded.</returns>
         </member>
         <member name="T:GardeningSystem.Common.Specifications.Managers.ISettingsManager">
             <summary>

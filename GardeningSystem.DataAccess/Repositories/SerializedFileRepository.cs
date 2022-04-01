@@ -147,7 +147,7 @@ namespace GardeningSystem.DataAccess.Repositories {
                     return JsonSerializer.Deserialize<T2>(File.ReadAllText(_filePath));
                 }
                 else {
-                    _logger.Warn($"[ReadSingleObjectFromFile]File {_filePath} does not exist.");
+                    _logger.Trace($"[ReadSingleObjectFromFile]File {_filePath} does not exist.");
                     return null;
                 }
             }

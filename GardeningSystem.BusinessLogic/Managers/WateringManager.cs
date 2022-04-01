@@ -109,6 +109,17 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         // inform user
                         //throw new NotImplementedException();
                     }
+                    else {
+                        Logger.Info($"[StartWatering]Opened valve {Utils.ConvertByteToHex(valve)} successfully.");
+
+                        // save the irrigation in the lastWaterings list of the valve
+                        var valveModuleInfo = ModuleManager.GetModule(valve);
+                        valveModuleInfo.LastWaterings.Add(ValueTimePair<int>.FromValue(Convert.ToInt32(irrigationInfo.IrrigationTime.TotalMinutes)));
+                        changeGotVerified = await ModuleManager.UpdateModule(valveModuleInfo.ToDto());
+                        if (!changeGotVerified) {
+                            Logger.Error($"[StartWatering]Could not update the lastWaterings list of valve {valve}.");
+                        }
+                    }
                 }
             }
             finally {
@@ -148,7 +159,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <summary>
-        /// Determines if plants near a sensor needs to be irrigated.
+        /// Determines if plants near a sensor need to be irrigated.
         /// </summary>
         /// <param name="moduleData">Sensor module data.</param>
         /// <param name="weatherData">Weather forecast for the next day and weather data of the previous day.</param>
@@ -193,15 +204,15 @@ namespace GardeningSystem.BusinessLogic.Managers {
         /// </summary>
         /// <typeparam name="T">A primitive data type.</typeparam>
         /// <param name="data"></param>
-        /// <param name="day">0 for the average of measurements from the last day, 1 for measurements the day before the last day and so on...</param>
+        /// <param name="day">1 for the average of measurements from the last day, 2 for measurements the day before the last day and so on...</param>
         /// <param name="measurementsPerDay">Number of measurements per day.</param>
         /// <returns>Average</returns>
         private float getAverageMeasurmentsFromDay<T>(IEnumerable<ValueTimePair<T>> data, int day, int measurementsPerDay) {
             // calculate average temp and soil moisture
             float average = 0;
-            int startPoint = data.Count() - (measurementsPerDay * day) - 1;
-            if (startPoint > 0) {
-                for (int i = startPoint; i >= startPoint - measurementsPerDay; i--) {
+            int startPoint = data.Count() - (measurementsPerDay * day);
+            if (startPoint >= 0) {
+                for (int i = startPoint; i < startPoint + measurementsPerDay; i++) {
                     average += (float)Convert.ChangeType(data.ElementAt(i).Value, typeof(float));
                 }
             }
@@ -213,8 +224,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
             int measurementsPerDay = 6;
 
             // calculate average temp and soil moisture
-            float averageTemp = getAverageMeasurmentsFromDay(moduleData?.TemperatureMeasurements ?? new List<ValueTimePair<float>>(), 0, measurementsPerDay);
-            //float averageSoilMoisture = getAverageMeasurmentsFromDay(moduleData.SoilMoistureMeasurements, 0, measurementsPerDay);
+            float averageTemp = getAverageMeasurmentsFromDay(moduleData?.TemperatureMeasurements ?? new List<ValueTimePair<float>>(), 1, measurementsPerDay);
+            //float averageSoilMoisture = getAverageMeasurmentsFromDay(moduleData.SoilMoistureMeasurements, 1, measurementsPerDay);
 
             return adjustIrrigationTime(currentIrrigationTime, averageTemp, weatherData);
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GardeningSystem.Common.Models.Entities;
 
 namespace GardeningSystem.Common.Specifications {
@@ -78,6 +79,12 @@ namespace GardeningSystem.Common.Specifications {
         /// <remarks>Shutsdown the service and starts it again.</remarks>
         /// <seealso cref="ChangeWlan(string, string)"/>
         /// <seealso cref="ManagedConnectToWlan(string, string)"/>
+        [Obsolete(message: "Replaced by RebootSystem()")]
         void ReloadDaemon();
+
+        /// <summary>
+        /// Sends a reboot command to the system.
+        /// </summary>
+        void RebootSystem();
     }
 }

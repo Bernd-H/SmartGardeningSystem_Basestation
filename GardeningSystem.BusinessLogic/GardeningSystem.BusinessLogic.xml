@@ -154,6 +154,9 @@
         <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.GetModule(System.Byte)">
             <inheritdoc/>
         </member>
+        <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.PingModule(System.Byte)">
+            <inheritdoc/>
+        </member>
         <member name="M:GardeningSystem.BusinessLogic.Managers.ModuleManager.sendCommand_retryRetoute(GardeningSystem.Common.Models.DTOs.ModuleInfoDto,System.Func{System.Threading.Tasks.Task{System.Boolean}},System.Boolean)">
             <summary>
             Executes a command. Retrys it one time if failed and trys to reroute the module.
@@ -228,7 +231,7 @@
         </member>
         <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.irrigationAlgo(GardeningSystem.Common.Models.Entities.ModuleInfo,GardeningSystem.Common.Models.Entities.WeatherData)">
             <summary>
-            Determines if plants near a sensor needs to be irrigated.
+            Determines if plants near a sensor need to be irrigated.
             </summary>
             <param name="moduleData">Sensor module data.</param>
             <param name="weatherData">Weather forecast for the next day and weather data of the previous day.</param>
@@ -240,7 +243,7 @@
             </summary>
             <typeparam name="T">A primitive data type.</typeparam>
             <param name="data"></param>
-            <param name="day">0 for the average of measurements from the last day, 1 for measurements the day before the last day and so on...</param>
+            <param name="day">1 for the average of measurements from the last day, 2 for measurements the day before the last day and so on...</param>
             <param name="measurementsPerDay">Number of measurements per day.</param>
             <returns>Average</returns>
         </member>

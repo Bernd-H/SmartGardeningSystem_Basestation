@@ -34,6 +34,11 @@ namespace GardeningSystem.Common.Models.Entities {
         public ValueTimePair<int> SignalStrength { get; set; }
 
         /// <summary>
+        /// Last measured battery level of the module.
+        /// </summary>
+        public ValueTimePair<float> BatteryLevel { get; set; }
+
+        /// <summary>
         /// List of temperature measurements of the module.
         /// </summary>
         public IList<ValueTimePair<float>> TemperatureMeasurements { get; set; }

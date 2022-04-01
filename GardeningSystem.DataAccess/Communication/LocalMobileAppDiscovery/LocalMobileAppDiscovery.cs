@@ -58,6 +58,8 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
 
         private CancellationTokenSource _cancellationTokenSource;
 
+        private Thread _thread;
+
 
         private ILogger Logger;
 
@@ -122,7 +124,8 @@ namespace GardeningSystem.DataAccess.Communication.LocalMobileAppDiscovery {
             UdpListener.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
             joinTheMulticastGroupOnAllInterfaces();
             Logger.Info($"[Start]Starting listening for mobile apps on {MulticastAddressV4.ToString()}.");
-            Task.Run(() => StartListening(ct), ct);
+            _thread =  new Thread(() => StartListening(ct));
+            _thread.Start();
         }
 
         /// <inheritdoc/>

@@ -30,7 +30,8 @@ namespace GardeningSystem.Common.Models {
                 EnabledForManualIrrigation = module.EnabledForManualIrrigation,
                 SignalStrength = module.SignalStrength,
                 SoilMoistureMeasurements = module.SoilMoistureMeasurements,
-                TemperatureMeasurements = module.TemperatureMeasurements
+                TemperatureMeasurements = module.TemperatureMeasurements,
+                BatteryLevel = module.BatteryLevel
             };
         }
 
@@ -45,7 +46,8 @@ namespace GardeningSystem.Common.Models {
                 EnabledForManualIrrigation = moduleDto.EnabledForManualIrrigation,
                 SignalStrength = moduleDto.SignalStrength,
                 TemperatureMeasurements = moduleDto.TemperatureMeasurements,
-                SoilMoistureMeasurements = moduleDto.SoilMoistureMeasurements
+                SoilMoistureMeasurements = moduleDto.SoilMoistureMeasurements,
+                BatteryLevel = moduleDto.BatteryLevel
             };
         }
 

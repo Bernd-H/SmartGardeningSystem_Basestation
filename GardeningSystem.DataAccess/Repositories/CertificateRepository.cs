@@ -42,7 +42,7 @@ namespace GardeningSystem.DataAccess.Repositories {
             if (CachedCertificates.ContainsKey(certThumbprint)) {
                 // check lifespan
                 if (CachedCertificates[certThumbprint].Lifetime.TotalDays < 5) {
-                    Logger.Trace($"[GetCertificate]Loading certificate with thumbprint {certThumbprint} from cache.");
+                    //Logger.Trace($"[GetCertificate]Loading certificate with thumbprint {certThumbprint} from cache.");
                     return CachedCertificates[certThumbprint].Object as X509Certificate2;
                 }
                 else {

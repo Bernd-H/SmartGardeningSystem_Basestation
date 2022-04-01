@@ -27,7 +27,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
         /// <inheritdoc/>
         public void StartSearchingForNatDevices() {
-            Logger.Info($"[StartSearchingForNatDevices]Searching for nats.");
+            Logger.Info($"[StartSearchingForNatDevices]Searching for NATs.");
             NatUtility.DeviceFound += deviceFound;
             NatUtility.StartDiscovery();
         }

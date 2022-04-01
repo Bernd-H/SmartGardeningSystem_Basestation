@@ -29,6 +29,8 @@ namespace GardeningSystem.DataAccess.Communication.Base {
 
         private ManualResetEvent allDone;
 
+        private Thread acceptClientsThread;
+
 
         /// <summary>
         /// NLog Logger.
@@ -75,7 +77,10 @@ namespace GardeningSystem.DataAccess.Communication.Base {
                 };
 
                 if (settings.AcceptMultipleClients) {
-                    Task.Run(() => StartListening(stPair), token);
+                    //Task.Run(() => StartListening(stPair), token);
+                    // start a new thread because this task will propable be long running
+                    acceptClientsThread = new Thread(() => StartListening(stPair));
+                    acceptClientsThread.Start();
                 }
                 else {
                     tcpListener.BeginAcceptTcpClient(BeginAcceptClient, stPair);

@@ -70,6 +70,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             if ((TimeUtils.GetCurrentTime() - _timeOfLastMeasurements).TotalMinutes < 10) {
                 // don't request measurements from the sensors
                 // last measurements are less than 10 minutes old
+                // (at 6 o'clock the measurmentJob and wateringJob will call this method simultaneously)
                 return;
             }
 
@@ -131,6 +132,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         module.SignalStrength = ValueTimePair<int>.FromValue((int)rfCommunicatorResult.Result);
                     }
 
+                    // measure battery level
+                    var rfCommunicatorResult2 = await sendCommand_retryRetoute(module, () => RfCommunicator.GetBatteryLevel(module));
+                    if (rfCommunicatorResult2.Success) {
+                        module.BatteryLevel = ValueTimePair<float>.FromValue(Convert.ToSingle(rfCommunicatorResult2.Result));
+                    }
+
                     // save new module
                     ModulesRepository.AddModule(module);
                 }
@@ -159,21 +166,20 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <inheritdoc/>
-        public async Task<bool> RemoveModule(Guid moduleId) {
+        public Task<bool> RemoveModule(Guid moduleId) {
             //await LOCKER.WaitAsync();
 
-            var module = ModulesRepository.GetModuleById(moduleId).ToDto();
+            //var module = ModulesRepository.GetModuleById(moduleId).ToDto();
 
             // send remove command
-            var removedModule = await sendCommand_retryRetoute(module, () => RfCommunicator.RemoveModule(module.ModuleId));
-            if (removedModule) {
+            //var removedModule = await sendCommand_retryRetoute(module, () => RfCommunicator.RemoveModule(module.ModuleId));
+            //if (removedModule) {
                 // remove module info
-                removedModule = ModulesRepository.RemoveModule(moduleId);
-            }
+                var removedModule = ModulesRepository.RemoveModule(moduleId);
+            //}
 
             //LOCKER.Release();
-            await Task.CompletedTask;
-            return removedModule;
+            return Task.FromResult(removedModule);
         }
 
         /// <inheritdoc/>
@@ -194,6 +200,31 @@ namespace GardeningSystem.BusinessLogic.Managers {
             else {
                 return null;
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> PingModule(byte moduleId) {
+            var module = GetModule(moduleId);
+
+            // perform ping and measure rssi
+            var rfCommunicatorResult = await sendCommand_retryRetoute(module.ToDto(), () => RfCommunicator.PingModule(module.ToDto()));
+            if (rfCommunicatorResult.Success) {
+                module.SignalStrength = ValueTimePair<int>.FromValue((int)rfCommunicatorResult.Result);
+
+                // save rssi
+                rfCommunicatorResult.Success = ModulesRepository.UpdateModule(module);
+            }
+
+            // also get the battery level
+            var rfCommunicatorResult2 = await sendCommand_retryRetoute(module.ToDto(), () => RfCommunicator.GetBatteryLevel(module.ToDto()));
+            if (rfCommunicatorResult2.Success) {
+                module.BatteryLevel = ValueTimePair<float>.FromValue(Convert.ToSingle(rfCommunicatorResult2.Result));
+
+                // save battery level
+                rfCommunicatorResult2.Success = ModulesRepository.UpdateModule(module);
+            }
+
+            return rfCommunicatorResult.Success;
         }
 
         private bool updateModule(ModuleInfo module) {
@@ -252,12 +283,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private async Task<bool> sendCommand_retryRetoute(ModuleInfoDto module, Func<Task<bool>> sendCommandCallback, bool alreadyRerouted = false) {
             int attempts = 0;
             bool answer;
-            do {
+            //do {
                 attempts++;
                 answer = await sendCommandCallback();
 
                 // retry 1 time if failed
-            } while (!answer && attempts < 3);
+            //} while (!answer && attempts < 3);
 
             if (!answer && !alreadyRerouted) {
                 // get id's of all modules
@@ -271,16 +302,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 moduleIds.Remove(module.ModuleId);
 
                 // try to reroute the module (reach the module over another one)
-                bool rerouted = await RfCommunicator.TryRerouteModule(module.ModuleId, moduleIds);
-                if (rerouted) {
-                    // delete rssi
-                    var moduleInfo = module.ToDo(ModulesRepository);
-                    moduleInfo.SignalStrength = null;
-                    ModulesRepository.UpdateModule(moduleInfo);
+                //bool rerouted = await RfCommunicator.TryRerouteModule(module.ModuleId, moduleIds);
+                //if (rerouted) {
+                //    // delete rssi
+                //    var moduleInfo = module.ToDo(ModulesRepository);
+                //    moduleInfo.SignalStrength = null;
+                //    ModulesRepository.UpdateModule(moduleInfo);
 
-                    // try sending the command again
-                    return await sendCommand_retryRetoute(module, sendCommandCallback, alreadyRerouted: true);
-                }
+                //    // try sending the command again
+                //    return await sendCommand_retryRetoute(module, sendCommandCallback, alreadyRerouted: true);
+                //}
             }
 
             return answer;

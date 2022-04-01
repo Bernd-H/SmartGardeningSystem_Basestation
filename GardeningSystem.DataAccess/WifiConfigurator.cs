@@ -292,6 +292,11 @@ namespace GardeningSystem.DataAccess {
             executeCommand($"sudo systemctl reload-or-restart {Configuration[ConfigurationVars.DAEMON_NAME]}.service");
         }
 
+        public void RebootSystem() {
+            Logger.Info($"[RebootSystem]Sending the reboot command.");
+            executeCommand($"sudo reboot");
+        }
+
         /// <summary>
         /// Calls every <paramref name="millisecondsInterval"/> ms a function (<paramref name="func"/>).
         /// Stops when the function returns true, or <paramref name="maxLoopCount"/> is reached.

@@ -76,17 +76,18 @@ namespace GardeningSystem.Jobs.Base {
         /// <param name="stoppingToken">Token to stop the start process. WARNING: Not implemented!</param>
         /// <returns>A Task that reprecents an asynchronous operation.</returns>
         public async Task StartAsync(CancellationToken stoppingToken) {
-            if (_startServiceAlsoOnStart) {
-                var count = Interlocked.Increment(ref _executionCount);
-                Logger.Trace($"[StartAsync]Starting service with name {_serviceName}.");
-                await _doWorkHandler?.Invoke(this, null);
-            }
-
             _serviceStarterTask = Task.Run(async () => {
+                if (_startServiceAlsoOnStart) {
+                    var count = Interlocked.Increment(ref _executionCount);
+                    Logger.Trace($"[StartAsync]Starting service with name {_serviceName}.");
+                    await _doWorkHandler?.Invoke(this, null);
+                }
+
                 while (true) {
                     // wait till the next time in the list _startTimes is reached
-                    await Task.Delay(getTimeSpanToWait(), _serviceStarterTaskCTS.Token);
-                    if (_serviceStarterTaskCTS.IsCancellationRequested) {
+                    try {
+                        await Task.Delay(getTimeSpanToWait(), _serviceStarterTaskCTS.Token);
+                    } catch (TaskCanceledException) {
                         break;
                     }
 
@@ -113,7 +114,9 @@ namespace GardeningSystem.Jobs.Base {
                 await _serviceStarterTask;
             }
 
-            await _stopHandler?.Invoke(this, null);
+            if (_stopHandler != null) {
+                await _stopHandler.Invoke(this, null);
+            }
         }
 
         /// <inheritdoc/>

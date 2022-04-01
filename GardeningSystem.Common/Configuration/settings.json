@@ -55,7 +55,7 @@
   "externalServer_weatherUrl": "https://{0}:{1}/api/Weather/",
 
   ///////////////////////// Service options
-  "wateringJob_enabled": "false",
+  "wateringJob_enabled": "true",
   "communicationJob_enabled": "true",
   "accessPointJob_enabled": "true",
   "measureJob_enabled": "false",

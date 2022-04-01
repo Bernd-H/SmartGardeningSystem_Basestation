@@ -36,7 +36,7 @@ namespace GardeningSystem.BusinessLogic {
 
         /// <inheritdoc/>
         public void SetupTestEnvironment() {
-            Logger.Info($"[SetupTestEnvironment]Setting up test/development environment.");
+            Logger.Info($"[SetupTestEnvironment]Setting up the test/development environment.");
 
             // register some modules
             Logger.Info($"[SetupTestEnvironment]Checking if there are some registered modules.");

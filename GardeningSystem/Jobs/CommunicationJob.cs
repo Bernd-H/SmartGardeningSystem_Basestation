@@ -70,7 +70,7 @@ namespace GardeningSystem.Jobs {
 
                     WanManager.Start();
 
-                    await apiTokenTask;
+                    //await apiTokenTask; -> don't block the thread that starts all the other jobs
                 } catch (Exception ex) {
                     Logger.Fatal(ex, "[StartAsync]An exception occured.");
                 }

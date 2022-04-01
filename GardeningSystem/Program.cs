@@ -41,7 +41,6 @@ namespace GardeningSystem {
 
                 // development setup
                 if (Convert.ToBoolean(ConfigurationContainer.Configuration[ConfigurationVars.IS_TEST_ENVIRONMENT])) {
-                    logger.Info("[Main]Setting up test development/test enviroment.");
                     IoC.Get<IDevelopmentSetuper>().SetupTestEnvironment();
                 }
 
@@ -93,22 +92,22 @@ namespace GardeningSystem {
                     });
                 })
                 .ConfigureServices((hostContext, services) => {
+                    // interval services
+                    if (Convert.ToBoolean(configuration[ConfigurationVars.ACCESSPOINTJOB_ENABLED])) {
+                        services.AddHostedService<AccessPointJob>();
+                    }
+
+                    // normal services
+                    if (Convert.ToBoolean(configuration[ConfigurationVars.COMMUNICATIONJOB_ENABLED])) {
+                        services.AddHostedService<CommunicationJob>();
+                    }
+
                     // timed services
                     if (Convert.ToBoolean(configuration[ConfigurationVars.WATERINGJOB_ENABLED])) {
                         services.AddHostedService<WateringJob>();
                     }
                     if (Convert.ToBoolean(configuration[ConfigurationVars.MEASUREJOB_ENABLED])) {
                         services.AddHostedService<MeasureJob>();
-                    }
-
-                    // interval services
-                    if (Convert.ToBoolean(configuration[ConfigurationVars.ACCESSPOINTJOB_ENABLED])) {
-                        services.AddHostedService<AccessPointJob>();
-                    }
-
-                    // other services
-                    if (Convert.ToBoolean(configuration[ConfigurationVars.COMMUNICATIONJOB_ENABLED])) {
-                        services.AddHostedService<CommunicationJob>();
                     }
                 }).UseConsoleLifetime();
     }

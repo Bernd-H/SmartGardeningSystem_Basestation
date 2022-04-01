@@ -19,11 +19,19 @@ namespace GardeningSystem.Jobs {
         static readonly DateTime[] START_TIMES = new DateTime[] {
                 new DateTime(1, 1, 1, hour: 0, minute: 0, second: 0),
 
+                new DateTime(1, 1, 1, hour: 3, minute: 0, second: 0),
+
                 new DateTime(1, 1, 1, hour: 6, minute: 0, second: 0),
+
+                new DateTime(1, 1, 1, hour: 9, minute: 0, second: 0),
 
                 new DateTime(1, 1, 1, hour: 12, minute: 0, second: 0),
 
+                new DateTime(1, 1, 1, hour: 15, minute: 0, second: 0),
+
                 new DateTime(1, 1, 1, hour: 18, minute: 0, second: 0),
+
+                new DateTime(1, 1, 1, hour: 21, minute: 0, second: 0)
             };
 
         private IModuleManager ModuleManager;
