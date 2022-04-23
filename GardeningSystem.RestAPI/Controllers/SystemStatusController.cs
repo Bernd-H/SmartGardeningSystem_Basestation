@@ -27,9 +27,10 @@ namespace GardeningSystem.RestAPI.Controllers {
         // GET: api/<SystemStatusController>
         [HttpGet]
         public SystemStatusDto Get() {
-            Logger.Info($"[Get]User {ControllerHelperClass.GetUserId(HttpContext)} requested system status.");
+            //Logger.Info($"[Get]User {ControllerHelperClass.GetUserId(HttpContext)} requested system status.");
+            Logger.Info($"[Get]User requested system status.");
             try {
-                Logger.Warn($"[Get]Mocking some system status properties.");
+                //Logger.Warn($"[Get]Mocking some system status properties.");
                 return new SystemStatusDto {
                     SystemUpMinutes = TimeUtils.GetUpTimeInMinutes(),
                     Temperature = 22,

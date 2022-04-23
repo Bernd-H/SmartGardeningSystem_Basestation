@@ -327,12 +327,12 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private async Task<RfCommunicatorResult> sendCommand_retryRetoute(ModuleInfoDto module, Func<Task<RfCommunicatorResult>> sendCommandCallback, bool alreadyRerouted = false) {
             int attempts = 0;
             RfCommunicatorResult answer;
-            do {
+            //do {
                 attempts++;
                 answer = await sendCommandCallback();
 
                 // retry 1 time if failed
-            } while (!answer.Success && attempts < 3);
+            //} while (!answer.Success && attempts < 3);
 
             if (!answer.Success && !alreadyRerouted) {
                 // get id's of all modules
@@ -346,16 +346,16 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 moduleIds.Remove(module.ModuleId);
 
                 // try to reroute the module (reach the module over another one)
-                var rerouted = await RfCommunicator.TryRerouteModule(module.ModuleId, moduleIds);
-                if (rerouted) {
-                    // delete rssi
-                    var moduleInfo = module.ToDo(ModulesRepository);
-                    moduleInfo.SignalStrength = null;
-                    ModulesRepository.UpdateModule(moduleInfo);
+                //var rerouted = await RfCommunicator.TryRerouteModule(module.ModuleId, moduleIds);
+                //if (rerouted) {
+                //    // delete rssi
+                //    var moduleInfo = module.ToDo(ModulesRepository);
+                //    moduleInfo.SignalStrength = null;
+                //    ModulesRepository.UpdateModule(moduleInfo);
 
-                    // try sending the command again
-                    return await sendCommand_retryRetoute(module, sendCommandCallback, alreadyRerouted: true);
-                }
+                //    // try sending the command again
+                //    return await sendCommand_retryRetoute(module, sendCommandCallback, alreadyRerouted: true);
+                //}
             }
 
             return answer;

@@ -78,6 +78,7 @@ namespace GardeningSystem.DataAccess.Communication.Base {
 
                 if (settings.AcceptMultipleClients) {
                     //Task.Run(() => StartListening(stPair), token);
+                    //ThreadPool.QueueUserWorkItem((state) => StartListening(stPair));
                     // start a new thread because this task will propable be long running
                     acceptClientsThread = new Thread(() => StartListening(stPair));
                     acceptClientsThread.Start();

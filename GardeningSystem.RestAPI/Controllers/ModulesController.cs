@@ -35,7 +35,8 @@ namespace GardeningSystem.RestAPI.Controllers {
         // GET: api/Modules
         [HttpGet]
         public IEnumerable<ModuleInfoDto> Get() {
-            Logger.Info($"[Get]User {ControllerHelperClass.GetUserId(HttpContext)} requested all registered modules.");
+            //Logger.Info($"[Get]User {ControllerHelperClass.GetUserId(HttpContext)} requested all registered modules.");
+            Logger.Info($"[Get]User requested all registered modules.");
             try {
                 return ModuleManager.GetAllModules().Result.ToDtos();
             }
@@ -51,7 +52,8 @@ namespace GardeningSystem.RestAPI.Controllers {
         public ActionResult<ModuleInfoDto> Get(string id) {
             byte moduleId = Utils.ConvertHexToByte(id);
             var userId = ControllerHelperClass.GetUserId(HttpContext);
-            Logger.Info($"[Get]User {userId} requested registered module with id={id}.");
+            //Logger.Info($"[Get]User {userId} requested registered module with id={id}.");
+            Logger.Info($"[Get]User requested registered module with id={id}.");
 
             ModuleInfoDto module;
             try {
