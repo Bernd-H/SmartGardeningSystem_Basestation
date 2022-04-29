@@ -223,6 +223,26 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 // save battery level
                 rfCommunicatorResult2.Success = ModulesRepository.UpdateModule(module);
             }
+            else {
+                Logger.Error($"[PingModule]Could not get battery level of module with id {Utils.ConvertByteToHex(module.ModuleId)}.");
+            }
+
+            // measure temperature
+            if (module.ModuleType == Common.Models.Enums.ModuleType.Sensor) {
+                rfCommunicatorResult2 = await sendCommand_retryRetoute(module.ToDto(), () => RfCommunicator.GetTempAndSoilMoisture(module.ToDto()));
+                if (rfCommunicatorResult2.Success) {
+                    (float temp, float soilMoisture) = (ValueTuple<float, float>)rfCommunicatorResult2.Result;
+
+                    module.TemperatureMeasurements.Add(ValueTimePair<float>.FromValue(temp));
+                    module.SoilMoistureMeasurements.Add(ValueTimePair<float>.FromValue(soilMoisture));
+
+                    // save temp and soil moisture
+                    ModulesRepository.UpdateModule(module);
+                }
+                else {
+                    Logger.Error($"[PingModule]Could not measure temperature and soil moisture of module with id {Utils.ConvertByteToHex(module.ModuleId)}.");
+                }
+            }
 
             return rfCommunicatorResult.Success;
         }
