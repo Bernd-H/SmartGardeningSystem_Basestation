@@ -123,7 +123,7 @@ namespace GardeningSystem.DataAccess.Repositories {
         }
 
         private IEnumerable<T> readListFromFile() {
-            _logger.Trace($"[ReadListFromFile]Reading list form file {new FileInfo(_filePath).Name}.");
+            //_logger.Trace($"[ReadListFromFile]Reading list form file {new FileInfo(_filePath).Name}.");
             var container = ReadSingleObjectFromFile<Container<T>>();
 
             return container?.Elements ?? new List<T>();
@@ -143,7 +143,7 @@ namespace GardeningSystem.DataAccess.Repositories {
         public T2 ReadSingleObjectFromFile<T2>() where T2 : class {
             lock (OBJECT_LOCKER) {
                 if (File.Exists(_filePath)) {
-                    _logger.Trace($"[ReadSingleObjectFromFile]Reading object from file {new FileInfo(_filePath).Name}.");
+                    //_logger.Trace($"[ReadSingleObjectFromFile]Reading object from file {new FileInfo(_filePath).Name}.");
                     return JsonSerializer.Deserialize<T2>(File.ReadAllText(_filePath));
                 }
                 else {

@@ -43,7 +43,7 @@ namespace GardeningSystem.DataAccess.Communication {
 
         /// <inheritdoc/>
         public override async Task SendAsync(byte[] data, Stream stream) {
-            Logger.Trace($"[SendData] Sending data with length {data.Length}.");
+            Logger.Trace($"[SendData]Sending data with length {data.Length}.");
 
             // encrypt message
             var encryptedData = AesEncrypterDecrypter.EncryptByteArray(data);

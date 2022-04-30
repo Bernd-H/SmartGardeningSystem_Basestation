@@ -214,6 +214,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 // save rssi
                 rfCommunicatorResult.Success = ModulesRepository.UpdateModule(module);
             }
+            else {
+                // exit when ping failed
+                return false;
+            }
 
             // also get the battery level
             var rfCommunicatorResult2 = await sendCommand_retryRetoute(module.ToDto(), () => RfCommunicator.GetBatteryLevel(module.ToDto()));

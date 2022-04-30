@@ -99,7 +99,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
         private ApplicationSettings getApplicationSettings() {
             try {
-                Logger.Trace("[getApplicationSettings]Loading application settings.");
+                //Logger.Trace("[getApplicationSettings]Loading application settings.");
                 return SerializeFileRepository.ReadSingleObjectFromFile<ApplicationSettings>();
             }
             catch (Exception ex) {

@@ -129,6 +129,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         success = await processCommand_PingModule(moduleId[0]);
                     }
                     else if (command.SequenceEqual(CommunicationCodes.Test)) {
+                        int n = 500;
+                        Logger.Info($"[OnCommandReceivedEvent]Received test command. Waiting for {n}ms.");
+                        await Task.Delay(n);
                         success = true;
                     }
                     // process other commands here

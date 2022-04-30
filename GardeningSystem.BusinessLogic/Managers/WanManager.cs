@@ -81,6 +81,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         private async Task connectToExternalServerLoop(CancellationToken cancellationToken) {
             bool success = false;
             bool resolveExceptionMessageLogged = false;
+            bool retryingMessageLogged = false;
 
             // connect
             do {
@@ -107,7 +108,11 @@ namespace GardeningSystem.BusinessLogic.Managers {
 
                 if (!success) {
                     // wait till the next attempt
-                    Logger.Trace($"WanManager not started. Retrying.");
+                    if (!retryingMessageLogged) {
+                        Logger.Info($"WanManager not started. Retrying till a successful connection is established.");
+                        retryingMessageLogged = true;
+                    }
+
                     await Task.Delay(60 * 1000, cancellationToken);
                 }
             } while (!success && !cancellationToken.IsCancellationRequested);
