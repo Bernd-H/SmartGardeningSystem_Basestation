@@ -226,7 +226,7 @@
         <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.StartWatering(GardeningSystem.Common.Models.Entities.IrrigationInfo)">
             <inheritdoc/>
         </member>
-        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.ManualOverwrite(System.Boolean,System.Nullable{System.TimeSpan})">
+        <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.ManualOverride(System.Boolean,System.Nullable{System.TimeSpan})">
             <inheritdoc/>
         </member>
         <member name="M:GardeningSystem.BusinessLogic.Managers.WateringManager.irrigationAlgo(GardeningSystem.Common.Models.Entities.ModuleInfo,GardeningSystem.Common.Models.Entities.WeatherData)">

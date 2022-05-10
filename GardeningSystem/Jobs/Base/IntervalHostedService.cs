@@ -19,17 +19,19 @@ namespace GardeningSystem.Jobs.Base {
         private EventHandler _stopHandler;
         private string _serviceName;
         private TimeSpan _period;
+        private bool _startServiceAlsoOnStart;
 
         /// <summary>
         /// true, if the timer should wait till all work in the doWorkHandler has been done to start the new period
         /// </summary>
         private bool _waitTillDoWorkHasFinished;
 
-        public IntervalHostedService(ILoggerService logger, string serviceName, TimeSpan period, bool waitTillDoWorkHasFinished) {
+        public IntervalHostedService(ILoggerService logger, string serviceName, TimeSpan period, bool waitTillDoWorkHasFinished, bool startServiceAlsoOnStart) {
             _logger = logger.GetLogger<IntervalHostedService>();
             _serviceName = serviceName;
             _period = period;
             _waitTillDoWorkHasFinished = waitTillDoWorkHasFinished;
+            _startServiceAlsoOnStart = startServiceAlsoOnStart;
         }
 
         /// <summary>
@@ -55,18 +57,24 @@ namespace GardeningSystem.Jobs.Base {
         /// <param name="stoppingToken">Token to stop the start process. WARNING: Not implemented!</param>
         /// <returns>A Task that reprecents an asynchronous operation.</returns>
         public Task StartAsync(CancellationToken stoppingToken) {
-            _logger.Trace($"[StartAsync]{_serviceName} is starting");
+            return Task.Run(() => {
+                _logger.Trace($"[StartAsync]{_serviceName} is starting.");
 
-            if (!_waitTillDoWorkHasFinished) {
-                _timer = new Timer(DoWork, null, TimeSpan.Zero, _period);
-            }
-            else {
-                // set the timer as a one-shot
-                // after the work in DoWork is completed, the timer will be set to the next one-shot
-                _timer = new Timer(DoWork, null, Convert.ToInt32(_period.TotalMilliseconds), Timeout.Infinite);
-            }
+                if (_startServiceAlsoOnStart) {
+                    var count = Interlocked.Increment(ref executionCount);
+                    _logger.Trace($"[StartAsync]{_serviceName} started. (execution count: {count}).");
+                    _doWorkHandler?.Invoke(this, null);
+                }
 
-            return Task.CompletedTask;
+                if (!_waitTillDoWorkHasFinished) {
+                    _timer = new Timer(DoWork, null, TimeSpan.Zero, _period);
+                }
+                else {
+                    // set the timer as a one-shot
+                    // after the work in DoWork is completed, the timer will be set to the next one-shot
+                    _timer = new Timer(DoWork, null, Convert.ToInt32(_period.TotalMilliseconds), Timeout.Infinite);
+                }
+            }, stoppingToken);
         }
 
         /// <summary>

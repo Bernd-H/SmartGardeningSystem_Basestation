@@ -32,7 +32,7 @@ namespace GardeningSystem.Common.Specifications.Managers {
         /// <param name="irrigationTimeSpan">Time the valve should stay open. Can also be null.</param>
         /// <returns>A task that represents an asynchronous operation. The value of the TResult
         /// parameter contains a boolean that is true when all valves got successfully set to the new task.</returns>
-        Task<bool> ManualOverwrite(bool activateWatering, TimeSpan? irrigationTimeSpan = null);
+        Task<bool> ManualOverride(bool activateWatering, TimeSpan? irrigationTimeSpan = null);
 
         /// <summary>
         /// Gets if the automatic irrigation algorithm is currently activated.

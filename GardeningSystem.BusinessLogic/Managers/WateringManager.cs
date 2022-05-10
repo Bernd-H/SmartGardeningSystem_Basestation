@@ -128,7 +128,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ManualOverwrite(bool activateWatering, TimeSpan? irrigationTimeSpan = null) {
+        public async Task<bool> ManualOverride(bool activateWatering, TimeSpan? irrigationTimeSpan = null) {
             try {
                 await locker.WaitAsync();
                 bool success = true;

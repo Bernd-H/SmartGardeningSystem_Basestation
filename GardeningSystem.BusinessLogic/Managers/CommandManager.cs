@@ -183,11 +183,10 @@ namespace GardeningSystem.BusinessLogic.Managers {
             if (WifiConfigurator.IsConnectedToWlan() && !WifiConfigurator.AccessPointStarted) {
                 Logger.Info($"[processCommand_DisconnectFromWlan]Disconnecting from wlan.");
                 disconnected = WifiConfigurator.DisconnectFromWlan();
+                Logger.Info($"[processCommand_DisconnectFromWlan]Disconnected successfully: {disconnected}");
 
-                var accessPointStarted = WifiConfigurator.CreateAP();
-                if (accessPointStarted) {
-                    WifiConfigurator.RebootSystem();
-                }
+                //var accessPointStarted = WifiConfigurator.CreateAP();
+                WifiConfigurator.RebootSystem();
             }
             else {
                 Logger.Info($"[processCommand_DisconnectFromWlan]Skipping the disconnect-from-wlan-command. Already disconnected.");
@@ -202,7 +201,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             Logger.Info($"[processCommand_StartManualIrrigation]Starting manual irrigation for {timeSpan.TotalMinutes} minutes.");
 
             // open all valves, which are enabled for manual irrigation
-            var success = await WateringManager.ManualOverwrite(true, timeSpan);
+            var success = await WateringManager.ManualOverride(true, timeSpan);
             if (success) {
                 // stop watering job (=automated irrigation)
                 SettingsManager.UpdateCurrentSettings((currentSettings) => {
@@ -220,7 +219,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 Logger.Info($"[processCommand_StopManualIrrigation]Stopping manual irrigation.");
 
                 // close all valves
-                var success = await WateringManager.ManualOverwrite(false);
+                var success = await WateringManager.ManualOverride(false);
                 if (success) {
                     SettingsManager.UpdateCurrentSettings((currentSettings) => {
                         currentSettings.WateringStatus = WateringStatus.Ready;
@@ -263,7 +262,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 // this can take longer, because of the lock...
                 // if the automatic irrigation algorithm is currently changing states of valves, then ManualOverwrite waits till
                 // the irrigation algorithm has finished it's routine.
-                var success = await WateringManager.ManualOverwrite(false);
+                var success = await WateringManager.ManualOverride(false);
                 if (success) {
                     // stop watering job (=automated irrigation)
                     SettingsManager.UpdateCurrentSettings((currentSettings) => {

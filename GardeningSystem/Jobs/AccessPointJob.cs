@@ -11,7 +11,7 @@ namespace GardeningSystem.Jobs {
     /// </summary>
     public class AccessPointJob : IntervalHostedService {
 
-        static readonly TimeSpan PERIOD = TimeSpan.FromMinutes(1);
+        static readonly TimeSpan PERIOD = TimeSpan.FromMinutes(4);
 
 
         private IWifiConfigurator WifiConfigurator;
@@ -19,7 +19,7 @@ namespace GardeningSystem.Jobs {
         private ILogger Logger;
 
         public AccessPointJob(ILoggerService logger, IWifiConfigurator wifiConfigurator)
-            : base(logger, nameof(AccessPointJob), PERIOD, waitTillDoWorkHasFinished: true) {
+            : base(logger, nameof(AccessPointJob), PERIOD, waitTillDoWorkHasFinished: true, startServiceAlsoOnStart: true) {
             Logger = logger.GetLogger<AccessPointJob>();
             WifiConfigurator = wifiConfigurator;
 

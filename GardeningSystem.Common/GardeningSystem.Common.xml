@@ -1111,7 +1111,7 @@
             <returns>A task that represents an asynchronous operation.</returns>
             <seealso cref="M:GardeningSystem.Common.Specifications.Managers.IWateringManager.IsWateringNeccessary"/>
         </member>
-        <member name="M:GardeningSystem.Common.Specifications.Managers.IWateringManager.ManualOverwrite(System.Boolean,System.Nullable{System.TimeSpan})">
+        <member name="M:GardeningSystem.Common.Specifications.Managers.IWateringManager.ManualOverride(System.Boolean,System.Nullable{System.TimeSpan})">
             <summary>
             Stops current watering tasks and overrides them with a specific setting.
             </summary>
