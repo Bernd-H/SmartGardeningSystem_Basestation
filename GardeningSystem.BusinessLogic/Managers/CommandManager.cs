@@ -86,6 +86,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         var connectInfo_bytes = await AesTcpListener.ReceiveAsync(networkStream);
                         var connectInfo = CommunicationUtils.DeserializeObject<WlanInfoDto>(connectInfo_bytes);
 
+                        await AesTcpListener.SendAsync(CommunicationCodes.ACK, networkStream); // send ACK
+
                         success = processCommand_ConnectToWlan(connectInfo);
                     }
                     else if (command.SequenceEqual(CommunicationCodes.DisconnectFromWlanCommand)) {
@@ -95,6 +97,8 @@ namespace GardeningSystem.BusinessLogic.Managers {
                         // receive irrigation timespan
                         var minutes = BitConverter.ToDouble(await AesTcpListener.ReceiveAsync(networkStream));
                         var timeSpan = TimeSpan.FromMinutes(minutes);
+
+                        await AesTcpListener.SendAsync(CommunicationCodes.ACK, networkStream); // send ACK
 
                         success = await processCommand_StartManualIrrigation(timeSpan);
                     }
@@ -116,16 +120,17 @@ namespace GardeningSystem.BusinessLogic.Managers {
                             success = true;
                         }
 
+                        // user must request the module info
+                        _ = await AesTcpListener.ReceiveAsync(networkStream);
+
                         // send moduleInfo
                         await AesTcpListener.SendAsync(dataToSend, networkStream);
-
-                        var ack = await AesTcpListener.ReceiveAsync(networkStream);
-                        if (!ack.SequenceEqual(CommunicationCodes.ACK)) {
-                            Logger.Error($"[OnCommandReceivedEvent]Received no ACK! ({Utils.ConvertByteArrayToHex(ack)})");
-                        }
                     }
                     else if (command.SequenceEqual(CommunicationCodes.PingModuleCommand)) {
                         var moduleId = await AesTcpListener.ReceiveAsync(networkStream);
+
+                        await AesTcpListener.SendAsync(CommunicationCodes.ACK, networkStream); // send ACK
+
                         success = await processCommand_PingModule(moduleId[0]);
                     }
                     else if (command.SequenceEqual(CommunicationCodes.Test)) {
@@ -139,6 +144,9 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 catch (Exception ex) {
                     Logger.Error(ex, $"[OnCommandReceivedEvent]An error occured while processing command {Convert.ToInt32(command[0])}.");
                 }
+
+                // user must request the return code
+                _ = await AesTcpListener.ReceiveAsync(networkStream);
 
                 // send return code
                 await AesTcpListener.SendAsync(BitConverter.GetBytes(success), networkStream);

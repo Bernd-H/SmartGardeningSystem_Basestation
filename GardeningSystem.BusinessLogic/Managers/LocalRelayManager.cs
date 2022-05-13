@@ -142,7 +142,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                 Logger.Trace($"[MakeAesTcpRequest]Connecting to local service with port {port} (sessionId={currentSessionId}).");
                 AesTcpClients[currentSessionId].Start(new ClientSettings() {
                     RemoteEndPoint = new IPEndPoint(IPAddress.Loopback, port)
-                });
+                }).Wait();
                 aesTcpClient = AesTcpClients[currentSessionId];
             }
 

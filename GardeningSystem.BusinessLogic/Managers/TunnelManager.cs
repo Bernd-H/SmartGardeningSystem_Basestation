@@ -108,6 +108,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
             try {
                 while (true) {
                     var packet = await sslTcpClient.ReceiveAsync();
+                    Logger.Info($"[externalServer_startRelaying]Received {packet.Length} bytes from {sslTcpClient.RemoteEndPoint.ToString()}.");
 
                     // decrypt package
                     packet = AesEncrypterDecrypter.DecryptToByteArray(packet);
@@ -118,6 +119,7 @@ namespace GardeningSystem.BusinessLogic.Managers {
                     answer = AesEncrypterDecrypter.EncryptByteArray(answer);
 
                     await sslTcpClient.SendAsync(answer);
+                    Logger.Info($"[externalServer_startRelaying]Sent {answer.Length} bytes to {sslTcpClient.RemoteEndPoint.ToString()}.");
                 }
             }
             catch (ObjectDisposedException ode) {
